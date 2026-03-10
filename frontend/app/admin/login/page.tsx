@@ -43,7 +43,7 @@ export default function Login() {
                 setError(data.error || "Login failed");
                 return;
             }
-            login({ email: data.email || loginEmail });
+            login({ email: data.email || loginEmail, shopid: data.shopid });
             router.push("/admin/products");
         } catch (err: any) {
             console.error("Login error:", err);

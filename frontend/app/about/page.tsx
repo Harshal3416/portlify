@@ -3,9 +3,14 @@
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { getSiteDetails } from "../lib/siteDetails";
+import { useAuth } from "@/app/context/AuthContext";
+import { useSearchParams } from "next/navigation";
 
 export default function About() {
-
+  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const shopidFromUrl = searchParams.get('shop');
+  
   const [open, setOpen] = useState(false);
 
   const [sitetitle, setSiteTitle] = useState("");
@@ -13,8 +18,13 @@ export default function About() {
   const [sitedescription, setSiteDescription] = useState("");
   const [sitelogourl, setSiteLogoUrl] = useState<string>("");
 
+  // Get shopid: from URL params first, then from auth context, then fallback
+  const shopid = shopidFromUrl || user?.shopid || '';
+
   useEffect(() => {
-    getSiteDetails().then((details) => {
+    if (!shopid) return;
+    
+    getSiteDetails(shopid).then((details) => {
       console.log("Site details--->>:", details);
       setSiteTitle(details?.sitetitle || '');
       setOwnerName(details?.ownername || "");

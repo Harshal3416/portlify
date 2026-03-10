@@ -23,7 +23,6 @@ router.post('/register', async (req, res) => {
     email,
     passwordhash: hashPassword(password),
     mobile,
-    userCode: generate6DigitCode(),
     emailVerified: false,
     verificationToken: crypto.randomUUID(),
     shopid,
@@ -32,16 +31,15 @@ router.post('/register', async (req, res) => {
 
   // Insert into DB
   const result = await pool.query(
-    `INSERT INTO usersTest2 
-        (name, email, passwordhash, mobile, userCode, emailVerified, verificationToken, createdat, shopid) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
+    `INSERT INTO usersTest4 
+        (name, email, passwordhash, mobile, emailVerified, verificationToken, createdat, shopid) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING *`,
     [
       name,
       email,
       user.passwordhash,
       mobile,
-      user.userCode,
       false,
       user.verificationToken,
       new Date().toISOString(),
@@ -58,7 +56,7 @@ router.post('/login', async (req, res) => {
   const { email, password } = req.body
   if (!email || !password) return res.status(400).json({ error: 'email and password required' })
   // const user = users.find(u => u.email === email)
-  let user = await pool.query("SELECT * FROM usersTest2 WHERE email = $1", [email]);
+  let user = await pool.query("SELECT * FROM usersTest4 WHERE email = $1", [email]);
   user = user.rows[0]
   if (!user) return res.status(401).json({ error: 'User not found' })
     
@@ -70,7 +68,7 @@ router.post('/login', async (req, res) => {
     }
 
   // Return minimal user info (token generation omitted)
-  return res.json({ id: user.id, name: user.name, email: user.email, userCode: user.userCode, emailVerified: user.emailVerified })
+  return res.json({ id: user.id, name: user.name, email: user.email, emailVerified: user.emailVerified, shopid: user.shopid })
 })
 
 // Logout
@@ -91,14 +89,13 @@ router.post('/google-signin', (req, res) => {
       email,
       passwordhash: null,
       mobile: null,
-      userCode: generate6DigitCode(),
       emailVerified: true,
       verificationToken: null,
       createdat: new Date().toISOString()
     }
     users.push(user)
   }
-  return res.json({ id: user.id, name: user.name, email: user.email, userCode: user.userCode })
+  return res.json({ id: user.id, name: user.name, email: user.email })
 })
 
 // Verify email (accepts email + token)

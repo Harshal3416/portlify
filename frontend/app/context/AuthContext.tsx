@@ -6,6 +6,7 @@ import React, { createContext, useContext, useEffect, useState } from "react";
  */
 export interface User {
   email: string;
+  shopid?: string;
   // add more fields (id, name, token, etc.)
 }
 

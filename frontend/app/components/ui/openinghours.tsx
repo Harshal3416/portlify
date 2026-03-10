@@ -3,8 +3,14 @@
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { getSiteDetails } from "../../lib/siteDetails";
+import { useAuth } from "@/app/context/AuthContext";
+import { useSearchParams } from "next/navigation";
 
 export default function OpeningHours() {
+  const { user } = useAuth();
+  const searchParams = useSearchParams();
+  const shopidFromUrl = searchParams.get('shop');
+  
   const [open, setOpen] = useState(false);
   
   const [monday, setMondayTime] = useState('');
@@ -15,8 +21,13 @@ export default function OpeningHours() {
   const [saturday, setSaturdayTime] = useState('');
   const [sunday, setSundayTime] = useState('');
 
+  // Get shopid: from URL params first, then from auth context, then fallback
+  const shopid = shopidFromUrl || user?.shopid || '';
+
   useEffect(() => {
-    getSiteDetails().then((details) => {
+    if (!shopid) return;
+    
+    getSiteDetails(shopid).then((details) => {
       console.log("Site details--->>:", details);
       setMondayTime(details?.monday || '');
       setTuesdayTime(details?.tuesday || '');

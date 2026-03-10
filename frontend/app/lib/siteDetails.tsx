@@ -1,6 +1,6 @@
-export const getSiteDetails = async () => {
+export const getSiteDetails = async (shopid: string) => {
     try {
-        const response = await fetch('http://localhost:3000/api/site-details/test12345');
+        const response = await fetch(`http://localhost:3000/api/site-details/${shopid}`);
         if (!response.ok) {
             throw new Error('Failed to fetch site details');
         }
