@@ -41,13 +41,21 @@ export default function Products() {
     setProductId(generateProductId());
   }, []);
 
+  // Route protection - redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      router.push("/admin/login");
+      return;
+    }
+  }, [user, router]);
+
   // fetch products only when logged in
   useEffect(() => {
-    // if (!user) return;
+    if (!user) return;
     const fetchProducts = async () => {
       try {
         setLoadingProducts(true);
-        const res = await fetch("http://localhost:3000/api/products");
+        const res = await fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`);
         const data = await res.json();
         console.log("DATA", data)
         // newest first
@@ -59,7 +67,7 @@ export default function Products() {
       }
     };
     fetchProducts();
-  }, []);
+  }, [user]);
 
   const resetProductForm = () => {
     setProductName("");
@@ -82,7 +90,7 @@ export default function Products() {
       // if editing: simple JSON update (no file change for now)
       if (editingProductId) {
         const res = await fetch(
-          `http://localhost:3000/api/products/${editingProductId}`,
+          `http://localhost:3000/api/products/${editingProductId}}`,
           {
             method: "PUT",
             headers: {
@@ -91,6 +99,7 @@ export default function Products() {
             body: JSON.stringify({
               name: productName,
               description,
+              shopid: user?.shopid
             }),
           }
         );
@@ -250,7 +259,6 @@ export default function Products() {
                   placeholder="Upload Highlight Image"
                   type="file"
                   accept="image/*"
-                  value={highlightimage ? undefined : ""}
                   onChange={(e) =>
                     setHighlightImage(e.target.files?.[0] || null)
                   }

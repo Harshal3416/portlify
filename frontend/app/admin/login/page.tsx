@@ -88,9 +88,11 @@ export default function Login() {
     };
 
     // If routes are changed forcefully, i am logging out, so user can relogin OR register new account
-    // useEffect(() => {
-    //     logout()
-    // })
+    useEffect(() => {
+        if(user) {
+            router.push("/admin/products")
+        }
+    }, [user, router])
 
     if (!user) {
         return (

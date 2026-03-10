@@ -51,6 +51,14 @@ export default function AdminPage() {
     setProductId(generateProductId());
   }, []);
 
+  // Route protection - redirect to login if not authenticated
+  useEffect(() => {
+    if (!user) {
+      router.push("/admin/login");
+      return;
+    }
+  }, [user, router]);
+
   // fetch products only when logged in
   useEffect(() => {
     if (!user) return;

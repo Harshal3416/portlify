@@ -33,7 +33,16 @@ export default function Settings() {
 
     const shopid = user?.shopid || '';
 
+    // Route protection - redirect to login if not authenticated
     useEffect(() => {
+        if (!user) {
+            router.push("/admin/login");
+            return;
+        }
+    }, [user, router]);
+
+    useEffect(() => {
+        console.log("SHOP ID IN SETTING PAGE", shopid)
         if (!shopid) return;
         
         fetch(`http://localhost:3000/api/site-details/${shopid}`)
@@ -88,7 +97,7 @@ export default function Settings() {
             .catch(error => {
                 console.error('Error fetching site details:', error);
             });
-    }, []);
+    }, [shopid]);
 
     const updateSettings = () => {
 
