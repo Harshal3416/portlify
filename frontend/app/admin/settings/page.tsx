@@ -208,7 +208,7 @@ export default function Settings() {
                       type="button"
                       className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
                       onClick={() => {
-                        router.push("/store");
+                        router.push(`/store?shop=${shopid}`);
                       }}
                     >
                       Customer Portal
