@@ -46,13 +46,33 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
     updatedat: new Date().toISOString(),
   }
 
-        // Insert into DB
+        // UPSERT into DB - update if exists, insert if not
       const result = await pool.query(
         `INSERT INTO sitedetails 
          (shopid, sitetitle, sitelogourl, ownername, sitedescription, contactemail, contactphone, alternatecontactphone, address, instagramurl, googleurl,
          justdialurl, monday, tuesday, wednesday, thursday, friday, saturday, sunday, updatedat)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
            $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+         ON CONFLICT (shopid) DO UPDATE SET
+           sitetitle = EXCLUDED.sitetitle,
+           sitelogourl = EXCLUDED.sitelogourl,
+           ownername = EXCLUDED.ownername,
+           sitedescription = EXCLUDED.sitedescription,
+           contactemail = EXCLUDED.contactemail,
+           contactphone = EXCLUDED.contactphone,
+           alternatecontactphone = EXCLUDED.alternatecontactphone,
+           address = EXCLUDED.address,
+           instagramurl = EXCLUDED.instagramurl,
+           googleurl = EXCLUDED.googleurl,
+           justdialurl = EXCLUDED.justdialurl,
+           monday = EXCLUDED.monday,
+           tuesday = EXCLUDED.tuesday,
+           wednesday = EXCLUDED.wednesday,
+           thursday = EXCLUDED.thursday,
+           friday = EXCLUDED.friday,
+           saturday = EXCLUDED.saturday,
+           sunday = EXCLUDED.sunday,
+           updatedat = EXCLUDED.updatedat
          RETURNING *`,
         [
           shopid,
