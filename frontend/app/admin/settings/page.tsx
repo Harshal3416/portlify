@@ -1,23 +1,13 @@
 'use client';
 
 import { useEffect, useState } from "react";
-
-// export interface SiteDetails {
-//     sitetitle: string;
-//     sitelogourl: Blob | string | { filename: string; size: number; url?: string } | null;
-//     ownername: string;
-//     sitedescription: string;
-//     contactemail: string;
-//     phoneNumber: string;
-//     alternatePhoneNumber: string;
-//     address: string;
-//     instagramurl: string;
-//     googleurl: string;
-//     justdialurl: string;
-//     openingHours: string;
-// }
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/app/context/AuthContext";
 
 export default function Settings() {
+
+    const router = useRouter();
+    const { user, logout } = useAuth();
 
     const [sitetitle, setSiteTitle] = useState("");
     const [sitelogourl, setSiteLogoUrl] = useState<File | null>(null);
@@ -25,7 +15,7 @@ export default function Settings() {
     const [ownername, setOwnerName] = useState("");
     const [sitedescription, setSiteDescription] = useState("");
     const [contactemail, setContactEmail] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState(""); 
+    const [phoneNumber, setPhoneNumber] = useState("");
     const [alternatePhoneNumber, setAlternatePhoneNumber] = useState("");
     const [address, setAddress] = useState("");
     const [instagramurl, setInstagramUrl] = useState("");
@@ -42,10 +32,11 @@ export default function Settings() {
     });
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/site-details')
+        fetch('http://localhost:3000/api/site-details/test12345')
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched site details:', data);
+                data = data.data[0];
                 setSiteTitle(data.sitetitle || "");
                 // Set the current logo URL for display - backend returns object with url property
                 if (data.sitelogourl && typeof data.sitelogourl === 'object' && data.sitelogourl.url) {
@@ -96,6 +87,7 @@ export default function Settings() {
         const file = sitelogourl;
         console.log("FILE", file);
         const form = new FormData();
+
         form.append('sitetitle', sitetitle);
         form.append('ownername', ownername);
         form.append('sitedescription', sitedescription);
@@ -107,7 +99,7 @@ export default function Settings() {
         form.append('instagramurl', instagramurl);
         form.append('googleurl', googleurl);
         form.append('justdialurl', justdialurl);
-        
+
         // Append opening hours for each day
         form.append('monday', openingHours.monday);
         form.append('tuesday', openingHours.tuesday);
@@ -128,30 +120,30 @@ export default function Settings() {
             method: 'POST',
             body: form,
         })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Server error: ${response.status} - ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Settings updated:', data);
-            alert("Settings saved!");
-            // Update the current logo if a new file was uploaded
-            if (sitelogourl && data.data && data.data.sitelogourl) {
-                setCurrentLogoUrl(data.data.sitelogourl.url);
-            }
-            // Clear the file input after successful save
-            if (sitelogourl) {
-                setSiteLogoUrl(null);
-            }
-        })
-        .catch(error => {
-            console.error('Error updating settings:', error);
-            alert("Failed to save settings: " + error.message);
-        });
+            .then(response => {
+                if (!response.ok) {
+                    return response.text().then(text => {
+                        throw new Error(`Server error: ${response.status} - ${text}`);
+                    });
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Settings updated:', data);
+                alert("Settings saved!");
+                // Update the current logo if a new file was uploaded
+                if (sitelogourl && data.data && data.data.sitelogourl) {
+                    setCurrentLogoUrl(data.data.sitelogourl.url);
+                }
+                // Clear the file input after successful save
+                if (sitelogourl) {
+                    setSiteLogoUrl(null);
+                }
+            })
+            .catch(error => {
+                console.error('Error updating settings:', error);
+                alert("Failed to save settings: " + error.message);
+            });
     }
 
     // Render logo preview - shows current logo or newly selected file
@@ -161,9 +153,9 @@ export default function Settings() {
             return (
                 <div className="mt-2">
                     <p className="text-sm text-gray-600">New logo preview:</p>
-                    <img 
-                        src={URL.createObjectURL(sitelogourl)} 
-                        alt="New logo preview" 
+                    <img
+                        src={URL.createObjectURL(sitelogourl)}
+                        alt="New logo preview"
                         className="w-32 h-32 object-contain rounded-md mt-1"
                     />
                 </div>
@@ -175,9 +167,9 @@ export default function Settings() {
             return (
                 <div className="mt-2">
                     <p className="text-sm text-gray-600">Current logo:</p>
-                    <img 
-                        src={"http://localhost:3000" + currentLogoUrl} 
-                        alt="Current logo" 
+                    <img
+                        src={"http://localhost:3000" + currentLogoUrl}
+                        alt="Current logo"
                         className="w-32 h-32 object-contain rounded-md mt-1"
                     />
                 </div>
@@ -190,7 +182,28 @@ export default function Settings() {
     return (
         <div className="flex min-h-screen flex-col items-center justify-center w-[60%] mt-2 px-4 mx-auto">
             <h6 className="text-2xl mb-4">Site Settings</h6>
-            
+            <div className="flex flex-row ml-auto">
+                <button
+                    type="button"
+                    className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+                    onClick={() => {
+                        logout();
+                        router.push("/admin/login");
+                    }}
+                >
+                    Logout
+                </button>
+                <button
+                    type="button"
+                    className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+                    onClick={() => {
+                        router.push("/store");
+                    }}
+                >
+                    Customer Portal
+                </button>
+            </div>
+
             {/* Site Title */}
             <div className="flex flex-row items-center w-full mb-4">
                 <label className="w-1/3 text-right pr-4 font-medium">Site Title</label>
@@ -349,7 +362,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
                             value={openingHours.monday}
-                            onChange={(e) => setOpeningHours({...openingHours, monday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, monday: e.target.value })}
                         />
                     </div>
                     <div className="flex items-center">
@@ -359,7 +372,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
                             value={openingHours.tuesday}
-                            onChange={(e) => setOpeningHours({...openingHours, tuesday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, tuesday: e.target.value })}
                         />
                     </div>
                     <div className="flex items-center">
@@ -369,7 +382,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
                             value={openingHours.wednesday}
-                            onChange={(e) => setOpeningHours({...openingHours, wednesday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, wednesday: e.target.value })}
                         />
                     </div>
                     <div className="flex items-center">
@@ -379,7 +392,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
                             value={openingHours.thursday}
-                            onChange={(e) => setOpeningHours({...openingHours, thursday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, thursday: e.target.value })}
                         />
                     </div>
                     <div className="flex items-center">
@@ -389,7 +402,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
                             value={openingHours.friday}
-                            onChange={(e) => setOpeningHours({...openingHours, friday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, friday: e.target.value })}
                         />
                     </div>
                     <div className="flex items-center">
@@ -399,7 +412,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
                             value={openingHours.saturday}
-                            onChange={(e) => setOpeningHours({...openingHours, saturday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, saturday: e.target.value })}
                         />
                     </div>
                     <div className="flex items-center">
@@ -409,7 +422,7 @@ export default function Settings() {
                             type="text"
                             placeholder="e.g., Closed"
                             value={openingHours.sunday}
-                            onChange={(e) => setOpeningHours({...openingHours, sunday: e.target.value})}
+                            onChange={(e) => setOpeningHours({ ...openingHours, sunday: e.target.value })}
                         />
                     </div>
                 </div>

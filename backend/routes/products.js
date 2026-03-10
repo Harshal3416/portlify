@@ -67,14 +67,16 @@ router.post(
 // List all products
 router.get('/', async (req, res) => {
     try {
-    const result = await pool.query("SELECT * FROM products ORDER BY createdat DESC");
-    return res.status(200).json({ success: true, data: result.rows });
-  } catch (err) {
-    console.error("Error fetching products:", err);
-    return res.status(500).json({ success: false, error: "Internal server error" });
-  }
-
-  // return res.json(products)
+      const result = await pool.query(
+        "SELECT * FROM products ORDER BY createdat DESC",
+      );
+      return res.status(200).json({ success: true, data: result.rows });
+    } catch (err) {
+      console.error("Error fetching products:", err);
+      return res
+        .status(500)
+        .json({ success: false, error: "Internal server error" });
+    }
 })
 
 // Get product by productid

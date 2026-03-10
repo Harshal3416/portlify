@@ -1,12 +1,12 @@
 export const getSiteDetails = async () => {
     try {
-        const response = await fetch('http://localhost:3000/api/site-details');
+        const response = await fetch('http://localhost:3000/api/site-details/test12345');
         if (!response.ok) {
             throw new Error('Failed to fetch site details');
         }
         const data: SiteDetails = await response.json();
         console.log("FETCHED SITE DETAILS", data)
-        return data;
+        return data.data[0];
     } catch (error) {
         console.error('Error fetching site details:', error);
         return null;
@@ -14,6 +14,7 @@ export const getSiteDetails = async () => {
 };
 
 interface SiteDetails {
+    data: [{
     sitetitle: string;
     sitelogourl?: { filename: string; size: number; url?: string } | string;
     ownername?: string;
@@ -33,4 +34,5 @@ interface SiteDetails {
     friday: string;
     saturday: string;
     sunday: string;
+    }]
 }

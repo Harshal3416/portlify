@@ -179,6 +179,15 @@ export default function Products() {
         >
           Logout
         </button>
+        <button
+          type="button"
+          className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+          onClick={() => {
+            router.push("/store");
+          }}
+        >
+          Customer Portal
+        </button>
         <IoSettingsOutline className="m-4" onClick={() => siteSettings()}/>
         </div>
       </div>

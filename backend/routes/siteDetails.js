@@ -80,15 +80,23 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
 
       setSiteDetails(result.rows[0])
       return res.status(201).json({ success: true, data: result.rows[0] });
-
-  // console.log('Updated site details:', getSiteDetails())
-  return res.json({ success: true, data: siteDetails })
 })
 
 // Get site details
-router.get('/', (req, res) => {
-  console.log('Send site details:', getSiteDetails())
-  return res.json(getSiteDetails())
-})
+router.get("/:shopid", async (req, res) => {
+  const { shopid } = req.params;
+  try {
+    const result = await pool.query(
+      "SELECT * from sitedetails WHERE shopid = $1",
+      [shopid],
+    );
+    return res.status(200).json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    return res
+      .status(500)
+      .json({ success: false, error: "Internal server error" });
+  }
+});
 
 module.exports = router

@@ -22,6 +22,7 @@ export default function Login() {
     const [regEmail, setRegEmail] = useState("");
     const [regPassword, setRegPassword] = useState("");
     const [regMobile, setRegMobile] = useState("");
+    const [regShopId, setShopId] = useState("");
 
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -67,6 +68,7 @@ export default function Login() {
                     email: regEmail,
                     password: regPassword,
                     mobile: regMobile,
+                    shopid: regShopId
                 }),
             });
             const data = await response.json();
@@ -187,6 +189,15 @@ export default function Login() {
                             type="password"
                             value={regPassword}
                             onChange={(e) => setRegPassword(e.target.value)}
+                            required
+                        />
+                        <input
+                            className="p-2 mt-2 border border-gray-300 rounded-md"
+                            name="Shop ID"
+                            type="text"
+                            placeholder="Enter 6 digit Shop ID"
+                            value={regShopId}
+                            onChange={(e) => setShopId(e.target.value)}
                             required
                         />
                         <button

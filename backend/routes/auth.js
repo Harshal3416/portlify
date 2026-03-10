@@ -7,11 +7,11 @@ const pool = require("../../database/db/db");
 
 // Register (creates user with 6-digit code and email verification token)
 router.post('/register', async (req, res) => {
-  const { name, email, password, mobile } = req.body;
-  if (!name || !email || !password || !mobile) {
+  const { name, email, password, mobile, shopid } = req.body;
+  if (!name || !email || !password || !mobile || !shopid) {
     return res
       .status(400)
-      .json({ error: "name, email, password and mobile are required" });
+      .json({ error: "name, email, password, shopid and mobile are required" });
   }
   const exists = users.find((u) => u.email === email);
   if (exists)
@@ -26,14 +26,15 @@ router.post('/register', async (req, res) => {
     userCode: generate6DigitCode(),
     emailVerified: false,
     verificationToken: crypto.randomUUID(),
+    shopid,
     createdat: new Date().toISOString(),
   };
 
   // Insert into DB
   const result = await pool.query(
     `INSERT INTO usersTest2 
-        (name, email, passwordhash, mobile, userCode, emailVerified, verificationToken, createdat) 
-       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+        (name, email, passwordhash, mobile, userCode, emailVerified, verificationToken, createdat, shopid) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) 
        RETURNING *`,
     [
       name,
@@ -44,6 +45,7 @@ router.post('/register', async (req, res) => {
       false,
       user.verificationToken,
       new Date().toISOString(),
+      shopid
     ],
   );
 
