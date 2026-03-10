@@ -1,50 +1,71 @@
 const express = require('express')
 const crypto = require('crypto')
 const router = express.Router()
-const { hashPassword, generate6DigitCode } = require('../utils/helpers')
+const { hashPassword, generate6DigitCode, comparePassword } = require('../utils/helpers')
 const { users } = require('../utils/store')
+const pool = require("../../database/db/db");
 
 // Register (creates user with 6-digit code and email verification token)
-router.post('/register', (req, res) => {
-  const { name, email, password, mobile } = req.body
+router.post('/register', async (req, res) => {
+  const { name, email, password, mobile } = req.body;
   if (!name || !email || !password || !mobile) {
-    return res.status(400).json({ error: 'name, email, password and mobile are required' })
+    return res
+      .status(400)
+      .json({ error: "name, email, password and mobile are required" });
   }
-  const exists = users.find((u) => u.email === email)
-  if (exists) return res.status(409).json({ error: 'Email already registered' })
+  const exists = users.find((u) => u.email === email);
+  if (exists)
+    return res.status(409).json({ error: "Email already registered" });
 
   const user = {
     id: crypto.randomUUID(),
     name,
     email,
-    passwordHash: hashPassword(password),
+    passwordhash: hashPassword(password),
     mobile,
     userCode: generate6DigitCode(),
     emailVerified: false,
     verificationToken: crypto.randomUUID(),
     createdAt: new Date().toISOString(),
-  }
-  users.push(user)
+  };
 
-  // NOTE: In production send verification email containing the token.
-  return res.status(201).json({
-    id: user.id,
-    name: user.name,
-    email: user.email,
-    mobile: user.mobile,
-    userCode: user.userCode,
-    emailVerified: user.emailVerified,
-    verificationToken: user.verificationToken,
-  })
-})
+  // Insert into DB
+  const result = await pool.query(
+    `INSERT INTO usersTest2 
+        (name, email, passwordhash, mobile, userCode, emailVerified, verificationToken, createdAt) 
+       VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
+       RETURNING *`,
+    [
+      name,
+      email,
+      user.passwordhash,
+      mobile,
+      user.userCode,
+      false,
+      user.verificationToken,
+      new Date().toISOString(),
+    ],
+  );
+
+  // Respond with inserted user
+  return res.status(201).json(result.rows[0]);
+});
 
 // Login (email + password)
-router.post('/login', (req, res) => {
+router.post('/login', async (req, res) => {
   const { email, password } = req.body
   if (!email || !password) return res.status(400).json({ error: 'email and password required' })
-  const user = users.find(u => u.email === email)
-  if (!user) return res.status(401).json({ error: 'Invalid credentials' })
-  if (user.passwordHash !== hashPassword(password)) return res.status(401).json({ error: 'Invalid credentials' })
+  // const user = users.find(u => u.email === email)
+  let user = await pool.query("SELECT * FROM usersTest2 WHERE email = $1", [email]);
+  user = user.rows[0]
+  if (!user) return res.status(401).json({ error: 'User not found' })
+    
+    // Compare password with stored hash
+    const isValid = comparePassword(password, user.passwordhash);
+    console.log("user", user, !user, isValid, password, user.passwordhash)
+    if (!isValid) {
+      return res.status(401).json({ error: "Invalid email or password" });
+    }
 
   // Return minimal user info (token generation omitted)
   return res.json({ id: user.id, name: user.name, email: user.email, userCode: user.userCode, emailVerified: user.emailVerified })
@@ -66,7 +87,7 @@ router.post('/google-signin', (req, res) => {
       id: crypto.randomUUID(),
       name: name || 'Google User',
       email,
-      passwordHash: null,
+      passwordhash: null,
       mobile: null,
       userCode: generate6DigitCode(),
       emailVerified: true,

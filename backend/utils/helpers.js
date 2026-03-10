@@ -1,13 +1,15 @@
-const crypto = require('crypto')
+const bcrypt = require('bcrypt')
 
-// Hash password using SHA-256 (for demo only, use bcrypt/scrypt in production)
-// NOTE: This is NOT secure for production use. Use a proper password hashing library like bcrypt or scrypt.
 function hashPassword(password) {
-  return crypto.createHash('sha256').update(password).digest('hex')
+  return bcrypt.hashSync(password, 10);
+}
+
+function comparePassword(password, hash) {
+  return bcrypt.compareSync(password, hash);
 }
 
 function generate6DigitCode() {
   return Math.floor(100000 + Math.random() * 900000)
 }
 
-module.exports = { hashPassword, generate6DigitCode }
+module.exports = { hashPassword, generate6DigitCode, comparePassword }
