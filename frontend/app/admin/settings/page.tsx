@@ -3,34 +3,34 @@
 import { useEffect, useState } from "react";
 
 // export interface SiteDetails {
-//     siteTitle: string;
-//     siteLogoUrl: Blob | string | { filename: string; size: number; url?: string } | null;
-//     ownerName: string;
-//     siteDescription: string;
-//     contactEmail: string;
+//     sitetitle: string;
+//     sitelogourl: Blob | string | { filename: string; size: number; url?: string } | null;
+//     ownername: string;
+//     sitedescription: string;
+//     contactemail: string;
 //     phoneNumber: string;
 //     alternatePhoneNumber: string;
 //     address: string;
-//     instagramUrl: string;
-//     googleUrl: string;
-//     justDialUrl: string;
+//     instagramurl: string;
+//     googleurl: string;
+//     justdialurl: string;
 //     openingHours: string;
 // }
 
 export default function Settings() {
 
-    const [siteTitle, setSiteTitle] = useState("");
-    const [siteLogoUrl, setSiteLogoUrl] = useState<File | null>(null);
+    const [sitetitle, setSiteTitle] = useState("");
+    const [sitelogourl, setSiteLogoUrl] = useState<File | null>(null);
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
-    const [ownerName, setOwnerName] = useState("");
-    const [siteDescription, setSiteDescription] = useState("");
-    const [contactEmail, setContactEmail] = useState("");
+    const [ownername, setOwnerName] = useState("");
+    const [sitedescription, setSiteDescription] = useState("");
+    const [contactemail, setContactEmail] = useState("");
     const [phoneNumber, setPhoneNumber] = useState(""); 
     const [alternatePhoneNumber, setAlternatePhoneNumber] = useState("");
     const [address, setAddress] = useState("");
-    const [instagramUrl, setInstagramUrl] = useState("");
-    const [googleUrl, setGoogleUrl] = useState("");
-    const [justDialUrl, setJustDialUrl] = useState("");
+    const [instagramurl, setInstagramUrl] = useState("");
+    const [googleurl, setGoogleUrl] = useState("");
+    const [justdialurl, setJustDialUrl] = useState("");
     const [openingHours, setOpeningHours] = useState({
         monday: "",
         tuesday: "",
@@ -46,23 +46,23 @@ export default function Settings() {
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched site details:', data);
-                setSiteTitle(data.siteTitle || "");
+                setSiteTitle(data.sitetitle || "");
                 // Set the current logo URL for display - backend returns object with url property
-                if (data.siteLogoUrl && typeof data.siteLogoUrl === 'object' && data.siteLogoUrl.url) {
-                    setCurrentLogoUrl(data.siteLogoUrl.url);
+                if (data.sitelogourl && typeof data.sitelogourl === 'object' && data.sitelogourl.url) {
+                    setCurrentLogoUrl(data.sitelogourl.url);
                 } else {
                     setCurrentLogoUrl("");
                 }
                 setSiteLogoUrl(null);
-                setOwnerName(data.ownerName || "");
-                setSiteDescription(data.siteDescription || "");
-                setContactEmail(data.contactEmail || "");
-                setPhoneNumber(data.contactPhone || "");
-                setAlternatePhoneNumber(data.alternateContactPhone || "");
+                setOwnerName(data.ownername || "");
+                setSiteDescription(data.sitedescription || "");
+                setContactEmail(data.contactemail || "");
+                setPhoneNumber(data.contactphone || "");
+                setAlternatePhoneNumber(data.alternatecontactphone || "");
                 setAddress(data.address || "");
-                setInstagramUrl(data.instagramUrl || "");
-                setGoogleUrl(data.googleUrl || "");
-                setJustDialUrl(data.justDialUrl || "");
+                setInstagramUrl(data.instagramurl || "");
+                setGoogleUrl(data.googleurl || "");
+                setJustDialUrl(data.justdialurl || "");
                 // Opening hours is now an object with individual days
                 if (data.openingHours && typeof data.openingHours === 'object') {
                     setOpeningHours({
@@ -93,20 +93,20 @@ export default function Settings() {
 
     const updateSettings = () => {
 
-        const file = siteLogoUrl;
+        const file = sitelogourl;
         console.log("FILE", file);
         const form = new FormData();
-        form.append('siteTitle', siteTitle);
-        form.append('ownerName', ownerName);
-        form.append('siteDescription', siteDescription);
-        form.append('contactEmail', contactEmail);
-        // Backend expects 'contactPhone' and 'alternateContactPhone'
-        form.append('contactPhone', phoneNumber);
-        form.append('alternateContactPhone', alternatePhoneNumber);
+        form.append('sitetitle', sitetitle);
+        form.append('ownername', ownername);
+        form.append('sitedescription', sitedescription);
+        form.append('contactemail', contactemail);
+        // Backend expects 'contactphone' and 'alternatecontactphone'
+        form.append('contactphone', phoneNumber);
+        form.append('alternatecontactphone', alternatePhoneNumber);
         form.append('address', address);
-        form.append('instagramUrl', instagramUrl);
-        form.append('googleUrl', googleUrl);
-        form.append('justDialUrl', justDialUrl);
+        form.append('instagramurl', instagramurl);
+        form.append('googleurl', googleurl);
+        form.append('justdialurl', justdialurl);
         
         // Append opening hours for each day
         form.append('monday', openingHours.monday);
@@ -119,7 +119,7 @@ export default function Settings() {
 
         // Only append the logo file if a new file was selected
         if (file && file instanceof File) {
-            form.append('siteLogoUrl', file);
+            form.append('sitelogourl', file);
         }
 
         console.log("Sending this", form, openingHours)
@@ -140,11 +140,11 @@ export default function Settings() {
             console.log('Settings updated:', data);
             alert("Settings saved!");
             // Update the current logo if a new file was uploaded
-            if (siteLogoUrl && data.data && data.data.siteLogoUrl) {
-                setCurrentLogoUrl(data.data.siteLogoUrl.url);
+            if (sitelogourl && data.data && data.data.sitelogourl) {
+                setCurrentLogoUrl(data.data.sitelogourl.url);
             }
             // Clear the file input after successful save
-            if (siteLogoUrl) {
+            if (sitelogourl) {
                 setSiteLogoUrl(null);
             }
         })
@@ -157,12 +157,12 @@ export default function Settings() {
     // Render logo preview - shows current logo or newly selected file
     const renderLogoPreview = () => {
         // If a new file is selected, show preview of the new file
-        if (siteLogoUrl && siteLogoUrl instanceof File) {
+        if (sitelogourl && sitelogourl instanceof File) {
             return (
                 <div className="mt-2">
                     <p className="text-sm text-gray-600">New logo preview:</p>
                     <img 
-                        src={URL.createObjectURL(siteLogoUrl)} 
+                        src={URL.createObjectURL(sitelogourl)} 
                         alt="New logo preview" 
                         className="w-32 h-32 object-contain rounded-md mt-1"
                     />
@@ -200,7 +200,7 @@ export default function Settings() {
                     type="text"
                     placeholder="Enter Site Title"
                     maxLength={50}
-                    value={siteTitle}
+                    value={sitetitle}
                     onChange={(e) => setSiteTitle(e.target.value)}
                 />
             </div>
@@ -230,7 +230,7 @@ export default function Settings() {
                     name="Owner Name"
                     type="text"
                     placeholder="Enter Owner Name"
-                    value={ownerName}
+                    value={ownername}
                     onChange={(e) => setOwnerName(e.target.value)}
                 />
             </div>
@@ -242,7 +242,7 @@ export default function Settings() {
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="Site Description"
                     placeholder="Enter Site Description"
-                    value={siteDescription}
+                    value={sitedescription}
                     onChange={(e) => setSiteDescription(e.target.value)}
                 />
             </div>
@@ -255,7 +255,7 @@ export default function Settings() {
                     name="Contact Email"
                     type="email"
                     placeholder="Enter Contact Email"
-                    value={contactEmail}
+                    value={contactemail}
                     onChange={(e) => setContactEmail(e.target.value)}
                 />
             </div>
@@ -307,7 +307,7 @@ export default function Settings() {
                     name="Instagram URL"
                     type="url"
                     placeholder="Enter Instagram URL"
-                    value={instagramUrl}
+                    value={instagramurl}
                     onChange={(e) => setInstagramUrl(e.target.value)}
                 />
             </div>
@@ -320,7 +320,7 @@ export default function Settings() {
                     name="Google URL"
                     type="url"
                     placeholder="Enter Google URL"
-                    value={googleUrl}
+                    value={googleurl}
                     onChange={(e) => setGoogleUrl(e.target.value)}
                 />
             </div>
@@ -333,7 +333,7 @@ export default function Settings() {
                     name="Just Dial URL"
                     type="url"
                     placeholder="Enter Just Dial URL"
-                    value={justDialUrl}
+                    value={justdialurl}
                     onChange={(e) => setJustDialUrl(e.target.value)}
                 />
             </div>

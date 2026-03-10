@@ -18,9 +18,9 @@ export default function Products() {
 
   // shared state for add / edit form
   const [productName, setProductName] = useState("");
-  const [productId, setProductId] = useState("");
+  const [productid, setProductId] = useState("");
   const [description, setDescription] = useState("");
-  const [highlightImage, setHighlightImage] = useState<File | null>(null);
+  const [highlightimage, setHighlightImage] = useState<File | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
@@ -29,7 +29,7 @@ export default function Products() {
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
     const id = Math.floor(100000 + Math.random() * 900000)+'';
-    if (products.find(p => p.productId === id)) {
+    if (products.find(p => p.productid === id)) {
       return generateProductId(); // ensure uniqueness
     }
     return id;
@@ -41,14 +41,15 @@ export default function Products() {
 
   // fetch products only when logged in
   useEffect(() => {
-    if (!user) return;
+    // if (!user) return;
     const fetchProducts = async () => {
       try {
         setLoadingProducts(true);
         const res = await fetch("http://localhost:3000/api/products");
         const data = await res.json();
+        console.log("DATA", data)
         // newest first
-        setProducts((data || []).slice().reverse());
+        setProducts((data.data || []).slice().reverse());
       } catch (err) {
         console.error("Error fetching products:", err);
       } finally {
@@ -56,7 +57,7 @@ export default function Products() {
       }
     };
     fetchProducts();
-  }, [user]);
+  }, []);
 
   const resetProductForm = () => {
     setProductName("");
@@ -71,7 +72,7 @@ export default function Products() {
       setSubmitting(true);
       setError(null);
 
-      if (!productId || !productName) {
+      if (!productid || !productName) {
         setError("Product ID and name are required");
         return;
       }
@@ -97,7 +98,7 @@ export default function Products() {
           return;
         }
         setProducts((prev) =>
-          prev.map((p) => (p.productId === editingProductId ? { ...p, ...data } : p))
+          prev.map((p) => (p.productid === editingProductId ? { ...p, ...data } : p))
         );
         resetProductForm();
         return;
@@ -105,11 +106,11 @@ export default function Products() {
 
       // creating new product (with optional highlight image)
       const form = new FormData();
-      form.append("productId", productId);
+      form.append("productid", productid);
       form.append("name", productName);
       form.append("description", description);
-      if (highlightImage) {
-        form.append("highlightImage", highlightImage);
+      if (highlightimage) {
+        form.append("highlightimage", highlightimage);
       }
 
       const res = await fetch("http://localhost:3000/api/products", {
@@ -132,10 +133,10 @@ export default function Products() {
     }
   };
 
-  const handleDeleteProduct = async (productId: string) => {
+  const handleDeleteProduct = async (productid: string) => {
     try {
       const res = await fetch(
-        `http://localhost:3000/api/products/${productId}`,
+        `http://localhost:3000/api/products/${productid}`,
         {
           method: "DELETE",
         }
@@ -145,7 +146,7 @@ export default function Products() {
         console.error("Failed to delete product", data);
         return;
       }
-      setProducts((prev) => prev.filter((p) => p.productId !== productId));
+      setProducts((prev) => prev.filter((p) => p.productid !== productid));
     } catch (err) {
       console.error("Delete product error:", err);
     }
@@ -156,9 +157,9 @@ export default function Products() {
   };
 
   const startEditingProduct = (product: Product) => {
-    setEditingProductId(product.productId);
+    setEditingProductId(product.productid);
     setProductName(product.name || "");
-    setProductId(product.productId || "");
+    setProductId(product.productid || "");
     setDescription(product.description || "");
     setHighlightImage(null);
   };
@@ -210,7 +211,7 @@ export default function Products() {
             <input
               className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
               type="text"
-              value={productId}
+              value={productid}
               placeholder="Enter Product ID"
               disabled={true}
             />
@@ -234,11 +235,11 @@ export default function Products() {
                 </label>
                 <input
                   className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
-                  name="highlightImage"
+                  name="highlightimage"
                   placeholder="Upload Highlight Image"
                   type="file"
                   accept="image/*"
-                  value={highlightImage ? undefined : ""}
+                  value={highlightimage ? undefined : ""}
                   onChange={(e) =>
                     setHighlightImage(e.target.files?.[0] || null)
                   }
@@ -253,9 +254,9 @@ export default function Products() {
                 type="button"
                 disabled={
                   submitting ||
-                  !productId ||
+                  !productid ||
                   !productName ||
-                  (!editingProductId && !highlightImage)
+                  (!editingProductId && !highlightimage)
                 }
               >
                 {editingProductId ? "Save changes" : "+ Add this product"}
@@ -280,7 +281,7 @@ export default function Products() {
           ) : (
             products.map((product) => (
               <Card
-                key={product.productId}
+                key={product.productid}
                 product={product}
                 mode="admin"
                 onDelete={handleDeleteProduct}

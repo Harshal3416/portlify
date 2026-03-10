@@ -26,13 +26,13 @@ router.post('/register', async (req, res) => {
     userCode: generate6DigitCode(),
     emailVerified: false,
     verificationToken: crypto.randomUUID(),
-    createdAt: new Date().toISOString(),
+    createdat: new Date().toISOString(),
   };
 
   // Insert into DB
   const result = await pool.query(
     `INSERT INTO usersTest2 
-        (name, email, passwordhash, mobile, userCode, emailVerified, verificationToken, createdAt) 
+        (name, email, passwordhash, mobile, userCode, emailVerified, verificationToken, createdat) 
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8) 
        RETURNING *`,
     [
@@ -92,7 +92,7 @@ router.post('/google-signin', (req, res) => {
       userCode: generate6DigitCode(),
       emailVerified: true,
       verificationToken: null,
-      createdAt: new Date().toISOString()
+      createdat: new Date().toISOString()
     }
     users.push(user)
   }

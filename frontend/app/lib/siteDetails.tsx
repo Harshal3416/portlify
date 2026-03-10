@@ -5,6 +5,7 @@ export const getSiteDetails = async () => {
             throw new Error('Failed to fetch site details');
         }
         const data: SiteDetails = await response.json();
+        console.log("FETCHED SITE DETAILS", data)
         return data;
     } catch (error) {
         console.error('Error fetching site details:', error);
@@ -13,17 +14,17 @@ export const getSiteDetails = async () => {
 };
 
 interface SiteDetails {
-    siteTitle: string;
-    siteLogoUrl?: { filename: string; size: number; url?: string } | string;
-    ownerName?: string;
-    siteDescription?: string;
-    contactEmail?: string;
-    contactPhone?: string;
-    alternateContactPhone?: string;
+    sitetitle: string;
+    sitelogourl?: { filename: string; size: number; url?: string } | string;
+    ownername?: string;
+    sitedescription?: string;
+    contactemail?: string;
+    contactphone?: string;
+    alternatecontactphone?: string;
     address?: string;
-    instagramUrl: string;
-    googleUrl: string,
-    justDialUrl: string;
+    instagramurl: string;
+    googleurl: string,
+    justdialurl: string;
     gmapLink: string;
     monday: string;
     tuesday: string;

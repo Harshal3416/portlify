@@ -33,11 +33,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   const login = (u: User) => {
+    console.log("LOGGED IN USER", u)
     setUser(u);
     localStorage.setItem("auth_user", JSON.stringify(u));
   };
 
   const logout = () => {
+    console.log("LOGGING OUT")
     setUser(null);
     localStorage.removeItem("auth_user");
   };

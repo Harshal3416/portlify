@@ -8,20 +8,20 @@ export default function About() {
 
   const [open, setOpen] = useState(false);
 
-  const [siteTitle, setSiteTitle] = useState("");
-  const [ownerName, setOwnerName] = useState("");
-  const [siteDescription, setSiteDescription] = useState("");
-  const [siteLogoUrl, setSiteLogoUrl] = useState<string>("");
+  const [sitetitle, setSiteTitle] = useState("");
+  const [ownername, setOwnerName] = useState("");
+  const [sitedescription, setSiteDescription] = useState("");
+  const [sitelogourl, setSiteLogoUrl] = useState<string>("");
 
   useEffect(() => {
     getSiteDetails().then((details) => {
       console.log("Site details--->>:", details);
-      setSiteTitle(details?.siteTitle || '');
-      setOwnerName(details?.ownerName || "");
-      setSiteDescription(details?.siteDescription || "");
+      setSiteTitle(details?.sitetitle || '');
+      setOwnerName(details?.ownername || "");
+      setSiteDescription(details?.sitedescription || "");
 
-      if (details?.siteLogoUrl && typeof details.siteLogoUrl === 'object' && details.siteLogoUrl.url) {
-        setSiteLogoUrl("http://localhost:3000" + details.siteLogoUrl.url);
+      if (details?.sitelogourl && typeof details.sitelogourl === 'object' && details.sitelogourl.url) {
+        setSiteLogoUrl("http://localhost:3000" + details.sitelogourl.url);
       }
 
     }).catch((error: any) => {
@@ -31,10 +31,10 @@ export default function About() {
 
   const renderLogo = () => {
     // Show the logo if we have a URL
-    if (siteLogoUrl) {
+    if (sitelogourl) {
       return (
         <img
-          src={siteLogoUrl}
+          src={sitelogourl}
           alt="Site Logo"
           className="w-20 h-auto rounded-md mb-6"
         />
@@ -61,7 +61,7 @@ export default function About() {
             {/* <img src="/svslogo.png" alt="SVS logo" className="w-22 h-auto rounded-md mb-6" /> */}
           </div>
           <h1 className="text-4xl md:text-5xl font-bold text-center" data-testid="text-about-title">
-            Welcome to {siteTitle}
+            Welcome to {sitetitle}
           </h1>
         </div>
       </div>
@@ -79,10 +79,10 @@ export default function About() {
           <div className="flex flex-col items-center justify-between border-t border-gray-300 p-2">
             <div className="prose prose-lg max-w-none">
               <div className="text-muted-foreground leading-relaxed p-5">
-                <span className="text-4xl md:text-2xl font-bold text-center">{ownerName}</span>
+                <span className="text-4xl md:text-2xl font-bold text-center">{ownername}</span>
                 {/* <span>Proprietor</span> */}
                 <p>
-                  {siteDescription}
+                  {sitedescription}
                 </p>
               </div>
             </div>

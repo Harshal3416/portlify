@@ -19,13 +19,13 @@ export default function Contact() {
   useEffect(() => {
     getSiteDetails().then((details) => {
       console.log("Site details--->>:", details);
-      setContactEmail(details?.contactEmail || "");
-      setContactPhone(details?.contactPhone || "");
-      setAlternateContactPhone(details?.alternateContactPhone || "");
+      setContactEmail(details?.contactemail || "");
+      setContactPhone(details?.contactphone || "");
+      setAlternateContactPhone(details?.alternatecontactphone || "");
       setAddress(details?.address || "");
-      setInstagramURL(details?.instagramUrl || "");
-      setGoogleURL(details?.googleUrl || "");
-      setJustDialURL(details?.justDialUrl || "");
+      setInstagramURL(details?.instagramurl || "");
+      setGoogleURL(details?.googleurl || "");
+      setJustDialURL(details?.justdialurl || "");
       setGmapLink(details?.gmapLink || "");
     }).catch((error: any) => {
       console.error("Error fetching site details:", error);

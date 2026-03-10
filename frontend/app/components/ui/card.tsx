@@ -1,17 +1,18 @@
 "use client";
 
+import { useEffect } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LuShoppingCart } from "react-icons/lu";
 
 export interface Product {
-    productId: string;
+    productid: string;
     name?: string;
     description?: string;
-    // highlightImage can be:
+    // highlightimage can be:
     // - a Blob/File (while previewing before upload)
     // - a string path
     // - an object with a `url` field from the backend
-    highlightImage?: Blob | string | { filename: string; size: number; url?: string } | null;
+    highlightimage?: Blob | string | { filename: string; size: number; url?: string } | null;
 }
 
 type CardMode = "public" | "admin" | "preview";
@@ -19,7 +20,7 @@ type CardMode = "public" | "admin" | "preview";
 interface CardProps {
     product: Product;
     mode?: CardMode;
-    onDelete?: (productId: string) => void;
+    onDelete?: (productid: string) => void;
     onEdit?: (product: Product) => void;
     whatsappNumber?: string;
 }
@@ -40,10 +41,14 @@ export default function Card({
 
     const openWhatsappForProduct = () => {
         const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
-        const message = `Hello, I would like to enquire about "${product.name || "-"}" (ID: ${product.productId || "-"}). Description: ${product.description || "-"}`;
+        const message = `Hello, I would like to enquire about "${product.name || "-"}" (ID: ${product.productid || "-"}). Description: ${product.description || "-"}`;
         const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
     };
+
+    useEffect(() => {
+        console.log("PRODUCTS", product)
+    })
 
     // Todo: If the product is already in the cart, we can show "Go to cart" instead of "Add to cart"
     // Add a cart option with items in cart count badge, and a simple popup to show items in cart with a order now option that leads to whatsapp with the list of products in the message.
@@ -52,33 +57,33 @@ export default function Card({
         alert(`Added "${product.name || "-"}" to cart! (This is a placeholder action.)`);
         const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
         existingCart.push({
-            productId: product.productId,
+            productid: product.productid,
             name: product.name,
         });
         localStorage.setItem("cart", JSON.stringify(existingCart));
     }
 
     const renderImage = () => {
-        if (!product.highlightImage) return null;
+        if (!product.highlightimage) return null;
 
         const baseProps = {
             alt: product.name || "Product image",
             className: "w-full h-32 sm:h-36 md:h-40 object-contain rounded-md",
         };
 
-        if (typeof product.highlightImage === "string") {
+        if (typeof product.highlightimage === "string") {
             return (
                 <img
-                    src={"http://localhost:3000" + product.highlightImage}
+                    src={"http://localhost:3000" + product.highlightimage}
                     {...baseProps}
                 />
             );
         }
 
-        if (typeof product.highlightImage === "object" && "url" in product.highlightImage && product.highlightImage.url) {
+        if (typeof product.highlightimage === "object" && "url" in product.highlightimage && product.highlightimage.url) {
             return (
                 <img
-                    src={"http://localhost:3000" + product.highlightImage.url}
+                    src={"http://localhost:3000" + product.highlightimage.url}
                     {...baseProps}
                 />
             );
@@ -86,7 +91,7 @@ export default function Card({
 
         return (
             <img
-                src={URL.createObjectURL(product.highlightImage as Blob)}
+                src={URL.createObjectURL(product.highlightimage as Blob)}
                 {...baseProps}
             />
         );
@@ -98,7 +103,7 @@ export default function Card({
                 <div className="flex-1 flex flex-col">
                     <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
                     <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
-                        Product ID: {product.productId || "-"}
+                        Product ID: {product.productid || "-"}
                     </span>
                     <p className="text-gray-600 mb-2 text-sm line-clamp-3 min-h-[3.5rem]">
                         Product Description: {product.description || "-"}
@@ -142,7 +147,7 @@ export default function Card({
                     {canDelete && (
                         <button
                             type="button"
-                            onClick={() => onDelete && onDelete(product.productId)}
+                            onClick={() => onDelete && onDelete(product.productid)}
                             className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
                         >
                             Delete

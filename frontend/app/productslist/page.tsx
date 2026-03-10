@@ -5,14 +5,14 @@ import Card from "../components/ui/card";
 import { LuShoppingCart } from "react-icons/lu";
 
 interface Product {
-    productId: string;
+    productid: string;
     name?: string;
     description?: string;
-    // highlightImage may be:
+    // highlightimage may be:
     // - a File/Blob client‑side (used when previewing before upload)
     // - a string URL returned by the server
     // - a metadata object returned by your API (e.g. { filename, size, url })
-    highlightImage?: Blob | string | { filename: string; size: number; url?: string } | null;
+    highlightimage?: Blob | string | { filename: string; size: number; url?: string } | null;
 }
 
 export default function ProductList() {
@@ -22,13 +22,14 @@ export default function ProductList() {
     const itemsPerPage = 20; // show 5 items per page
 
     useEffect(() => {
+        console.log("PRODUCTLIST page")
         // Fetch products from the backend API
         fetch('http://localhost:3000/api/products')
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched products:', data);
                 // show newest products first
-                const list = (data || []).slice().reverse();
+                const list = (data.data || []).slice().reverse();
                 setProducts(list);
                 // always start from first page when data changes
                 setCurrentPage(1);
@@ -69,7 +70,7 @@ export default function ProductList() {
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                         {paginatedProducts.map((product) => (
                             <Card
-                              key={product.productId}
+                              key={product.productid}
                               product={product}
                               mode="public"
                             />

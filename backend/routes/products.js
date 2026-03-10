@@ -3,42 +3,61 @@ const crypto = require('crypto')
 const router = express.Router()
 const { upload } = require('../middleware/upload')
 const { products } = require('../utils/store')
+const pool = require("../../database/db/db");
 
 // Create product (multipart/form-data only; files are stored and URLs provided)
 router.post(
   '/',
   upload.fields([
-    { name: 'highlightImage', maxCount: 1 },
-    { name: 'otherImages', maxCount: 6 },
+    { name: 'highlightimage', maxCount: 1 },
+    { name: 'otherimages', maxCount: 6 },
     { name: 'videos', maxCount: 1 },
   ]),
-  (req, res) => {
+  async (req, res) => {
     console.log('Received product creation request with body:', req.body)
     try {
-      const { productId, name, description } = req.body
-      if (!productId || !name) return res.status(400).json({ success: false, error: 'productId and name are required' })
+      const { productid, name, description } = req.body
+      if (!productid || !name) return res.status(400).json({ success: false, error: 'productid and name are required' })
       console.log('products', products)
-      const exists = products.find(p => p.productId === productId)
+      const exists = products.find(p => p.productid === productid)
       if (exists) return res.status(409).json({ success: false, error: 'Product with this ID already exists' })
 
       const product = {
         id: crypto.randomUUID(),
-        productId,
+        productid,
         name,
         description: description || '',
-        highlightImage: req.files?.highlightImage
-          ? { filename: req.files.highlightImage[0].originalname, size: req.files.highlightImage[0].size, url: `/uploads/${req.files.highlightImage[0].filename}` }
+        highlightimage: req.files?.highlightimage
+          ? { filename: req.files.highlightimage[0].originalname, size: req.files.highlightimage[0].size, url: `/uploads/${req.files.highlightimage[0].filename}` }
           : null,
-        otherImages: req.files?.otherImages
-          ? req.files.otherImages.map(f => ({ filename: f.originalname, size: f.size, url: `/uploads/${f.filename}` })).slice(0, 6)
+        otherimages: req.files?.otherimages
+          ? req.files.otherimages.map(f => ({ filename: f.originalname, size: f.size, url: `/uploads/${f.filename}` })).slice(0, 6)
           : [],
         videos: req.files?.videos
           ? req.files.videos.map(f => ({ filename: f.originalname, size: f.size, url: `/uploads/${f.filename}` })).slice(0, 1)
           : [],
-        createdAt: new Date().toISOString(),
+        createdat: new Date().toISOString(),
       }
-      products.push(product)
-      return res.status(201).json({ success: true, data: product })
+
+      // Insert into DB
+      const result = await pool.query(
+        `INSERT INTO products 
+         (id, productid, name, description, highlightimage, otherimages, videos, createdat)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         RETURNING *`,
+        [
+          product.id,
+          product.productid,
+          product.name,
+          product.description,
+          product.highlightimage,
+          product.otherimages,
+          product.videos,
+          product.createdat,
+        ]
+      );
+
+      return res.status(201).json({ success: true, data: result.rows[0] });
     } catch (err) {
       return res.status(500).json({ success: false, error: 'Server error: ' + err.message })
     }
@@ -46,41 +65,49 @@ router.post(
 )
 
 // List all products
-router.get('/', (req, res) => {
-  return res.json(products)
+router.get('/', async (req, res) => {
+    try {
+    const result = await pool.query("SELECT * FROM products ORDER BY createdat DESC");
+    return res.status(200).json({ success: true, data: result.rows });
+  } catch (err) {
+    console.error("Error fetching products:", err);
+    return res.status(500).json({ success: false, error: "Internal server error" });
+  }
+
+  // return res.json(products)
 })
 
-// Get product by productId
-router.get('/:productId', (req, res) => {
-  const { productId } = req.params
-  const product = products.find(p => p.productId === productId)
+// Get product by productid
+router.get('/:productid', (req, res) => {
+  const { productid } = req.params
+  const product = products.find(p => p.productid === productid)
   if (!product) return res.status(404).json({ success: false, error: 'Product not found' })
   return res.json({ success: true, data: product })
 })
 
-// Update product by productId
-router.put('/:productId', (req, res) => {
-  const { productId } = req.params
-  const { name, description, highlightImage, otherImages, videos } = req.body
-  const product = products.find(p => p.productId === productId)
+// Update product by productid
+router.put('/:productid', (req, res) => {
+  const { productid } = req.params
+  const { name, description, highlightimage, otherimages, videos } = req.body
+  const product = products.find(p => p.productid === productid)
   if (!product) return res.status(404).json({ error: 'Product not found' })
-  if (otherImages && otherImages.length > 6) return res.status(400).json({ error: 'otherImages max 6' })
+  if (otherimages && otherimages.length > 6) return res.status(400).json({ error: 'otherimages max 6' })
   if (videos && videos.length > 1) return res.status(400).json({ error: 'videos max 1' })
 
   product.name = name || product.name
   product.description = description || product.description
-  product.highlightImage = highlightImage !== undefined ? highlightImage : product.highlightImage
-  product.otherImages = Array.isArray(otherImages) ? otherImages.slice(0, 6) : product.otherImages
+  product.highlightimage = highlightimage !== undefined ? highlightimage : product.highlightimage
+  product.otherimages = Array.isArray(otherimages) ? otherimages.slice(0, 6) : product.otherimages
   product.videos = Array.isArray(videos) ? videos.slice(0, 1) : product.videos
-  product.updatedAt = new Date().toISOString()
+  product.updatedat = new Date().toISOString()
 
   return res.json(product)
 })
 
-// Delete product by productId
-router.delete('/:productId', (req, res) => {
-  const { productId } = req.params
-  const idx = products.findIndex(p => p.productId === productId)
+// Delete product by productid
+router.delete('/:productid', (req, res) => {
+  const { productid } = req.params
+  const idx = products.findIndex(p => p.productid === productid)
   if (idx === -1) return res.status(404).json({ error: 'Product not found' })
   const removed = products.splice(idx, 1)[0]
   return res.json({ message: 'Product deleted', product: removed })
