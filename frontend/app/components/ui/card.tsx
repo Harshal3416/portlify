@@ -116,20 +116,20 @@ export default function Card({
 
             </div>
             {(canDelete || canEdit || showEnquire) && (
-                <div className="mt-3">
+                <div className="mt-3 ">
                     {showEnquire && (
-                        <div className="flex flec-row t-wrap gap-2 px-3 mb-3">
+                        <div className="flex flec-row gap-0 px-1 mb-3 w-full">
                         <button
                             type="button"
                             onClick={openWhatsappForProduct}
-                            className="px-4 py-2 border-1 text-black rounded-md mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
+                            className="px-1 py-1 w-full border-1   text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
                         > <FaWhatsapp className="inline-block mr-2" />
                             Enquire now
                         </button>
                         <button
                             type="button"
                             onClick={addToCart}
-                            className="px-4 py-2 border-1 text-black rounded-md mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
+                            className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
                         ><LuShoppingCart /> 
                             Add to cart
                         </button>

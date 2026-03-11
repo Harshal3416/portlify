@@ -4,10 +4,12 @@ import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { getSiteDetails } from "../lib/siteDetails";
 import { useAuth } from "@/app/context/AuthContext";
-import { useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function About() {
   const { user } = useAuth();
+  const router = useRouter();
+  
   const searchParams = useSearchParams();
   const shopidFromUrl = searchParams.get('shop');
   
@@ -65,6 +67,9 @@ export default function About() {
     <>
       <div className="bg-primary/5 py-4">
         <button>SHARE: TODO</button>
+
+        <button className="px-4 py-2 border-1 text-black rounded-md mt-3 border border-gray-400 disabled:opacity-60"
+          onClick={() => router.push("/admin/products")}>Admin</button>
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center mb-6">
             {renderLogo()}
