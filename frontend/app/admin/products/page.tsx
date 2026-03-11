@@ -5,18 +5,21 @@ import { useRouter } from "next/navigation";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useAuth } from "@/app/context/AuthContext";
 import Card, { Product } from "@/app/components/ui/card";
+import { useCreateProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 
 // type Tab = "login" | "register";
 
 export default function Products() {
   const { user, logout } = useAuth();
   const router = useRouter();
+  const createMutation = useCreateProduct();
+  const updateMutation = useUpdateProduct();
   
   const shopid = user?.shopid || '';
 
-  // products state for dashboard
-  const [products, setProducts] = useState<Product[]>([]);
-  const [loadingProducts, setLoadingProducts] = useState(false);
+  // Use React Query for fetching products - simplifies data fetching with caching
+  // Returns data, loading state, error, and refetch function
+  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(shopid);
 
   // shared state for add / edit form
   const [productName, setProductName] = useState("");
@@ -26,12 +29,12 @@ export default function Products() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
     const id = Math.floor(100000 + Math.random() * 900000)+'';
-    if (products.find(p => p.productid === id)) {
+    if (products.find((p:any) => p.productid === id)) {
       return generateProductId(); // ensure uniqueness
     }
     return id;
@@ -49,25 +52,8 @@ export default function Products() {
     }
   }, [user, router]);
 
-  // fetch products only when logged in
-  useEffect(() => {
-    if (!user) return;
-    const fetchProducts = async () => {
-      try {
-        setLoadingProducts(true);
-        const res = await fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`);
-        const data = await res.json();
-        console.log("DATA", data)
-        // newest first
-        setProducts((data.data || []).slice().reverse());
-      } catch (err) {
-        console.error("Error fetching products:", err);
-      } finally {
-        setLoadingProducts(false);
-      }
-    };
-    fetchProducts();
-  }, [user]);
+  // Note: Products are now fetched via useGetProductsQuery hook above
+  // No need for manual useEffect fetch anymore
 
   const resetProductForm = () => {
     setProductName("");
@@ -78,94 +64,48 @@ export default function Products() {
   };
 
   const handleSubmitProduct = async () => {
+    // Validate required fields
+    if (!productid || !productName) {
+      setSubmitError("Product ID and name are required");
+      return;
+    }
+
+    // Build FormData - common for both create and update
+    const form = new FormData();
+    form.append("productid", productid);
+    form.append("name", productName);
+    form.append("description", description);
+    form.append("shopid", shopid);
+
+    // Only append image if a new file is selected
+    if (highlightimage) {
+      form.append("highlightimage", highlightimage);
+    }
+
     try {
-      setSubmitting(true);
-      setError(null);
-
-      if (!productid || !productName) {
-        setError("Product ID and name are required");
-        return;
-      }
-
-      // if editing: simple JSON update (no file change for now)
       if (editingProductId) {
-        const editform = new FormData();
-        editform.append("productid", productid);
-        editform.append("name", productName);
-        editform.append("description", description);
-        editform.append("shopid", shopid);
-        if (highlightimage) {
-          editform.append("highlightimage", highlightimage);
-        }
-        console.log("FORM DATA", productName, productid, description, shopid)
-        const res = await fetch(
-          `http://localhost:3000/api/products/${editingProductId}`,
-          {
-            method: "PUT",
-            body: editform,
-          }
-        );
-        let data = await res.json();
-        if (!res.ok) {
-          setError(data.error || "Failed to update product");
-          return;
-        }
-        data = data.rows[0]
-        console.log("EDITED", data)
-        let merged = products.map((el) => {
-          console.log(el.productid, data.productid)
-          if (el.productid === data.productid) {
-            console.log("MATCHED", el)
-            return{
-              ...el,
-              description: data.description,
-              highlightimage: data.highlightimage,
-              name: data.name
-            }
-          }
-          return el;
-        })
-          // data.productid === productid)
-        // products.push(data.rows[0])
-        console.log("merged data", merged)
-        setProducts(merged)
-        console.log("after editing", products)
-        resetProductForm();
-        return;
+        // Update existing product
+        await updateMutation.mutateAsync({
+          id: editingProductId,
+          formData: form,
+        });
+        // React Query handles cache invalidation via onSuccess in the mutation hook
+      } else {
+        // Create new product
+        await createMutation.mutateAsync(form);
+        // React Query handles cache invalidation via onSuccess in the mutation hook
       }
 
-      // creating new product (with optional highlight image)
-      const form = new FormData();
-      form.append("productid", productid);
-      form.append("name", productName);
-      form.append("description", description);
-      form.append("shopid", shopid);
-      if (highlightimage) {
-        form.append("highlightimage", highlightimage);
-      }
-
-      const res = await fetch("http://localhost:3000/api/products", {
-        method: "POST",
-        body: form,
-      });
-      const data = await res.json();
-      if (!res.ok || !data.success) {
-        setError(data.error || "Failed to create product");
-        return;
-      }
-      // prepend so newest appears first
-      setProducts((prev) => [data.data, ...prev]);
-      
+      // Reset form after successful submit
       resetProductForm();
     } catch (err: any) {
-      console.error("Product submit error:", err);
-      setError("Failed to save product. Please try again.");
-    } finally {
-      setSubmitting(false);
+      // Display error message to user
+      setSubmitError(err.message || "Failed to save product");
     }
   };
 
   const handleDeleteProduct = async (productid: string) => {
+    // Optimistically could remove from UI, but we'll rely on React Query cache
     try {
       const res = await fetch(
         `http://localhost:3000/api/products/${productid}`,
@@ -176,11 +116,13 @@ export default function Products() {
       const data = await res.json();
       if (!res.ok) {
         console.error("Failed to delete product", data);
+        setSubmitError("Failed to delete product");
         return;
       }
-      setProducts((prev) => prev.filter((p) => p.productid !== productid));
+      // Products will auto-refresh via React Query cache invalidation
     } catch (err) {
       console.error("Delete product error:", err);
+      setSubmitError("Failed to delete product");
     }
   };
 
@@ -224,9 +166,9 @@ export default function Products() {
         </div>
       </div>
 
-      {error && (
+      {submitError && (
         <p className="text-red-600 mb-2 text-sm max-w-md">
-          {error}
+          {submitError}
         </p>
       )}
 
@@ -315,7 +257,7 @@ export default function Products() {
               No products added yet. Use the first card to add one.
             </p>
           ) : (
-            products.map((product) => (
+            products.map((product:any) => (
               <Card
                 key={product.productid}
                 product={product}

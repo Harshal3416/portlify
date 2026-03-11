@@ -21,7 +21,6 @@ app.use(express.urlencoded({ extended: true }))
 
 app.use( cors({ origin: ["http://localhost:4000"], credentials: true }) );
 
-// app.use(corsMiddleware)
 
 // Routes
 app.get('/', (req, res) => res.send('Enquiry App backend'))
