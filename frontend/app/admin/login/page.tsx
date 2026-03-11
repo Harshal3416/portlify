@@ -1,6 +1,7 @@
 'use client'
 
 import { useAuth } from "@/app/context/AuthContext";
+import { useLogin } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -10,7 +11,8 @@ export default function Login() {
 
     const { user, login, logout } = useAuth();
     const router = useRouter();
-    
+    const loginMutation = useLogin();
+
     const [activeTab, setActiveTab] = useState<Tab>("login");
 
     // login form state
@@ -27,31 +29,23 @@ export default function Login() {
     const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-    const handleLogin = async () => {
-        try {
-            setSubmitting(true);
-            setError(null);
-            const response = await fetch("http://localhost:3000/api/auth/login", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ email: loginEmail, password: loginPassword }),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                setError(data.error || "Login failed");
-                return;
-            }
-            login({ email: data.email || loginEmail, shopid: data.shopid });
-            router.push("/admin/products");
-        } catch (err: any) {
-            console.error("Login error:", err);
-            setError("Login failed. Please try again.");
-        } finally {
-            setSubmitting(false);
+  const handleLogin = async () => {
+    loginMutation.mutate(
+      { email: loginEmail, password: loginPassword },
+      {
+        onSuccess: (data) => {
+          // Call login from AuthContext after successful authentication
+          login({ email: data.email || loginEmail, shopid: data.shopid });
+          router.push("/admin/products");
+          console.log("Login success", data);
+        },
+        onError: (error) => {
+         setError("Login failed. Please try again.");
+          console.log("Login failed", error);
         }
-    };
+      }
+    );
+  };
 
     const handleRegister = async () => {
         setError('');
@@ -150,9 +144,9 @@ export default function Login() {
                             className="px-4 py-2 border-1 text-black rounded-md mt-3 border border-gray-400 disabled:opacity-60"
                             type="button"
                             onClick={handleLogin}
-                            disabled={!loginEmail || !loginPassword || submitting}
+                            disabled={!loginEmail || !loginPassword || loginMutation.isPending}
                         >
-                            {submitting ? "Logging in..." : "Login"}
+                            {loginMutation.isPending ? "Logging in..." : "Login"}
                         </button>
                     </div>
                 ) : (
