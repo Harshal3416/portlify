@@ -120,6 +120,7 @@ export default function Products() {
       form.append("productid", productid);
       form.append("name", productName);
       form.append("description", description);
+      form.append("shopid", shopid);
       if (highlightimage) {
         form.append("highlightimage", highlightimage);
       }

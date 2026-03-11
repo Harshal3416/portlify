@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Card from "../components/ui/card";
 import { LuShoppingCart } from "react-icons/lu";
+import { useAuth } from "../context/AuthContext";
 
 interface Product {
     productid: string;
@@ -16,6 +17,8 @@ interface Product {
 }
 
 export default function ProductList() {
+      const { user, logout } = useAuth();
+    
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [cartCount, setCartCount] = useState(0);
@@ -24,7 +27,7 @@ export default function ProductList() {
     useEffect(() => {
         console.log("PRODUCTLIST page")
         // Fetch products from the backend API
-        fetch('http://localhost:3000/api/products')
+        fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`)
             .then(response => response.json())
             .then(data => {
                 console.log('Fetched products:', data);

@@ -43,6 +43,7 @@ export default function Settings() {
 
     useEffect(() => {
         console.log("SHOP ID IN SETTING PAGE", shopid)
+        console.log("Local storage", localStorage.getItem('auth_user'))
         if (!shopid) return;
         
         fetch(`http://localhost:3000/api/site-details/${shopid}`)
