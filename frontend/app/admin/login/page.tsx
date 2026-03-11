@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from "@/app/context/AuthContext";
-import { useLogin } from "@/hooks/useAuth";
+import { useLogin, useRegister } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 
@@ -9,9 +9,10 @@ type Tab = "login" | "register";
 
 export default function Login() {
 
-    const { user, login, logout } = useAuth();
+    const { user, login } = useAuth();
     const router = useRouter();
     const loginMutation = useLogin();
+    const registerMutation = useRegister();
 
     const [activeTab, setActiveTab] = useState<Tab>("login");
 
@@ -26,64 +27,54 @@ export default function Login() {
     const [regMobile, setRegMobile] = useState("");
     const [regShopId, setShopId] = useState("");
 
-    const [submitting, setSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
-  const handleLogin = async () => {
-    loginMutation.mutate(
-      { email: loginEmail, password: loginPassword },
-      {
-        onSuccess: (data) => {
-          // Call login from AuthContext after successful authentication
-          login({ email: data.email || loginEmail, shopid: data.shopid });
-          router.push("/admin/products");
-          console.log("Login success", data);
-        },
-        onError: (error) => {
-         setError("Login failed. Please try again.");
-          console.log("Login failed", error);
-        }
-      }
-    );
-  };
+    const handleLogin = async () => {
+        loginMutation.mutate(
+            { email: loginEmail, password: loginPassword },
+            {
+                onSuccess: (data) => {
+                    // Call login from AuthContext after successful authentication
+                    login({ email: data.email || loginEmail, shopid: data.shopid });
+                    router.push("/admin/products");
+                    console.log("Login success", data);
+                },
+                onError: (error) => {
+                    setError("Login failed. Please try again.");
+                    console.log("Login failed", error);
+                }
+            }
+        );
+    };
 
     const handleRegister = async () => {
-        setError('');
-        try {
-            setSubmitting(true);
-            setError(null);
-            const response = await fetch("http://localhost:3000/api/auth/register", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json",
+        registerMutation.mutate(
+            {
+                name: regName,
+                email: regEmail,
+                password: regPassword,
+                mobile: regMobile,
+                shopid: regShopId
+            },
+            {
+                onSuccess: (data) => {
+                    // Call login from AuthContext after successful authentication
+                    login({ email: data.email || regEmail, shopid: data.shopid, });
+                    router.push("/admin/settings");
+                    console.log("Login success", data);
                 },
-                body: JSON.stringify({
-                    name: regName,
-                    email: regEmail,
-                    password: regPassword,
-                    mobile: regMobile,
-                    shopid: regShopId
-                }),
-            });
-            const data = await response.json();
-            if (!response.ok) {
-                setError(data.error || "Registration failed");
-                return;
+                onError: (error) => {
+                    setError("Login failed. Please try again.");
+                    console.log("Login failed", error);
+                }
             }
-            // auto-login after successful registration
-            login({ email: data.email || regEmail });
-            router.push("/admin/settings")
-        } catch (err: any) {
-            console.error("Register error:", err);
-            setError("Registration failed. Please try again.");
-        } finally {
-            setSubmitting(false);
-        }
+        );
     };
+
 
     // If routes are changed forcefully, i am logging out, so user can relogin OR register new account
     useEffect(() => {
-        if(user) {
+        if (user) {
             router.push("/admin/products")
         }
     }, [user, router])
@@ -95,8 +86,8 @@ export default function Login() {
                 <div className="mb-4 flex space-x-4">
                     <button
                         className={`px-4 py-2 rounded-md ${activeTab === "login"
-                                ? "bg-black text-white"
-                                : "bg-gray-200 text-black"
+                            ? "bg-black text-white"
+                            : "bg-gray-200 text-black"
                             }`}
                         onClick={() => setActiveTab("login")}
                     >
@@ -104,8 +95,8 @@ export default function Login() {
                     </button>
                     <button
                         className={`px-4 py-2 rounded-md ${activeTab === "register"
-                                ? "bg-black text-white"
-                                : "bg-gray-200 text-black"
+                            ? "bg-black text-white"
+                            : "bg-gray-200 text-black"
                             }`}
                         onClick={() => setActiveTab("register")}
                     >
@@ -201,10 +192,10 @@ export default function Login() {
                             type="button"
                             onClick={handleRegister}
                             disabled={
-                                !regName || !regEmail || !regPassword || !regMobile || submitting
+                                !regName || !regEmail || !regPassword || !regMobile || registerMutation.isPending
                             }
                         >
-                            {submitting ? "Registering..." : "Register"}
+                            {registerMutation.isPending ? "Registering..." : "Register"}
                         </button>
                     </div>
                 )}
