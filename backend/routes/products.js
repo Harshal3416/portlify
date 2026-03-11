@@ -105,15 +105,25 @@ router.put('/:productid', upload.fields([
   ]), async (req, res) => {
   const { productid } = req.params
   console.log("EDITING PRODUCT", req.body)
-  const { name, description } = req.body
-  const highlightimage = req.files?.highlightimage
-    ? {
-        filename: req.files.highlightimage[0].originalname,
-        size: req.files.highlightimage[0].size,
-        url: `/uploads/${req.files.highlightimage[0].filename}`,
-      }
-    : null;
-  const product = await pool.query("UPDATE PRODUCTS SET name = $1, description = $2, highlightimage = $3 WHERE productid = $4 RETURNING *", [name, description, highlightimage, productid])
+  const { name, description, shopid } = req.body
+  
+  // Only update highlightimage if a new file is provided
+  let query = "UPDATE PRODUCTS SET name = $1, description = $2";
+  let params = [name, description, productid];
+  
+  if (req.files?.highlightimage) {
+    const highlightimage = {
+      filename: req.files.highlightimage[0].originalname,
+      size: req.files.highlightimage[0].size,
+      url: `/uploads/${req.files.highlightimage[0].filename}`,
+    };
+    query = "UPDATE PRODUCTS SET name = $1, description = $2, highlightimage = $3 WHERE productid = $4 RETURNING *";
+    params = [name, description, highlightimage, productid];
+  } else {
+    query += " WHERE productid = $3 RETURNING *";
+  }
+  
+  const product = await pool.query(query, params)
     // if (shopid) {
     //     result = await pool.query(
     //       "SELECT * FROM products WHERE shopid = $1 ORDER BY createdat DESC",
@@ -126,7 +136,9 @@ router.put('/:productid', upload.fields([
 
   product.name = name || product.name
   product.description = description || product.description
-  product.highlightimage = highlightimage !== undefined ? highlightimage : product.highlightimage
+  if(product.highlightimage) {
+    product.highlightimage = highlightimage !== undefined ? highlightimage : product.highlightimage
+  }
   // product.otherimages = Array.isArray(otherimages) ? otherimages.slice(0, 6) : product.otherimages
   // product.videos = Array.isArray(videos) ? videos.slice(0, 1) : product.videos
   // product.updatedat = new Date().toISOString()
