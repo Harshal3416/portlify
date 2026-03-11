@@ -1,8 +1,9 @@
 const express = require('express')
 const multer = require('multer')
 const path = require('path')
+const cors = require("cors");
 
-const corsMiddleware = require('./middleware/cors')
+// const corsMiddleware = require('./middleware/cors')
 const { uploadsDir } = require('./middleware/upload')
 
 const authRoutes = require('./routes/auth')
@@ -17,7 +18,10 @@ app.use('/uploads', express.static(uploadsDir))
 
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
-app.use(corsMiddleware)
+
+app.use( cors({ origin: ["http://localhost:4000"], credentials: true }) );
+
+// app.use(corsMiddleware)
 
 // Routes
 app.get('/', (req, res) => res.send('Enquiry App backend'))
