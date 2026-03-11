@@ -17,7 +17,7 @@ interface Product {
 }
 
 export default function ProductList() {
-      const { user, logout } = useAuth();
+    const { user } = useAuth();
     
     const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);

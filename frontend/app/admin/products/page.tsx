@@ -89,28 +89,47 @@ export default function Products() {
 
       // if editing: simple JSON update (no file change for now)
       if (editingProductId) {
+        const editform = new FormData();
+        editform.append("productid", productid);
+        editform.append("name", productName);
+        editform.append("description", description);
+        editform.append("shopid", shopid);
+        if (highlightimage) {
+          editform.append("highlightimage", highlightimage);
+        }
+        console.log("FORM DATA", productName, productid, description, shopid)
         const res = await fetch(
-          `http://localhost:3000/api/products/${editingProductId}}`,
+          `http://localhost:3000/api/products/${editingProductId}`,
           {
             method: "PUT",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              name: productName,
-              description,
-              shopid: user?.shopid
-            }),
+            body: editform,
           }
         );
-        const data = await res.json();
+        let data = await res.json();
         if (!res.ok) {
           setError(data.error || "Failed to update product");
           return;
         }
-        setProducts((prev) =>
-          prev.map((p) => (p.productid === editingProductId ? { ...p, ...data } : p))
-        );
+        data = data.rows[0]
+        console.log("EDITED", data)
+        let merged = products.map((el) => {
+          console.log(el.productid, data.productid)
+          if (el.productid === data.productid) {
+            console.log("MATCHED", el)
+            return{
+              ...el,
+              description: data.description,
+              highlightimage: data.highlightimage,
+              name: data.name
+            }
+          }
+          return el;
+        })
+          // data.productid === productid)
+        // products.push(data.rows[0])
+        console.log("merged data", merged)
+        setProducts(merged)
+        console.log("after editing", products)
         resetProductForm();
         return;
       }
@@ -136,6 +155,7 @@ export default function Products() {
       }
       // prepend so newest appears first
       setProducts((prev) => [data.data, ...prev]);
+      
       resetProductForm();
     } catch (err: any) {
       console.error("Product submit error:", err);
@@ -249,23 +269,19 @@ export default function Products() {
               {description.length}/150 characters
             </p>
 
-            {!editingProductId && (
-              <>
-                <label className="mt-3 text-xs font-medium text-gray-700">
-                  Upload Highlight Image <span className="text-red-700">*</span>
-                </label>
-                <input
-                  className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
-                  name="highlightimage"
-                  placeholder="Upload Highlight Image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setHighlightImage(e.target.files?.[0] || null)
-                  }
-                />
-              </>
-            )}
+            <label className="mt-3 text-xs font-medium text-gray-700">
+              Upload Highlight Image <span className="text-red-700">*</span>
+            </label>
+            <input
+              className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
+              name="highlightimage"
+              placeholder="Upload Highlight Image"
+              type="file"
+              accept="image/*"
+              onChange={(e) =>
+                setHighlightImage(e.target.files?.[0] || null)
+              }
+            />
 
             <div className="flex gap-2 mt-3">
               <button

@@ -16,17 +16,18 @@ router.post(
   async (req, res) => {
     console.log('Received product creation request with body:', req.body)
     try {
-      const { productid, name, description } = req.body
+      const { productid, name, description, shopid } = req.body
       if (!productid || !name) return res.status(400).json({ success: false, error: 'productid and name are required' })
       console.log('products', products)
-      const exists = products.find(p => p.productid === productid)
-      if (exists) return res.status(409).json({ success: false, error: 'Product with this ID already exists' })
+      // const exists = products.find(p => p.productid === productid)
+      // if (exists) return res.status(409).json({ success: false, error: 'Product with this ID already exists' })
 
       const product = {
         id: crypto.randomUUID(),
         productid,
         name,
         description: description || '',
+        shopid,
         highlightimage: req.files?.highlightimage
           ? { filename: req.files.highlightimage[0].originalname, size: req.files.highlightimage[0].size, url: `/uploads/${req.files.highlightimage[0].filename}` }
           : null,
@@ -42,11 +43,12 @@ router.post(
       // Insert into DB
       const result = await pool.query(
         `INSERT INTO products 
-         (id, productid, name, description, highlightimage, otherimages, videos, createdat)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+         (id, shopid, productid, name, description, highlightimage, otherimages, videos, createdat)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING *`,
         [
           product.id,
+          product.shopid,
           product.productid,
           product.name,
           product.description,
@@ -66,10 +68,20 @@ router.post(
 
 // List all products
 router.get('/', async (req, res) => {
+  const { shopid } = req.query; // read from query string
+  console.log("SHOP ID IN BACKEND", shopid)
     try {
-      const result = await pool.query(
-        "SELECT * FROM products ORDER BY createdat DESC",
-      );
+      if (shopid) {
+        result = await pool.query(
+          "SELECT * FROM products WHERE shopid = $1 ORDER BY createdat DESC",
+          [shopid],
+        );
+      } else {
+        result = await pool.query(
+          "SELECT * FROM products ORDER BY createdat DESC",
+        );
+      }
+
       return res.status(200).json({ success: true, data: result.rows });
     } catch (err) {
       console.error("Error fetching products:", err);
@@ -88,31 +100,50 @@ router.get('/:productid', (req, res) => {
 })
 
 // Update product by productid
-router.put('/:productid', (req, res) => {
+router.put('/:productid', upload.fields([
+    { name: 'highlightimage', maxCount: 1 }
+  ]), async (req, res) => {
   const { productid } = req.params
-  const { name, description, highlightimage, otherimages, videos } = req.body
-  const product = products.find(p => p.productid === productid)
+  console.log("EDITING PRODUCT", req.body)
+  const { name, description } = req.body
+  const highlightimage = req.files?.highlightimage
+    ? {
+        filename: req.files.highlightimage[0].originalname,
+        size: req.files.highlightimage[0].size,
+        url: `/uploads/${req.files.highlightimage[0].filename}`,
+      }
+    : null;
+  const product = await pool.query("UPDATE PRODUCTS SET name = $1, description = $2, highlightimage = $3 WHERE productid = $4 RETURNING *", [name, description, highlightimage, productid])
+    // if (shopid) {
+    //     result = await pool.query(
+    //       "SELECT * FROM products WHERE shopid = $1 ORDER BY createdat DESC",
+    //       [shopid],
+    //     );
+    //   } 
   if (!product) return res.status(404).json({ error: 'Product not found' })
-  if (otherimages && otherimages.length > 6) return res.status(400).json({ error: 'otherimages max 6' })
-  if (videos && videos.length > 1) return res.status(400).json({ error: 'videos max 1' })
+  // if (otherimages && otherimages.length > 6) return res.status(400).json({ error: 'otherimages max 6' })
+  // if (videos && videos.length > 1) return res.status(400).json({ error: 'videos max 1' })
 
   product.name = name || product.name
   product.description = description || product.description
   product.highlightimage = highlightimage !== undefined ? highlightimage : product.highlightimage
-  product.otherimages = Array.isArray(otherimages) ? otherimages.slice(0, 6) : product.otherimages
-  product.videos = Array.isArray(videos) ? videos.slice(0, 1) : product.videos
-  product.updatedat = new Date().toISOString()
+  // product.otherimages = Array.isArray(otherimages) ? otherimages.slice(0, 6) : product.otherimages
+  // product.videos = Array.isArray(videos) ? videos.slice(0, 1) : product.videos
+  // product.updatedat = new Date().toISOString()
 
   return res.json(product)
 })
 
 // Delete product by productid
-router.delete('/:productid', (req, res) => {
+router.delete('/:productid', async (req, res) => {
   const { productid } = req.params
-  const idx = products.findIndex(p => p.productid === productid)
-  if (idx === -1) return res.status(404).json({ error: 'Product not found' })
-  const removed = products.splice(idx, 1)[0]
-  return res.json({ message: 'Product deleted', product: removed })
+  // const idx = products.findIndex(p => p.productid === productid)
+
+  const product = await pool.query("DELETE FROM PRODUCTS WHERE productid = $1 RETURNING *", [productid])
+
+  if (product.success === false) return res.status(404).json({ error: 'Product not found' })
+  // const removed = products.splice(idx, 1)[0]
+  return res.json({ message: 'Product deleted', product })
 })
 
 module.exports = router
