@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import Card from "../components/ui/card";
 import { LuShoppingCart } from "react-icons/lu";
 import { useAuth } from "../context/AuthContext";
+import { useGetProductsQuery } from "@/hooks/useProductMutation";
 
 interface Product {
     productid: string;
@@ -17,32 +18,34 @@ interface Product {
 }
 
 export default function ProductList() {
-    const { user } = useAuth();
     
-    const [products, setProducts] = useState<Product[]>([]);
+    const { user } = useAuth();
+    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(user?.shopid);
+    
+    // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [cartCount, setCartCount] = useState(0);
     const itemsPerPage = 20; // show 5 items per page
 
-    useEffect(() => {
-        console.log("PRODUCTLIST page")
-        // Fetch products from the backend API
-        fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Fetched products:', data);
-                // show newest products first
-                const list = (data.data || []).slice().reverse();
-                setProducts(list);
-                // always start from first page when data changes
-                setCurrentPage(1);
-            })
-            .catch(error => {
-                console.error('Error fetching products:', error);
-            });
+    // useEffect(() => {
+    //     console.log("PRODUCTLIST page")
+    //     // Fetch products from the backend API
+    //     fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`)
+    //         .then(response => response.json())
+    //         .then(data => {
+    //             console.log('Fetched products:', data);
+    //             // show newest products first
+    //             const list = (data.data || []).slice().reverse();
+    //             setProducts(list);
+    //             // always start from first page when data changes
+    //             setCurrentPage(1);
+    //         })
+    //         .catch(error => {
+    //             console.error('Error fetching products:', error);
+    //         });
 
-            setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length);
-    }, []);
+    //         setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length);
+    // }, []);
 
     // Calculate pagination
     const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -71,7 +74,7 @@ export default function ProductList() {
             {products.length > 0 ? (
                 <>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                        {paginatedProducts.map((product) => (
+                        {paginatedProducts.map((product:any) => (
                             <Card
                               key={product.productid}
                               product={product}

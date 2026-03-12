@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useAuth } from "@/app/context/AuthContext";
 import Card, { Product } from "@/app/components/ui/card";
-import { useCreateProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
+import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 
 // type Tab = "login" | "register";
 
@@ -14,7 +14,8 @@ export default function Products() {
   const router = useRouter();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
-  
+  const deleteMutation = useDeleteProduct();
+
   const shopid = user?.shopid || '';
 
   // Use React Query for fetching products - simplifies data fetching with caching
@@ -105,26 +106,21 @@ export default function Products() {
   };
 
   const handleDeleteProduct = async (productid: string) => {
-    // Optimistically could remove from UI, but we'll rely on React Query cache
-    try {
-      const res = await fetch(
-        `http://localhost:3000/api/products/${productid}`,
-        {
-          method: "DELETE",
+    deleteMutation.mutate(
+      {
+        productid,
+      },
+      {
+        onSuccess : (data) => {
+          console.log("DELETED", data)
+        },
+        onError: (err) => {
+          console.log("Error in deleting")
         }
-      );
-      const data = await res.json();
-      if (!res.ok) {
-        console.error("Failed to delete product", data);
-        setSubmitError("Failed to delete product");
-        return;
       }
-      // Products will auto-refresh via React Query cache invalidation
-    } catch (err) {
-      console.error("Delete product error:", err);
-      setSubmitError("Failed to delete product");
-    }
-  };
+    )
+  }
+
 
   const siteSettings = () => {
     router.push("/admin/settings");
@@ -262,7 +258,7 @@ export default function Products() {
                 key={product.productid}
                 product={product}
                 mode="admin"
-                onDelete={handleDeleteProduct}
+                onDelete={() => handleDeleteProduct(product.productid)}
                 onEdit={startEditingProduct}
               />
             ))
