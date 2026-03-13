@@ -3,33 +3,37 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
+import { SiteDetail } from "@/app/lib/siteDetails";
+import { useSettings } from "@/hooks/useSettings";
+
+
 
 export default function Settings() {
 
     const router = useRouter();
     const { user, logout } = useAuth();
-    
-    const [sitetitle, setSiteTitle] = useState("");
-    const [sitelogourl, setSiteLogoUrl] = useState<File | null>(null);
-    const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
-    const [ownername, setOwnerName] = useState("");
-    const [sitedescription, setSiteDescription] = useState("");
-    const [contactemail, setContactEmail] = useState("");
-    const [phoneNumber, setPhoneNumber] = useState(""); 
-    const [alternatePhoneNumber, setAlternatePhoneNumber] = useState("");
-    const [address, setAddress] = useState("");
-    const [instagramurl, setInstagramUrl] = useState("");
-    const [googleurl, setGoogleUrl] = useState("");
-    const [justdialurl, setJustDialUrl] = useState("");
-    const [openingHours, setOpeningHours] = useState({
-        monday: "",
-        tuesday: "",
-        wednesday: "",
-        thursday: "",
-        friday: "",
-        saturday: "",
-        sunday: ""
+
+    const settingsMutation = useSettings()
+
+const [siteDetails, setSiteDetails] = useState<SiteDetail | null>(null)
+
+    const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+        console.log("setting value", field, e.target.value)
+setSiteDetails(prev => {
+      if (!prev) {
+        const newDetails: SiteDetail = {
+          sitetitle: '',
+          [field]: e.target.value
+        } as SiteDetail;
+        return newDetails;
+      }
+      return { ...prev, [field]: e.target.value };
     });
+        console.log(siteDetails)
+    };
+
+    const [sitelogourl, setSitelogourl] = useState<File | null>(null);
+    const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
 
     const shopid = user?.shopid || '';
 
@@ -45,59 +49,29 @@ export default function Settings() {
         console.log("SHOP ID IN SETTING PAGE", shopid)
         console.log("Local storage", localStorage.getItem('auth_user'))
         if (!shopid) return;
-        
-        fetch(`http://localhost:3000/api/site-details/${shopid}`)
-            .then(response => response.json())
-            .then(data => {
-                console.log('Fetched site details:', data);
-                data = data.data[0];
-                if(!data || data.length == 0) {
-                    throw new Error("Empty Data");
-                    
+
+        settingsMutation.mutate(shopid,
+            {
+                onSuccess: (data: any) => {
+                    console.log("RECEIVED DATA FROM MUTATION-SETTING", data, data?.data[0]);
+                    const details = data?.data[0];
+                    if (details) {
+                      setSiteDetails(details);
+                      // Set current logo
+                      if (details.sitelogourl) {
+                          if (typeof details.sitelogourl === 'object' && details.sitelogourl.url) {
+                              setCurrentLogoUrl(details.sitelogourl.url);
+                          } else if (typeof details.sitelogourl === 'string') {
+                              setCurrentLogoUrl(details.sitelogourl);
+                          }
+                      }
+                    }
+                },
+                onError: (err) => {
+                    console.log("MUTATION ERROR-SETTING", err)
                 }
-                setSiteTitle(data.sitetitle || "");
-                // Set the current logo URL for display - backend returns object with url property
-                if (data.sitelogourl && typeof data.sitelogourl === 'object' && data.sitelogourl.url) {
-                    setCurrentLogoUrl(data.sitelogourl.url);
-                } else {
-                    setCurrentLogoUrl("");
-                }
-                setSiteLogoUrl(null);
-                setOwnerName(data.ownername || "");
-                setSiteDescription(data.sitedescription || "");
-                setContactEmail(data.contactemail || "");
-                setPhoneNumber(data.contactphone || "");
-                setAlternatePhoneNumber(data.alternatecontactphone || "");
-                setAddress(data.address || "");
-                setInstagramUrl(data.instagramurl || "");
-                setGoogleUrl(data.googleurl || "");
-                setJustDialUrl(data.justdialurl || "");
-                // Opening hours is now an object with individual days
-                if (data.openingHours && typeof data.openingHours === 'object') {
-                    setOpeningHours({
-                        monday: data.openingHours.monday || "",
-                        tuesday: data.openingHours.tuesday || "",
-                        wednesday: data.openingHours.wednesday || "",
-                        thursday: data.openingHours.thursday || "",
-                        friday: data.openingHours.friday || "",
-                        saturday: data.openingHours.saturday || "",
-                        sunday: data.openingHours.sunday || ""
-                    });
-                } else {
-                    setOpeningHours({
-                        monday: "",
-                        tuesday: "",
-                        wednesday: "",
-                        thursday: "",
-                        friday: "",
-                        saturday: "",
-                        sunday: ""
-                    });
-                }
-            })
-            .catch(error => {
-                console.error('Error fetching site details:', error);
-            });
+            }
+        )
     }, [shopid]);
 
     const updateSettings = () => {
@@ -109,33 +83,32 @@ export default function Settings() {
         // Add shopid to form data
         form.append('shopid', shopid);
         
-        form.append('sitetitle', sitetitle);
-        form.append('ownername', ownername);
-        form.append('sitedescription', sitedescription);
-        form.append('contactemail', contactemail);
+        form.append('sitetitle', siteDetails?.sitetitle || '');
+        form.append('ownername', siteDetails?.ownername || '');
+        form.append('sitedescription', siteDetails?.sitedescription || '');
+        form.append('contactemail', siteDetails?.contactemail || '');
         // Backend expects 'contactphone' and 'alternatecontactphone'
-        form.append('contactphone', phoneNumber);
-        form.append('alternatecontactphone', alternatePhoneNumber);
-        form.append('address', address);
-        form.append('instagramurl', instagramurl);
-        form.append('googleurl', googleurl);
-        form.append('justdialurl', justdialurl);
+        form.append('contactphone', siteDetails?.contactphone || '');
+        form.append('alternatecontactphone', siteDetails?.alternatecontactphone || '');
+        form.append('address', siteDetails?.address || '');
+        form.append('instagramurl', siteDetails?.instagramurl || '');
+        form.append('googleurl', siteDetails?.googleurl || '');
+        form.append('justdialurl', siteDetails?.justdialurl || '');
         
         // Append opening hours for each day
-        form.append('monday', openingHours.monday);
-        form.append('tuesday', openingHours.tuesday);
-        form.append('wednesday', openingHours.wednesday);
-        form.append('thursday', openingHours.thursday);
-        form.append('friday', openingHours.friday);
-        form.append('saturday', openingHours.saturday);
-        form.append('sunday', openingHours.sunday);
+        form.append('monday', siteDetails?.monday ?? '');
+        form.append('tuesday', siteDetails?.tuesday ?? '');
+        form.append('wednesday', siteDetails?.wednesday ?? '');
+        form.append('thursday', siteDetails?.thursday ?? '');
+        form.append('friday', siteDetails?.friday ?? '');
+        form.append('saturday', siteDetails?.saturday ?? '');
+        form.append('sunday', siteDetails?.sunday ?? '');
 
         // Only append the logo file if a new file was selected
         if (file && file instanceof File) {
             form.append('sitelogourl', file);
         }
 
-        console.log("Sending this", form, openingHours)
 
         fetch('http://localhost:3000/api/site-details', {
             method: 'POST',
@@ -154,11 +127,11 @@ export default function Settings() {
             alert("Settings saved!");
             // Update the current logo if a new file was uploaded
             if (sitelogourl && data.data && data.data.sitelogourl) {
-                setCurrentLogoUrl(data.data.sitelogourl.url);
+                setCurrentLogoUrl(data.data[0]?.sitelogourl?.url || '');
             }
             // Clear the file input after successful save
             if (sitelogourl) {
-                setSiteLogoUrl(null);
+                setSitelogourl(null);
             }
         })
         .catch(error => {
@@ -234,8 +207,8 @@ export default function Settings() {
                     type="text"
                     placeholder="Enter Site Title"
                     maxLength={50}
-                    value={sitetitle}
-                    onChange={(e) => setSiteTitle(e.target.value)}
+value={siteDetails?.sitetitle ?? ''}
+                    onChange={updateField('sitetitle')}
                 />
             </div>
 
@@ -249,7 +222,7 @@ export default function Settings() {
                         type="file"
                         placeholder="Enter Site Logo URL"
                         accept="image/*"
-                        onChange={(e) => setSiteLogoUrl(e.target.files?.[0] || null)}
+onChange={(e) => setSitelogourl(e.target.files?.[0] || null)}
                     />
                     {/* Logo Preview - shows current logo or newly selected file */}
                     {renderLogoPreview()}
@@ -264,8 +237,8 @@ export default function Settings() {
                     name="Owner Name"
                     type="text"
                     placeholder="Enter Owner Name"
-                    value={ownername}
-                    onChange={(e) => setOwnerName(e.target.value)}
+value={siteDetails?.ownername ?? ''}
+                    onChange={updateField('ownername')}
                 />
             </div>
 
@@ -276,8 +249,8 @@ export default function Settings() {
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="Site Description"
                     placeholder="Enter Site Description"
-                    value={sitedescription}
-                    onChange={(e) => setSiteDescription(e.target.value)}
+value={siteDetails?.sitedescription ?? ''}
+                    onChange={updateField('sitedescription')}
                 />
             </div>
 
@@ -289,8 +262,8 @@ export default function Settings() {
                     name="Contact Email"
                     type="email"
                     placeholder="Enter Contact Email"
-                    value={contactemail}
-                    onChange={(e) => setContactEmail(e.target.value)}
+value={siteDetails?.contactemail ?? ''}
+                    onChange={updateField('contactemail')}
                 />
             </div>
 
@@ -302,8 +275,8 @@ export default function Settings() {
                     name="Phone Number"
                     type="tel"
                     placeholder="Enter Phone Number"
-                    value={phoneNumber}
-                    onChange={(e) => setPhoneNumber(e.target.value)}
+value={siteDetails?.contactphone ?? ''}
+                    onChange={updateField('contactphone')}
                 />
             </div>
 
@@ -315,8 +288,8 @@ export default function Settings() {
                     name="Alternate Phone Number"
                     type="tel"
                     placeholder="Enter Alternate Phone Number"
-                    value={alternatePhoneNumber}
-                    onChange={(e) => setAlternatePhoneNumber(e.target.value)}
+value={siteDetails?.alternatecontactphone ?? ''}
+                    onChange={updateField('alternatecontactphone')}
                 />
             </div>
 
@@ -328,8 +301,8 @@ export default function Settings() {
                     name="Address"
                     placeholder="Enter Address"
                     maxLength={200}
-                    value={address}
-                    onChange={(e) => setAddress(e.target.value)}
+value={siteDetails?.address ?? ''}
+                    onChange={updateField('address')}
                 />
             </div>
 
@@ -341,8 +314,8 @@ export default function Settings() {
                     name="Instagram URL"
                     type="url"
                     placeholder="Enter Instagram URL"
-                    value={instagramurl}
-                    onChange={(e) => setInstagramUrl(e.target.value)}
+value={siteDetails?.instagramurl ?? ''}
+                    onChange={updateField('instagramurl')}
                 />
             </div>
 
@@ -354,8 +327,8 @@ export default function Settings() {
                     name="Google URL"
                     type="url"
                     placeholder="Enter Google URL"
-                    value={googleurl}
-                    onChange={(e) => setGoogleUrl(e.target.value)}
+value={siteDetails?.googleurl ?? ''}
+                    onChange={updateField('googleurl')}
                 />
             </div>
 
@@ -367,8 +340,8 @@ export default function Settings() {
                     name="Just Dial URL"
                     type="url"
                     placeholder="Enter Just Dial URL"
-                    value={justdialurl}
-                    onChange={(e) => setJustDialUrl(e.target.value)}
+value={siteDetails?.justdialurl ?? ''}
+                    onChange={updateField('justdialurl')}
                 />
             </div>
 
@@ -382,8 +355,8 @@ export default function Settings() {
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
-                            value={openingHours.monday}
-                            onChange={(e) => setOpeningHours({...openingHours, monday: e.target.value})}
+value={siteDetails?.monday ?? ''}
+                            onChange={updateField('monday')}
                         />
                     </div>
                     <div className="flex items-center">
@@ -392,8 +365,8 @@ export default function Settings() {
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
-                            value={openingHours.tuesday}
-                            onChange={(e) => setOpeningHours({...openingHours, tuesday: e.target.value})}
+                            value={siteDetails?.tuesday ?? ''}
+                            onChange={updateField('tuesday')}
                         />
                     </div>
                     <div className="flex items-center">
@@ -402,18 +375,18 @@ export default function Settings() {
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
-                            value={openingHours.wednesday}
-                            onChange={(e) => setOpeningHours({...openingHours, wednesday: e.target.value})}
+                            value={siteDetails?.wednesday ?? ''}
+                            onChange={updateField('wednesday')}
                         />
                     </div>
                     <div className="flex items-center">
-                        <span className="w-24 text-sm font-medium">Thursday</span>
+        <span className="w-24 text-sm font-medium">Thursday</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
-                            value={openingHours.thursday}
-                            onChange={(e) => setOpeningHours({...openingHours, thursday: e.target.value})}
+                            value={siteDetails?.thursday ?? ''}
+                            onChange={updateField('thursday')}
                         />
                     </div>
                     <div className="flex items-center">
@@ -422,8 +395,8 @@ export default function Settings() {
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
-                            value={openingHours.friday}
-                            onChange={(e) => setOpeningHours({...openingHours, friday: e.target.value})}
+                            value={siteDetails?.friday ?? ''}
+                            onChange={updateField('friday')}
                         />
                     </div>
                     <div className="flex items-center">
@@ -432,8 +405,8 @@ export default function Settings() {
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., 9:00 AM - 6:00 PM"
-                            value={openingHours.saturday}
-                            onChange={(e) => setOpeningHours({...openingHours, saturday: e.target.value})}
+                            value={siteDetails?.saturday ?? ''}
+                            onChange={updateField('saturday')}
                         />
                     </div>
                     <div className="flex items-center">
@@ -442,8 +415,8 @@ export default function Settings() {
                             className="p-2 border border-gray-300 rounded-md flex-1"
                             type="text"
                             placeholder="e.g., Closed"
-                            value={openingHours.sunday}
-                            onChange={(e) => setOpeningHours({...openingHours, sunday: e.target.value})}
+                            value={siteDetails?.sunday ?? ''}
+                            onChange={updateField('sunday')}
                         />
                     </div>
                 </div>

@@ -4,7 +4,7 @@ export const getSiteDetails = async (shopid: string) => {
         if (!response.ok) {
             throw new Error('Failed to fetch site details');
         }
-        const data: SiteDetails = await response.json();
+        const data: SiteDetailsResponse = await response.json();
         console.log("FETCHED SITE DETAILS", data)
         return data.data[0];
     } catch (error) {
@@ -13,26 +13,31 @@ export const getSiteDetails = async (shopid: string) => {
     }
 };
 
-interface SiteDetails {
-    data: [{
+export interface SiteDetail {
     sitetitle: string;
-    sitelogourl?: { filename: string; size: number; url?: string } | string;
+    sitelogourl?: { filename: string; size: number; url?: string } | string | null;
     ownername?: string;
     sitedescription?: string;
     contactemail?: string;
     contactphone?: string;
     alternatecontactphone?: string;
     address?: string;
-    instagramurl: string;
-    googleurl: string,
-    justdialurl: string;
-    gmapLink: string;
-    monday: string;
-    tuesday: string;
-    wednesday: string;
-    thursday: string;
-    friday: string;
-    saturday: string;
-    sunday: string;
-    }]
+    instagramurl?: string;
+    googleurl?: string;
+    justdialurl?: string;
+    gmapLink?: string;
+    monday?: string;
+    tuesday?: string;
+    wednesday?: string;
+    thursday?: string;
+    friday?: string;
+    saturday?: string;
+    sunday?: string;
 }
+
+export interface SiteDetailsResponse {
+    data: SiteDetail[];
+}
+
+// Update getSiteDetails return type
+
