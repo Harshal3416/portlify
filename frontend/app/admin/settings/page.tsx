@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/app/context/AuthContext";
 import { SiteDetail } from "@/app/lib/siteDetails";
-import { useSettings } from "@/hooks/useSettings";
+import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 
 
 
@@ -14,6 +14,7 @@ export default function Settings() {
     const { user, logout } = useAuth();
 
     const settingsMutation = useSettings()
+    const updateSettingsMutation = useUpdateSettings()
 
 const [siteDetails, setSiteDetails] = useState<SiteDetail | null>(null)
 
@@ -75,7 +76,6 @@ setSiteDetails(prev => {
     }, [shopid]);
 
     const updateSettings = () => {
-
         const file = sitelogourl;
         console.log("FILE", file);
         const form = new FormData();
@@ -87,7 +87,6 @@ setSiteDetails(prev => {
         form.append('ownername', siteDetails?.ownername || '');
         form.append('sitedescription', siteDetails?.sitedescription || '');
         form.append('contactemail', siteDetails?.contactemail || '');
-        // Backend expects 'contactphone' and 'alternatecontactphone'
         form.append('contactphone', siteDetails?.contactphone || '');
         form.append('alternatecontactphone', siteDetails?.alternatecontactphone || '');
         form.append('address', siteDetails?.address || '');
@@ -109,34 +108,21 @@ setSiteDetails(prev => {
             form.append('sitelogourl', file);
         }
 
-
-        fetch('http://localhost:3000/api/site-details', {
-            method: 'POST',
-            body: form,
-        })
-        .then(response => {
-            if (!response.ok) {
-                return response.text().then(text => {
-                    throw new Error(`Server error: ${response.status} - ${text}`);
-                });
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Settings updated:', data);
-            alert("Settings saved!");
-            // Update the current logo if a new file was uploaded
-            if (sitelogourl && data.data && data.data.sitelogourl) {
-                setCurrentLogoUrl(data.data[0]?.sitelogourl?.url || '');
-            }
-            // Clear the file input after successful save
-            if (sitelogourl) {
+        updateSettingsMutation.mutate(form, {
+            onSuccess: (data) => {
+                console.log('Settings updated:', data);
+                alert("Settings saved!");
+                // Update the current logo if a new file was uploaded
+                if (sitelogourl && data.data && data.data.sitelogourl) {
+                    setCurrentLogoUrl(data.data[0]?.sitelogourl?.url || '');
+                }
+                // Clear the file input after successful save
                 setSitelogourl(null);
+            },
+            onError: (error) => {
+                console.error('Error updating settings:', error);
+                alert("Failed to save settings");
             }
-        })
-        .catch(error => {
-            console.error('Error updating settings:', error);
-            alert("Failed to save settings: " + error.message);
         });
     }
 
