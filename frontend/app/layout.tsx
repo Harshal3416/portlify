@@ -32,14 +32,14 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* auth provider covers the entire app */}
-        <SiteProvider>
           <AuthProvider>
+        <SiteProvider>
             <QueryProvider>
               {children}
             </QueryProvider>
             <FooterComponent></FooterComponent>
-          </AuthProvider>
         </SiteProvider>
+          </AuthProvider>
       </body>
     </html>
   );

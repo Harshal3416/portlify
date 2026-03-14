@@ -9,39 +9,29 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function About() {
   const { user } = useAuth();
   const router = useRouter();
-    const siteDetails = useSiteDetails();
-  
-  
+  const siteDetails = useSiteDetails();
   const searchParams = useSearchParams();
   const shopidFromUrl = searchParams.get('shop');
-  
-  const [open, setOpen] = useState(false);
+  const shopid = shopidFromUrl || user?.shopid || ''; // Get shopid: from URL params first, then from auth context, then fallback
 
+  const [open, setOpen] = useState(false);
   const [sitetitle, setSiteTitle] = useState("");
   const [ownername, setOwnerName] = useState("");
   const [sitedescription, setSiteDescription] = useState("");
   const [sitelogourl, setSiteLogoUrl] = useState<string>("");
 
-  // Get shopid: from URL params first, then from auth context, then fallback
-  const shopid = shopidFromUrl || user?.shopid || '';
-
   useEffect(() => {
     if (!shopid) return;
-    
-    // getSiteDetails(shopid).then((details) => {
-    //   console.log("Site details--->>:", details);
-    //   setSiteTitle(details?.sitetitle || '');
-    //   setOwnerName(details?.ownername || "");
-    //   setSiteDescription(details?.sitedescription || "");
 
-    //   if (details?.sitelogourl && typeof details.sitelogourl === 'object' && details.sitelogourl.url) {
-    //     setSiteLogoUrl("http://localhost:3000" + details.sitelogourl.url);
-    //   }
-
-    // }).catch((error: any) => {
-    //   console.error("Error fetching site details:", error);
-    // });
-  }, []);
+    if(siteDetails) {
+      setSiteTitle(siteDetails.sitetitle);
+      setSiteDescription(siteDetails.sitedescription || '')
+      setOwnerName(siteDetails.ownername || '')
+      if (siteDetails?.sitelogourl && typeof siteDetails.sitelogourl === 'object' && siteDetails.sitelogourl.url) {
+        setSiteLogoUrl("http://localhost:3000" + siteDetails.sitelogourl.url);
+      }
+    }
+  }, [siteDetails]);
 
   const renderLogo = () => {
     // Show the logo if we have a URL
@@ -58,7 +48,7 @@ export default function About() {
     // Fallback to default logo
     return (
       <img
-        src="/svslogo.png"
+        src="/logo.jpg"
         alt="Default Logo"
         className="w-20 h-auto rounded-md mb-6"
       />

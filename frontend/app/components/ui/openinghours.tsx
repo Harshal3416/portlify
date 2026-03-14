@@ -10,11 +10,11 @@ export default function OpeningHours() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const shopidFromUrl = searchParams.get('shop');
-  
-    const siteDetails = useSiteDetails();
-  
+
+  const siteDetails = useSiteDetails();
+
   const [open, setOpen] = useState(false);
-  
+
   const [monday, setMondayTime] = useState('');
   const [tuesday, setTuesdayTime] = useState('');
   const [wednesday, setWednesdayTime] = useState('');
@@ -23,26 +23,17 @@ export default function OpeningHours() {
   const [saturday, setSaturdayTime] = useState('');
   const [sunday, setSundayTime] = useState('');
 
-  // Get shopid: from URL params first, then from auth context, then fallback
-  const shopid = shopidFromUrl || user?.shopid || '';
-
   useEffect(() => {
-    if (!shopid) return;
-        console.log("siteDetails in contact component", siteDetails)
-
-    // getSiteDetails(shopid).then((details) => {
-    //   console.log("Site details--->>:", details);
-    //   setMondayTime(details?.monday || '');
-    //   setTuesdayTime(details?.tuesday || '');
-    //   setWednesdayTime(details?.wednesday || '');
-    //   setThursdayTime(details?.thursday || '');
-    //   setFridayTime(details?.friday || '');
-    //   setSaturdayTime(details?.saturday || '');
-    //   setSundayTime(details?.sunday || '');
-    // }).catch((error:any) => {
-    //   console.error("Error fetching site details:", error);
-    // });
-  }, []);
+    if (siteDetails) {
+      setMondayTime(siteDetails?.monday || '');
+      setTuesdayTime(siteDetails?.tuesday || '');
+      setWednesdayTime(siteDetails?.wednesday || '');
+      setThursdayTime(siteDetails?.thursday || '');
+      setFridayTime(siteDetails?.friday || '');
+      setSaturdayTime(siteDetails?.saturday || '');
+      setSundayTime(siteDetails?.sunday || '');
+    }
+  }, [siteDetails]);
 
   return (
     <div className="w-[80%] mx-auto border-1 border-gray-300 rounded-md my-2">
@@ -63,27 +54,27 @@ export default function OpeningHours() {
           <p className="text-lg mt-2 flex flex-row justify-between  w-70">
             <span>Tuesday: </span>
             {tuesday}
-            </p>
+          </p>
           <p className="text-lg mt-2 flex flex-row justify-between  w-70">
             <span>Wednesday: </span>
             {wednesday}
-            </p>
+          </p>
           <p className="text-lg mt-2 flex flex-row justify-between  w-70">
             <span>Thursday: </span>
             {thursday}
-            </p>
+          </p>
           <p className="text-lg mt-2 flex flex-row justify-between  w-70">
             <span>Friday: </span>
             {friday}
-            </p>
+          </p>
           <p className="text-lg mt-2 flex flex-row justify-between  w-70">
             <span>Saturday: </span>
             {saturday}
-            </p>
+          </p>
           <p className="text-lg mt-2 flex flex-row justify-between  w-70">
             <span>Sunday: </span>
             {sunday}
-            </p>
+          </p>
         </div>
       )}
     </div>
