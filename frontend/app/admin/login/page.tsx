@@ -17,8 +17,8 @@ export default function Login() {
     const [activeTab, setActiveTab] = useState<Tab>("login");
 
     // login form state
-    const [loginEmail, setLoginEmail] = useState("");
-    const [loginPassword, setLoginPassword] = useState("");
+    const [loginEmail, setLoginEmail] = useState("test@gmail.com");
+    const [loginPassword, setLoginPassword] = useState("Test@123");
 
     // register form state
     const [regName, setRegName] = useState("");
@@ -29,7 +29,31 @@ export default function Login() {
 
     const [error, setError] = useState<string | null>(null);
 
+    const validateEmail = (value: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(value);
+    };
+
+      const validatePassword = (value:string) => {
+    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    return regex.test(value);
+  };
+
+
+  const validatePhone = (value:string) => {
+    const regex = /^[6-9][0-9]{9}$/; // Indian 10-digit numbers starting with 6–9
+    return regex.test(value);
+  };
+
+
     const handleLogin = async () => {
+
+        const isEmailValid = validateEmail(loginEmail);
+
+        if(!isEmailValid) {
+            return setError("Please enter a valid email")
+        }
+
         loginMutation.mutate(
             { email: loginEmail, password: loginPassword },
             {
@@ -48,6 +72,18 @@ export default function Login() {
     };
 
     const handleRegister = async () => {
+        const isEmailValid = validateEmail(regEmail);
+        const isMobileNumberValid = validatePhone(regMobile);
+        const isPasswordStrong = validatePassword(regPassword)
+        if (!isEmailValid) {
+            return setError("Please enter a valid email")
+        }
+        if(!isMobileNumberValid) {
+            return setError("Please enter a valid phone number")
+        }
+                if(!isPasswordStrong) {
+            return setError("Please enter strong password. Rules: At least 8 characters, At least one uppercase letter, At least one lowercase letter, At least one number, - At least one special character (like !@#$%^&*)")
+        }
         registerMutation.mutate(
             {
                 name: regName,
@@ -89,7 +125,7 @@ export default function Login() {
                             ? "bg-black text-white"
                             : "bg-gray-200 text-black"
                             }`}
-                        onClick={() => setActiveTab("login")}
+                        onClick={() => {setActiveTab("login"); setError(null)}}
                     >
                         Login
                     </button>
@@ -98,7 +134,7 @@ export default function Login() {
                             ? "bg-black text-white"
                             : "bg-gray-200 text-black"
                             }`}
-                        onClick={() => setActiveTab("register")}
+                        onClick={() => {setActiveTab("register"); setError(null)}}
                     >
                         Register
                     </button>
@@ -132,7 +168,7 @@ export default function Login() {
                             required
                         />
                         <button
-                            className="px-4 py-2 border-1 text-black rounded-md mt-3 border border-gray-400 disabled:opacity-60"
+                            className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30"
                             type="button"
                             onClick={handleLogin}
                             disabled={!loginEmail || !loginPassword || loginMutation.isPending}
@@ -154,7 +190,7 @@ export default function Login() {
                         <input
                             className="p-2 mt-2 border border-gray-300 rounded-md"
                             name="Mobile"
-                            type="tel"
+                            type="number"
                             placeholder="Enter Mobile Number"
                             value={regMobile}
                             onChange={(e) => setRegMobile(e.target.value)}
@@ -182,17 +218,17 @@ export default function Login() {
                             className="p-2 mt-2 border border-gray-300 rounded-md"
                             name="Shop ID"
                             type="text"
-                            placeholder="Enter 6 digit Shop ID"
+                            placeholder="Enter Shop ID"
                             value={regShopId}
                             onChange={(e) => setShopId(e.target.value)}
                             required
                         />
                         <button
-                            className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-60"
+                            className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30"
                             type="button"
                             onClick={handleRegister}
                             disabled={
-                                !regName || !regEmail || !regPassword || !regMobile || registerMutation.isPending
+                                !regName || !regEmail || !regPassword || !regMobile || !regShopId || registerMutation.isPending
                             }
                         >
                             {registerMutation.isPending ? "Registering..." : "Register"}

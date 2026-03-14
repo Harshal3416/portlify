@@ -6,8 +6,6 @@ import { useAuth } from "@/app/context/AuthContext";
 import { SiteDetail } from "@/app/lib/siteDetails";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 
-
-
 export default function Settings() {
 
     const router = useRouter();
