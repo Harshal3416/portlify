@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LuShoppingCart } from "react-icons/lu";
 
@@ -23,6 +23,12 @@ interface CardProps {
     onDelete?: (productid: string) => void;
     onEdit?: (product: Product) => void;
     whatsappNumber?: string;
+    cartUpdated: () => void;
+}
+
+interface CartData {
+    productid: string,
+    name: string
 }
 
 const DEFAULT_WHATSAPP_NUMBER = "9164735164"; // change to your business number
@@ -33,11 +39,14 @@ export default function Card({
     onDelete,
     onEdit,
     whatsappNumber,
+    cartUpdated
 }: CardProps) {
 
     const canDelete = mode === "admin" && !!onDelete;
     const canEdit = mode === "admin" && !!onEdit;
     const showEnquire = mode === "public";
+
+    const [availableInCart, setAvailableInCart] = useState(false)
 
     const openWhatsappForProduct = () => {
         const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
@@ -47,20 +56,25 @@ export default function Card({
     };
 
     useEffect(() => {
-        console.log("PRODUCTS", product)
-    })
+        setAvailableInCart(isProductExistInCart);
+    }, [])
 
-    // Todo: If the product is already in the cart, we can show "Go to cart" instead of "Add to cart"
+    const getCartFromLocalStorage = () => {
+        return JSON.parse(localStorage.getItem("cart") || "[]");
+    }
+
+    // Todo: If the product is already in the cart, we can show "Remove from cart" instead of "Add to cart"
     // Add a cart option with items in cart count badge, and a simple popup to show items in cart with a order now option that leads to whatsapp with the list of products in the message.
 
     const addToCart = () => {
-        alert(`Added "${product.name || "-"}" to cart! (This is a placeholder action.)`);
-        const existingCart = JSON.parse(localStorage.getItem("cart") || "[]");
-        existingCart.push({
+        const existingCartLS = getCartFromLocalStorage();
+        existingCartLS.push({
             productid: product.productid,
             name: product.name,
         });
-        localStorage.setItem("cart", JSON.stringify(existingCart));
+        localStorage.setItem("cart", JSON.stringify(existingCartLS));
+        setAvailableInCart(true)
+        cartUpdated()
     }
 
     const renderImage = () => {
@@ -97,6 +111,20 @@ export default function Card({
         );
     };
 
+    const isProductExistInCart = () => {
+        const x = getCartFromLocalStorage().find((el:CartData) => el.productid === product.productid);
+        return x ? true : false
+    }
+
+    const removeFromCart = () => {
+        const remainingProducts = getCartFromLocalStorage().filter((el:CartData) => {
+            return el.productid !== product.productid
+        })
+        setAvailableInCart(false)
+        localStorage.setItem('cart', JSON.stringify(remainingProducts))
+        cartUpdated()
+    }
+
     return (
         <span className="border border-gray-300 rounded-md pb-0 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
             <div className="p-4 flex flex-col flex-1">
@@ -128,10 +156,11 @@ export default function Card({
                         </button>
                         <button
                             type="button"
-                            onClick={addToCart}
+                            onClick={ availableInCart ? removeFromCart : addToCart }
                             className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
                         ><LuShoppingCart /> 
-                            Add to cart
+                        {availableInCart ? 'Remove From cart' : 'Add to cart' }
+                            
                         </button>
                         </div>
                     )}

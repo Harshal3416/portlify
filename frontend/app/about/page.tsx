@@ -2,13 +2,15 @@
 
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { getSiteDetails } from "../lib/siteDetails";
+import { useSiteDetails } from "../context/siteContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { useRouter, useSearchParams } from "next/navigation";
 
 export default function About() {
   const { user } = useAuth();
   const router = useRouter();
+    const siteDetails = useSiteDetails();
+  
   
   const searchParams = useSearchParams();
   const shopidFromUrl = searchParams.get('shop');
@@ -26,19 +28,19 @@ export default function About() {
   useEffect(() => {
     if (!shopid) return;
     
-    getSiteDetails(shopid).then((details) => {
-      console.log("Site details--->>:", details);
-      setSiteTitle(details?.sitetitle || '');
-      setOwnerName(details?.ownername || "");
-      setSiteDescription(details?.sitedescription || "");
+    // getSiteDetails(shopid).then((details) => {
+    //   console.log("Site details--->>:", details);
+    //   setSiteTitle(details?.sitetitle || '');
+    //   setOwnerName(details?.ownername || "");
+    //   setSiteDescription(details?.sitedescription || "");
 
-      if (details?.sitelogourl && typeof details.sitelogourl === 'object' && details.sitelogourl.url) {
-        setSiteLogoUrl("http://localhost:3000" + details.sitelogourl.url);
-      }
+    //   if (details?.sitelogourl && typeof details.sitelogourl === 'object' && details.sitelogourl.url) {
+    //     setSiteLogoUrl("http://localhost:3000" + details.sitelogourl.url);
+    //   }
 
-    }).catch((error: any) => {
-      console.error("Error fetching site details:", error);
-    });
+    // }).catch((error: any) => {
+    //   console.error("Error fetching site details:", error);
+    // });
   }, []);
 
   const renderLogo = () => {

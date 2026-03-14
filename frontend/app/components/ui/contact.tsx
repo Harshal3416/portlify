@@ -1,6 +1,6 @@
 'use client';
 
-import { getSiteDetails } from "@/app/lib/siteDetails";
+import { useSiteDetails } from "@/app/context/siteContext";
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useAuth } from "@/app/context/AuthContext";
@@ -10,6 +10,8 @@ export default function Contact() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const shopidFromUrl = searchParams.get('shop');
+
+  let siteDetails = useSiteDetails();
   
   const [open, setOpen] = useState(false);
   const [gmailId, setContactEmail] = useState("");
@@ -25,22 +27,19 @@ export default function Contact() {
   const shopid = shopidFromUrl || user?.shopid || '';
 
   useEffect(() => {
-    if (!shopid) return;
-    
-    getSiteDetails(shopid).then((details) => {
-      console.log("Site details--->>:", details);
-      setContactEmail(details?.contactemail || "");
-      setContactPhone(details?.contactphone || "");
-      setAlternateContactPhone(details?.alternatecontactphone || "");
-      setAddress(details?.address || "");
-      setInstagramURL(details?.instagramurl || "");
-      setGoogleURL(details?.googleurl || "");
-      setJustDialURL(details?.justdialurl || "");
-      setGmapLink(details?.gmapLink || "");
-    }).catch((error: any) => {
-      console.error("Error fetching site details:", error);
-    });
-  }, []);
+    console.log("siteDetails in contact component", siteDetails)
+
+    if (siteDetails) {
+      setContactEmail(siteDetails.contactemail || "");
+      setContactPhone(siteDetails.contactphone || "");
+      setAlternateContactPhone(siteDetails.alternatecontactphone || "");
+      setAddress(siteDetails.address || "");
+      setInstagramURL(siteDetails.instagramurl || "");
+      setGoogleURL(siteDetails.googleurl || "");
+      setJustDialURL(siteDetails.justdialurl || "");
+      setGmapLink(siteDetails.gmapLink || "");
+    }
+  }, [siteDetails]);
 
   const openWhatsapp = () => {
     const message = "Hello, I would like to inquire about your products."; // replace with your default message

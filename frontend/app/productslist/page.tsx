@@ -27,6 +27,10 @@ export default function ProductList() {
     const [cartCount, setCartCount] = useState(0);
     const itemsPerPage = 20; // show 5 items per page
 
+    useEffect(() => {
+        handleCart()
+    })
+
     // useEffect(() => {
     //     console.log("PRODUCTLIST page")
     //     // Fetch products from the backend API
@@ -52,14 +56,18 @@ export default function ProductList() {
     const startIndex = (currentPage - 1) * itemsPerPage;
     const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
 
-    const handlePageChange = (page: number) => {
-        if (page < 1 || page > totalPages) return;
-        setCurrentPage(page);
-    };
+    // const handlePageChange = (page: number) => {
+    //     if (page < 1 || page > totalPages) return;
+    //     setCurrentPage(page);
+    // };
 
     const openCart = () => {
         alert("This is a placeholder for the cart! You have " + cartCount + " items in your cart.");
         // In a real app, you would navigate to the cart page or open a cart modal here.
+    }
+
+    const handleCart = () => {
+        setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length)
     }
 
     return (
@@ -79,11 +87,12 @@ export default function ProductList() {
                               key={product.productid}
                               product={product}
                               mode="public"
+                              cartUpdated={handleCart}
                             />
                         ))}
                     </div>
                     {/* Pagination Controls */}
-                    <div className="flex justify-center items-center mt-8 space-x-2">
+                    {/* <div className="flex justify-center items-center mt-8 space-x-2">
                         <button
                             onClick={() => handlePageChange(currentPage - 1)}
                             disabled={currentPage === 1}
@@ -110,7 +119,7 @@ export default function ProductList() {
                         >
                             Next
                         </button>
-                    </div>
+                    </div> */}
                 </>
             ) : (
                 <p>No products available.</p>

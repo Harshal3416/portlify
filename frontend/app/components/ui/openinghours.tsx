@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { getSiteDetails } from "../../lib/siteDetails";
+import { useSiteDetails } from "../../context/siteContext";
 import { useAuth } from "@/app/context/AuthContext";
 import { useSearchParams } from "next/navigation";
 
@@ -10,6 +10,8 @@ export default function OpeningHours() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
   const shopidFromUrl = searchParams.get('shop');
+  
+    const siteDetails = useSiteDetails();
   
   const [open, setOpen] = useState(false);
   
@@ -26,19 +28,20 @@ export default function OpeningHours() {
 
   useEffect(() => {
     if (!shopid) return;
-    
-    getSiteDetails(shopid).then((details) => {
-      console.log("Site details--->>:", details);
-      setMondayTime(details?.monday || '');
-      setTuesdayTime(details?.tuesday || '');
-      setWednesdayTime(details?.wednesday || '');
-      setThursdayTime(details?.thursday || '');
-      setFridayTime(details?.friday || '');
-      setSaturdayTime(details?.saturday || '');
-      setSundayTime(details?.sunday || '');
-    }).catch((error:any) => {
-      console.error("Error fetching site details:", error);
-    });
+        console.log("siteDetails in contact component", siteDetails)
+
+    // getSiteDetails(shopid).then((details) => {
+    //   console.log("Site details--->>:", details);
+    //   setMondayTime(details?.monday || '');
+    //   setTuesdayTime(details?.tuesday || '');
+    //   setWednesdayTime(details?.wednesday || '');
+    //   setThursdayTime(details?.thursday || '');
+    //   setFridayTime(details?.friday || '');
+    //   setSaturdayTime(details?.saturday || '');
+    //   setSundayTime(details?.sunday || '');
+    // }).catch((error:any) => {
+    //   console.error("Error fetching site details:", error);
+    // });
   }, []);
 
   return (

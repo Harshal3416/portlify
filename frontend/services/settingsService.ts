@@ -1,10 +1,10 @@
 import apiClient from "@/lib/apiClient";
+import { SiteDetail } from "@/app/interfaces/interface";
 
-export const getUserSettings = async (shopid: string) => {
-    console.log("SHOP ID in settings--->>", shopid)
+export const getUserSettings = async (shopid?: string): Promise<SiteDetail | null> => {
+  if (!shopid) return null;
   const res = await apiClient.get(`/site-details/${shopid}`);
-  console.log("Received data", res)
-  return res.data;
+  return res.data.data[0] ?? null;
 };
 
 export const updateUserSettings = async (formData: FormData) => {
