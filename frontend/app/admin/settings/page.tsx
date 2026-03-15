@@ -11,9 +11,10 @@ export default function Settings() {
 
     const router = useRouter();
     const { user, logout } = useAuth();
+    const shopid = user?.shopid || '';
 
     const siteContextDetails = useSiteDetails();
-    const settingsMutation = useSettings()
+    const settingsMutation = useSettings(shopid)
     const updateSettingsMutation = useUpdateSettings()
 
     const [localDetails, setLocalDetails] = useState<SiteDetail | null>(null)
@@ -35,7 +36,7 @@ export default function Settings() {
     const [sitelogourl, setSitelogourl] = useState<File | null>(null);
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
 
-    const shopid = user?.shopid || '';
+    
 
     // Route protection - redirect to login if not authenticated
     useEffect(() => {
@@ -47,10 +48,9 @@ export default function Settings() {
 
     // Load initial details from context or mutation
     useEffect(() => {
-        console.log("SHOP ID IN SETTING PAGE", shopid)
-        console.log("Local storage", localStorage.getItem('auth_user'))
         if (!shopid) return;
 
+        console.log("siteContextDetails", siteContextDetails)
         if (siteContextDetails) {
             setLocalDetails(siteContextDetails);
             if (siteContextDetails.sitelogourl) {
@@ -61,12 +61,11 @@ export default function Settings() {
             // Fallback to mutation
             settingsMutation.mutate(undefined, {
                 onSuccess: (data: any) => {
-                    console.log("RECEIVED DATA FROM MUTATION-SETTING", data, data?.data[0]);
-                    const details = data?.data[0];
-                    if (details) {
-                        setLocalDetails(details);
-                        if (details.sitelogourl) {
-                            const logoUrl = typeof details.sitelogourl === 'object' ? details.sitelogourl.url : details.sitelogourl;
+                    console.log("RECEIVED DATA FROM MUTATION-SETTING", data);
+                    if (data) {
+                        setLocalDetails(data);
+                        if (data.sitelogourl) {
+                            const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
                             setCurrentLogoUrl(logoUrl || '');
                         }
                     }

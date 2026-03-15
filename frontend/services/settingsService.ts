@@ -2,9 +2,14 @@ import apiClient from "@/lib/apiClient";
 import { SiteDetail } from "@/app/interfaces/interface";
 
 export const getUserSettings = async (shopid?: string): Promise<SiteDetail | null> => {
-  if (!shopid) return null;
+  if (!shopid) {
+    console.warn("getUserSettings no shopid");
+    return null;
+  }
+  console.log("Settings fetch for:", shopid);
   const res = await apiClient.get(`/site-details/${shopid}`);
-  return res.data.data[0] ?? null;
+  console.log("Settings res:", res.data);
+  return res.data?.data[0] ?? null;
 };
 
 export const updateUserSettings = async (formData: FormData) => {
