@@ -53,28 +53,30 @@ export default function Settings() {
         console.log("siteContextDetails", siteContextDetails)
         if (siteContextDetails) {
             setLocalDetails(siteContextDetails);
+            // Update current logo from context
             if (siteContextDetails.sitelogourl) {
                 const logoUrl = typeof siteContextDetails.sitelogourl === 'object' ? siteContextDetails.sitelogourl.url : siteContextDetails.sitelogourl;
                 setCurrentLogoUrl(logoUrl || '');
+            } else {
+                setCurrentLogoUrl('');
             }
-        } else {
-            // Fallback to mutation
-            settingsMutation.mutate(undefined, {
-                onSuccess: (data: any) => {
-                    console.log("RECEIVED DATA FROM MUTATION-SETTING", data);
-                    if (data) {
-                        setLocalDetails(data);
-                        if (data.sitelogourl) {
-                            const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
-                            setCurrentLogoUrl(logoUrl || '');
-                        }
-                    }
-                },
-                onError: (err) => {
-                    console.log("MUTATION ERROR-SETTING", err)
-                }
-            });
         }
+        // Fallback to mutation
+        settingsMutation.mutate(undefined, {
+            onSuccess: (data: any) => {
+                console.log("RECEIVED DATA FROM MUTATION-SETTING", data);
+                if (data) {
+                    setLocalDetails(data);
+                    if (data.sitelogourl) {
+                        const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
+                        setCurrentLogoUrl(logoUrl || '');
+                    }
+                }
+            },
+            onError: (err) => {
+                console.log("MUTATION ERROR-SETTING", err)
+            }
+        });
     }, [shopid, siteContextDetails]);
 
     const updateSettings = () => {
@@ -112,11 +114,16 @@ export default function Settings() {
         updateSettingsMutation.mutate(form, {
             onSuccess: (data) => {
                 console.log('Settings updated:', data);
-                const updatedDetails = data.data[0];
-                setLocalDetails(updatedDetails);
-                if (updatedDetails.sitelogourl) {
-                    const logoUrl = typeof updatedDetails.sitelogourl === 'object' ? updatedDetails.sitelogourl.url : updatedDetails.sitelogourl;
-                    setCurrentLogoUrl(logoUrl || '');
+                const updatedDetails = data.data;
+                if (updatedDetails) {
+                    setLocalDetails(updatedDetails);
+                    // Always update logo URL from response - even if no new file uploaded
+                    if (updatedDetails.sitelogourl) {
+                        const logoUrl = typeof updatedDetails.sitelogourl === 'object' ? updatedDetails.sitelogourl.url : updatedDetails.sitelogourl;
+                        setCurrentLogoUrl(logoUrl || '');
+                    } else {
+                        setCurrentLogoUrl('');
+                    }
                 }
                 alert("Settings saved!");
                 setSitelogourl(null);
