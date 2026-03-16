@@ -42,12 +42,14 @@ export default function Contact() {
   }, [siteDetails]);
 
   const openWhatsapp = () => {
+    if(!phoneNumber) return;
     const message = "Hello, I would like to inquire about your products."; // replace with your default message
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   }
 
   const openGmail = () => {
+    if(!gmailId) return;
     const subject = "Inquiry about products"; // replace with your default subject
     const body = "Hello, I would like to inquire about your products."; // replace with your default message
     const url = `mailto:${gmailId}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
@@ -55,12 +57,14 @@ export default function Contact() {
   }
 
   const openPhoneDialer = (mob: number) => {
+    if(!mob) return;
     const phoneNumber = mob; // replace with your phone number
     const url = `tel:${phoneNumber}`;
     window.open(url, "_blank");
   }
 
   const openLink = (url: string) => {
+    if(!url) return;
     window.open(url, "_blank");
   }
 
