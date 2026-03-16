@@ -17,8 +17,8 @@ export default function Login() {
     const [activeTab, setActiveTab] = useState<Tab>("login");
 
     // login form state
-    const [loginEmail, setLoginEmail] = useState("test@gmail.com");
-    const [loginPassword, setLoginPassword] = useState("Test@123");
+    const [loginEmail, setLoginEmail] = useState("");
+    const [loginPassword, setLoginPassword] = useState("");
 
     // register form state
     const [regName, setRegName] = useState("");
@@ -34,10 +34,10 @@ export default function Login() {
         return regex.test(value);
     };
 
-      const validatePassword = (value:string) => {
-    const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
-    return regex.test(value);
-  };
+    const validatePassword = (value: string) => {
+        const regex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+        return regex.test(value);
+    };
 
 
   const validatePhone = (value:string) => {
@@ -45,11 +45,17 @@ export default function Login() {
     return regex.test(value);
   };
 
+    function hasSpecialCharacter(value: string) {
+        const regex = /[^a-zA-Z0-9]/;
+        const isValid = regex.test(value);
+        console.log("Validity", isValid)
+        return !isValid;
+    }
+
+
 
     const handleLogin = async () => {
-
         const isEmailValid = validateEmail(loginEmail);
-
         if(!isEmailValid) {
             return setError("Please enter a valid email")
         }
@@ -220,7 +226,7 @@ export default function Login() {
                             type="text"
                             placeholder="Enter Shop ID"
                             value={regShopId}
-                            onChange={(e) => setShopId(e.target.value)}
+                            onChange={(e) => hasSpecialCharacter(e.target.value) && e.target.value.length < 10 && setShopId(e.target.value)}
                             required
                         />
                         <button

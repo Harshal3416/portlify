@@ -193,7 +193,7 @@ export default function Settings() {
             
             {/* Site Title */}
             <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Site Title</label>
+                <label className="w-1/3 text-right pr-4 font-medium">Site Title<span className="text-red-700">*</span></label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="sitetitle"
@@ -207,7 +207,7 @@ export default function Settings() {
 
             {/* Site Logo */}
             <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Site Logo</label>
+                <label className="w-1/3 text-right pr-4 font-medium">Site Logo<span className="text-red-700">*</span></label>
                 <div className="w-2/3">
                     <input
                         className="p-2 border border-gray-300 rounded-md w-full"
@@ -222,7 +222,7 @@ export default function Settings() {
 
             {/* Owner Name */}
             <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Owner Name</label>
+                <label className="w-1/3 text-right pr-4 font-medium">Owner Name<span className="text-red-700">*</span></label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="ownername"
@@ -235,7 +235,7 @@ export default function Settings() {
 
             {/* Site Description */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium pt-2">Site Description</label>
+                <label className="w-1/3 text-right pr-4 font-medium pt-2">Site Description<span className="text-red-700">*</span></label>
                 <textarea
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="sitedescription"
@@ -247,7 +247,7 @@ export default function Settings() {
 
             {/* Contact Email */}
             <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Contact Email</label>
+                <label className="w-1/3 text-right pr-4 font-medium">Contact Email<span className="text-red-700">*</span></label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="contactemail"
@@ -260,7 +260,7 @@ export default function Settings() {
 
             {/* Phone Number */}
             <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Phone Number</label>
+                <label className="w-1/3 text-right pr-4 font-medium">Phone Number<span className="text-red-700">*</span></label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="contactphone"

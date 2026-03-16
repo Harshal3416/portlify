@@ -46,22 +46,22 @@ export default function About() {
     }
 
     // Fallback to default logo
-    return (
-      <img
-        src="/logo.jpg"
-        alt="Default Logo"
-        className="w-20 h-auto rounded-md mb-6"
-      />
-    );
+    // return (
+    //   <img
+    //     src="/logo.jpg"
+    //     alt="Default Logo"
+    //     className="w-20 h-auto rounded-md mb-6"
+    //   />
+    // );
   }
 
   return (
     <>
       <div className="bg-primary/5 py-4">
-        <button>SHARE: TODO</button>
+        {/* <button>SHARE: TODO</button> */}
 
-        <button className="px-4 py-2 border-1 text-black rounded-md mt-3 border border-gray-400 disabled:opacity-60"
-          onClick={() => router.push("/admin/products")}>Admin</button>
+        {/* <button className="px-4 py-2 border-1 text-black rounded-md mt-3 border border-gray-400 disabled:opacity-60"
+          onClick={() => router.push("/admin/products")}>Admin</button> */}
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-center mb-6">
             {renderLogo()}

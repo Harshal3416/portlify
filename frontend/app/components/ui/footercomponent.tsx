@@ -16,7 +16,7 @@ export function FooterComponent() {
                 data-testid="link-email"
               >
                 <Mail className="h-4 w-4" />
-                temp@gmail.com
+                professor3416@gmail.com
               </a>
             </div>
           </div>

@@ -1,11 +1,10 @@
 import apiClient from "@/lib/apiClient";
 
-export const getProducts = async () => {
-  const { data } = await apiClient.get("/products");
+export const getProducts = async (shopid:string) => {
+  const { data } = await apiClient.get(`/products?shopid=${shopid}`);
   if (!data.success) {
     throw new Error(data.error || "Failed to fetch products");
   }
-
   return data.data;
 };
 

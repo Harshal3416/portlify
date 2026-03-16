@@ -5,7 +5,7 @@ import { createProduct, updateProduct, getProducts, deleteProduct } from "@/serv
 export const useGetProductsQuery = (shopid: string | any) => {
   return useQuery({
     queryKey: ["products", shopid],
-    queryFn: getProducts,
+    queryFn: () => getProducts(shopid),
     enabled: !!shopid, // Only run query when shopid is available
   });
 };
