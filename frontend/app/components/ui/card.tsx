@@ -23,7 +23,7 @@ interface CardProps {
     onDelete?: (productid: string) => void;
     onEdit?: (product: Product) => void;
     whatsappNumber?: string;
-    cartUpdated?: () => void;
+    cartUpdated?: (count: number) => void;
 }
 
 interface CartData {
@@ -74,7 +74,7 @@ export default function Card({
         });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
-        cartUpdated && cartUpdated()
+        cartUpdated && cartUpdated(existingCartLS.length)
     }
 
     const renderImage = () => {
@@ -122,7 +122,7 @@ export default function Card({
         })
         setAvailableInCart(false)
         localStorage.setItem('cart', JSON.stringify(remainingProducts))
-        cartUpdated && cartUpdated()
+        cartUpdated && cartUpdated(remainingProducts.length)
     }
 
     return (

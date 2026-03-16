@@ -28,7 +28,15 @@ export default function ProductList() {
     const itemsPerPage = 20; // show 5 items per page
 
     useEffect(() => {
-        handleCart()
+        // get product details and filter from local storage
+        const items = JSON.parse(localStorage.getItem("cart") || "[]");
+        const productids = products.map((item:Product) => item.productid);
+        console.log("Product ids", productids, products)
+        const x = items.filter((item:Product) => {
+            productids.includes(item.productid) 
+        })
+        console.log("items", items, x)
+        handleCart(items.length);
     })
 
     // useEffect(() => {
@@ -66,8 +74,9 @@ export default function ProductList() {
         // In a real app, you would navigate to the cart page or open a cart modal here.
     }
 
-    const handleCart = () => {
-        setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length)
+    const handleCart = (count: number) => {
+        console.log("handleCart", count)
+        setCartCount(count)
     }
 
     return (
@@ -87,7 +96,7 @@ export default function ProductList() {
                               key={product.productid}
                               product={product}
                               mode="public"
-                              cartUpdated={handleCart}
+                              cartUpdated={(count:number) => handleCart(count)}
                             />
                         ))}
                     </div>

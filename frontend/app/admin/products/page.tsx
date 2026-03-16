@@ -112,7 +112,12 @@ export default function Products() {
       },
       {
         onSuccess : (data) => {
-          console.log("DELETED", data)
+          console.log("DELETED", data);
+          // remove from cart
+          const remainingProducts = JSON.parse(localStorage.getItem("cart") || "[]").filter((el: any) => {
+            return el.productid !== productid
+          })
+          localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
         onError: (err) => {
           console.log("Error in deleting")
