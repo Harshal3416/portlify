@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { IoSettingsOutline } from "react-icons/io5";
 import { useAuth } from "@/app/context/AuthContext";
@@ -28,6 +28,7 @@ export default function Products() {
   const [description, setDescription] = useState("");
   const [highlightimage, setHighlightImage] = useState<File | null>(null);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -61,6 +62,10 @@ export default function Products() {
     setProductId(generateProductId());
     setDescription("");
     setHighlightImage(null);
+    // Clear file input visually
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
     setEditingProductId(null);
   };
 
@@ -216,6 +221,7 @@ export default function Products() {
               Upload Highlight Image <span className="text-red-700">*</span>
             </label>
             <input
+              ref={fileInputRef}
               className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
               name="highlightimage"
               placeholder="Upload Highlight Image"
