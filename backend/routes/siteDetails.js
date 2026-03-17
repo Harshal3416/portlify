@@ -14,8 +14,15 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
   } = req.body
 
   if (!shopid || !sitetitle) {
-    return res.status(400).json({ error: 'shopid, sitetitle, ownername, sitedescription and contactemail are required' })
+    return res.status(400).json({ error: 'shopid and sitetitle are required' })
   }
+
+  // Fetch existing logo to preserve if no new file
+  const existingResult = await pool.query("SELECT sitelogourl FROM sitedetails WHERE shopid = $1", [shopid]);
+  const existingLogo = existingResult.rows[0]?.sitelogourl || null;
+
+  console.log("sitelogourl", req.files?.sitelogourl)
+  console.log("existingLogo", existingLogo)
 
   const siteDetails = {
     shopid,
@@ -26,7 +33,7 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
           size: req.files.sitelogourl[0].size,
           url: `/uploads/${req.files.sitelogourl[0].filename}`,
         }
-      : null,
+      : existingLogo,
     ownername,
     sitedescription,
     contactemail,
@@ -46,60 +53,60 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
     updatedat: new Date().toISOString(),
   }
 
-        // UPSERT into DB - update if exists, insert if not
-      const result = await pool.query(
-        `INSERT INTO sitedetails 
-         (shopid, sitetitle, sitelogourl, ownername, sitedescription, contactemail, contactphone, alternatecontactphone, address, instagramurl, googleurl,
-         justdialurl, monday, tuesday, wednesday, thursday, friday, saturday, sunday, updatedat)
-         VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
-           $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-         ON CONFLICT (shopid) DO UPDATE SET
-           sitetitle = EXCLUDED.sitetitle,
-           sitelogourl = EXCLUDED.sitelogourl,
-           ownername = EXCLUDED.ownername,
-           sitedescription = EXCLUDED.sitedescription,
-           contactemail = EXCLUDED.contactemail,
-           contactphone = EXCLUDED.contactphone,
-           alternatecontactphone = EXCLUDED.alternatecontactphone,
-           address = EXCLUDED.address,
-           instagramurl = EXCLUDED.instagramurl,
-           googleurl = EXCLUDED.googleurl,
-           justdialurl = EXCLUDED.justdialurl,
-           monday = EXCLUDED.monday,
-           tuesday = EXCLUDED.tuesday,
-           wednesday = EXCLUDED.wednesday,
-           thursday = EXCLUDED.thursday,
-           friday = EXCLUDED.friday,
-           saturday = EXCLUDED.saturday,
-           sunday = EXCLUDED.sunday,
-           updatedat = EXCLUDED.updatedat
-         RETURNING *`,
-        [
-          shopid,
-          sitetitle,
-          JSON.stringify(siteDetails.sitelogourl), 
-          ownername,
-          sitedescription, 
-          contactemail, 
-          contactphone, 
-          alternatecontactphone,
-          address,
-          instagramurl, 
-          googleurl, 
-          justdialurl, 
-          monday, 
-          tuesday, 
-          wednesday, 
-          thursday, 
-          friday, 
-          saturday, 
-          sunday,
-          siteDetails.updatedat
-        ]
-      );
+  // UPSERT into DB - update if exists, insert if not
+  const result = await pool.query(
+    `INSERT INTO sitedetails 
+     (shopid, sitetitle, sitelogourl, ownername, sitedescription, contactemail, contactphone, alternatecontactphone, address, instagramurl, googleurl,
+     justdialurl, monday, tuesday, wednesday, thursday, friday, saturday, sunday, updatedat)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
+       $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
+     ON CONFLICT (shopid) DO UPDATE SET
+       sitetitle = EXCLUDED.sitetitle,
+       sitelogourl = EXCLUDED.sitelogourl,
+       ownername = EXCLUDED.ownername,
+       sitedescription = EXCLUDED.sitedescription,
+       contactemail = EXCLUDED.contactemail,
+       contactphone = EXCLUDED.contactphone,
+       alternatecontactphone = EXCLUDED.alternatecontactphone,
+       address = EXCLUDED.address,
+       instagramurl = EXCLUDED.instagramurl,
+       googleurl = EXCLUDED.googleurl,
+       justdialurl = EXCLUDED.justdialurl,
+       monday = EXCLUDED.monday,
+       tuesday = EXCLUDED.tuesday,
+       wednesday = EXCLUDED.wednesday,
+       thursday = EXCLUDED.thursday,
+       friday = EXCLUDED.friday,
+       saturday = EXCLUDED.saturday,
+       sunday = EXCLUDED.sunday,
+       updatedat = EXCLUDED.updatedat
+     RETURNING *`,
+    [
+      shopid,
+      sitetitle,
+      JSON.stringify(siteDetails.sitelogourl), 
+      ownername,
+      sitedescription, 
+      contactemail, 
+      contactphone, 
+      alternatecontactphone,
+      address,
+      instagramurl, 
+      googleurl, 
+      justdialurl, 
+      monday, 
+      tuesday, 
+      wednesday, 
+      thursday, 
+      friday, 
+      saturday, 
+      sunday,
+      siteDetails.updatedat
+    ]
+  );
 
-      setSiteDetails(result.rows[0])
-      return res.status(201).json({ success: true, data: result.rows[0] });
+  setSiteDetails(result.rows[0])
+  return res.status(201).json({ success: true, data: result.rows[0] });
 })
 
 // Get site details
@@ -120,3 +127,4 @@ router.get("/:shopid", async (req, res) => {
 });
 
 module.exports = router
+
