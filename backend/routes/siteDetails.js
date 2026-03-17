@@ -13,7 +13,7 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
     monday, tuesday, wednesday, thursday, friday, saturday, sunday,
   } = req.body
 
-  if (!shopid || !sitetitle || !ownername || !sitedescription || !contactemail) {
+  if (!shopid || !sitetitle) {
     return res.status(400).json({ error: 'shopid, sitetitle, ownername, sitedescription and contactemail are required' })
   }
 
