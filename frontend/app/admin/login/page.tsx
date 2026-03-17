@@ -87,7 +87,7 @@ export default function Login() {
         if(!isMobileNumberValid) {
             return setError("Please enter a valid phone number")
         }
-                if(!isPasswordStrong) {
+        if (!isPasswordStrong) {
             return setError("Please enter strong password. Rules: At least 8 characters, At least one uppercase letter, At least one lowercase letter, At least one number, - At least one special character (like !@#$%^&*)")
         }
         registerMutation.mutate(

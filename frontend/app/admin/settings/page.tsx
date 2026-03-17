@@ -18,6 +18,7 @@ export default function Settings() {
     const updateSettingsMutation = useUpdateSettings()
 
     const [localDetails, setLocalDetails] = useState<SiteDetail | null>(null)
+    const [error, setError] = useState('')
 
     const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         console.log("setting value", field, e.target.value)
@@ -36,7 +37,25 @@ export default function Settings() {
     const [sitelogourl, setSitelogourl] = useState<File | null>(null);
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
 
-    
+    const validateEmail = (value: string) => {
+        const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return regex.test(value);
+    };
+
+    const validatePhone = (value: string) => {
+        const regex = /^[6-9][0-9]{9}$/; // Indian 10-digit numbers starting with 6–9
+        return regex.test(value);
+    };
+
+    function isValidUrl(url: string) {
+        try {
+            new URL(url);
+            return true;
+        } catch (_) {
+            return false;
+        }
+    }
+
 
     // Route protection - redirect to login if not authenticated
     useEffect(() => {
@@ -80,6 +99,22 @@ export default function Settings() {
     }, [shopid, siteContextDetails]);
 
     const updateSettings = () => {
+
+        if(((localDetails?.contactphone !== '' && !validatePhone(localDetails?.contactphone+'')) || 
+        (localDetails?.alternatecontactphone !== '' && !validatePhone(localDetails?.alternatecontactphone+'')))) {
+            return setError("Enter a valid Phone number")
+        };
+
+        if(localDetails?.contactemail !== '' && !validateEmail(localDetails?.contactemail || '')) {
+            return setError("Enter a valid Email")
+        };
+
+        if ((localDetails?.instagramurl !== '' && !isValidUrl(localDetails?.instagramurl || '')) ||
+            (localDetails?.googleurl !== '' && !isValidUrl(localDetails?.googleurl || '')) ||
+            (localDetails?.justdialurl !== '' && !isValidUrl(localDetails?.justdialurl || ''))) {
+            return setError("Enter valid URL")
+        }
+
         const file = sitelogourl;
         console.log("FILE", file);
         const form = new FormData();
@@ -121,10 +156,9 @@ export default function Settings() {
                     if (updatedDetails.sitelogourl) {
                         const logoUrl = typeof updatedDetails.sitelogourl === 'object' ? updatedDetails.sitelogourl.url : updatedDetails.sitelogourl;
                         setCurrentLogoUrl(logoUrl || '');
-                    } else {
-                        setCurrentLogoUrl('');
                     }
                 }
+                setError('')
                 alert("Settings saved!");
                 setSitelogourl(null);
             },
@@ -411,7 +445,13 @@ export default function Settings() {
                 </div>
             </div>
 
-            <button className="px-4 py-2 bg-black text-white rounded-md mt-3" onClick={updateSettings}
+            {error && (
+                <p className="text-red-600 mb-2 text-sm max-w-md text-center">
+                    {error}
+                </p>
+            )}
+
+            <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateSettings}
             disabled={!localDetails?.sitetitle}>
                 Save Settings
             </button>
