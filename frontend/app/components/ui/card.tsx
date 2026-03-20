@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LuShoppingCart } from "react-icons/lu";
+import { useToast } from "@/app/context/ToastContext";
 
 export interface Product {
     productid: string;
@@ -46,7 +47,8 @@ export default function Card({
     const canEdit = mode === "admin" && !!onEdit;
     const showEnquire = mode === "public";
 
-    const [availableInCart, setAvailableInCart] = useState(false)
+const [availableInCart, setAvailableInCart] = useState(false)
+const { showToast } = useToast();
 
     const openWhatsappForProduct = () => {
         const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
@@ -71,9 +73,11 @@ export default function Card({
         existingCartLS.push({
             productid: product.productid,
             name: product.name,
-        });
+        }); 
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
+        // showToast("Item added to cart ✅", "success");
+        showToast(`${product.name || 'Product'} added to cart!`, "success")
         cartUpdated && cartUpdated(existingCartLS.length)
     }
 
@@ -122,6 +126,7 @@ export default function Card({
         })
         setAvailableInCart(false)
         localStorage.setItem('cart', JSON.stringify(remainingProducts))
+        showToast(`${product.name || 'Product'} removed from cart!`, "success")
         cartUpdated && cartUpdated(remainingProducts.length)
     }
 
@@ -156,7 +161,14 @@ export default function Card({
                         </button>
                         <button
                             type="button"
-                            onClick={ availableInCart ? removeFromCart : addToCart }
+                              onClick={() => {
+                                    if (availableInCart) {
+                                        removeFromCart();
+                                    } else {
+                                        addToCart();
+                                    }
+                                }}
+
                             className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
                         ><LuShoppingCart /> 
                         {availableInCart ? 'Remove From cart' : 'Add to cart' }
@@ -182,7 +194,7 @@ export default function Card({
                             Delete
                         </button>
                     )}
-                </div>
+            </div>
             )}
         </span>
     );

@@ -6,6 +6,7 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { useAuth } from "@/app/context/AuthContext";
 import Card, { Product } from "@/app/components/ui/card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
+import { useToast } from "@/app/context/ToastContext";
 
 // type Tab = "login" | "register";
 
@@ -15,7 +16,8 @@ export default function Products() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
-
+  const { showToast } = useToast();
+  
   const shopid = user?.shopid || '';
 
   // Use React Query for fetching products - simplifies data fetching with caching
@@ -101,6 +103,7 @@ export default function Products() {
         await createMutation.mutateAsync(form);
         // React Query handles cache invalidation via onSuccess in the mutation hook
       }
+      showToast(`Product Added!`, "success")
 
       // Reset form after successful submit
       resetProductForm();
@@ -122,6 +125,7 @@ export default function Products() {
           const remainingProducts = JSON.parse(localStorage.getItem("cart") || "[]").filter((el: any) => {
             return el.productid !== productid
           })
+          showToast(`${data.name || 'Product'} Deleted!`, "success")
           localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
         onError: (err) => {

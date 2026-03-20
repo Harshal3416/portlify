@@ -72,6 +72,8 @@ export default function ProductList() {
     const openCart = () => {
         alert("This is a placeholder for the cart! You have " + cartCount + " items in your cart.");
         // In a real app, you would navigate to the cart page or open a cart modal here.
+        const items = JSON.parse(localStorage.getItem("cart") || "[]");
+        console.log("items from cart", items)
     }
 
     const handleCart = (count: number) => {
