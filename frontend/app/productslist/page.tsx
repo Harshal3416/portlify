@@ -5,6 +5,9 @@ import Card from "../components/ui/card";
 import { LuShoppingCart } from "react-icons/lu";
 import { useAuth } from "../context/AuthContext";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import { renderImage } from "../lib/renderImage";
 
 interface Product {
     productid: string;
@@ -17,6 +20,13 @@ interface Product {
     highlightimage?: Blob | string | { filename: string; size: number; url?: string } | null;
 }
 
+interface CartData {
+    productid: string,
+    name: string,
+    image: Blob | string | { filename: string; size: number; url?: string } | null,
+    count: number
+}
+
 export default function ProductList() {
     
     const { user } = useAuth();
@@ -27,37 +37,20 @@ export default function ProductList() {
     const [cartCount, setCartCount] = useState(0);
     const itemsPerPage = 20; // show 5 items per page
 
+    const [isCartOpen, setCartOpen] = useState(false);
+    const [cartItems, setCartItems] = useState<[]>()
+
     useEffect(() => {
         // get product details and filter from local storage
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
         const productids = products.map((item:Product) => item.productid);
         console.log("Product ids", productids, products)
-        const x = items.filter((item:Product) => {
+        const x = items.filter((item:CartData) => {
             productids.includes(item.productid) 
         })
         console.log("items", items, x)
         handleCart(items.length);
     })
-
-    // useEffect(() => {
-    //     console.log("PRODUCTLIST page")
-    //     // Fetch products from the backend API
-    //     fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             console.log('Fetched products:', data);
-    //             // show newest products first
-    //             const list = (data.data || []).slice().reverse();
-    //             setProducts(list);
-    //             // always start from first page when data changes
-    //             setCurrentPage(1);
-    //         })
-    //         .catch(error => {
-    //             console.error('Error fetching products:', error);
-    //         });
-
-    //         setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length);
-    // }, []);
 
     // Calculate pagination
     const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -70,15 +63,30 @@ export default function ProductList() {
     // };
 
     const openCart = () => {
-        alert("This is a placeholder for the cart! You have " + cartCount + " items in your cart.");
-        // In a real app, you would navigate to the cart page or open a cart modal here.
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        console.log("items from cart", items)
+        setCartItems(items)
+        setCartOpen(true);
     }
 
     const handleCart = (count: number) => {
         console.log("handleCart", count)
         setCartCount(count)
+    }
+
+    const contactOverWhatsapp = () => {
+        console.log("Whatsapp")
+    }
+
+    const handleItemCount = (id:string, action:string) => {
+        const items = JSON.parse(localStorage.getItem("cart") || "[]");
+        items.map((item:CartData) => {
+            if(item.productid === id){
+                item.count = action === 'add' ? item.count+1 : (action === 'delete'? 0 : Math.max(0, item.count-1));
+            }
+            return item;
+        })
+        console.log("storing", items)
+        localStorage.setItem('cart', JSON.stringify(items))
     }
 
     return (
@@ -134,6 +142,64 @@ export default function ProductList() {
                 </>
             ) : (
                 <p>No products available.</p>
+            )}
+
+            {isCartOpen && cartItems && cartItems.length > 0 && (
+                <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Cart</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {cartItems.map((item: CartData, index) => {
+                            return (
+                                <div key={index} className="flex flex-row items-center border-1 border-gray-200 p-4">
+                                    <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'add')}
+                                            className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600"
+                                        >
+                                            +
+                                        </button>
+
+                                        <span className="px-4 py-1 border border-gray-300 rounded-md bg-white">
+                                            {item.count}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'remove')}
+                                            disabled={item.count===0}
+                                            className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                        >
+                                            -
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'delete')}
+                                            className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                        >
+                                            D
+                                        </button>
+                                    </div>
+
+                                </div>
+                            )
+                        })}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setCartOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={() => {
+                            setCartOpen(false);
+                            contactOverWhatsapp();
+                        }}>
+                            Buy Now
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             )}
         </div>
     );

@@ -4,6 +4,9 @@ import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LuShoppingCart } from "react-icons/lu";
 import { useToast } from "@/app/context/ToastContext";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import { renderImage } from "@/app/lib/renderImage";
 
 export interface Product {
     productid: string;
@@ -29,7 +32,9 @@ interface CardProps {
 
 interface CartData {
     productid: string,
-    name: string
+    name: string,
+    image: Blob | string | { filename: string; size: number; url?: string } | null,
+    count: number
 }
 
 const DEFAULT_WHATSAPP_NUMBER = "9164735164"; // change to your business number
@@ -48,6 +53,7 @@ export default function Card({
     const showEnquire = mode === "public";
 
 const [availableInCart, setAvailableInCart] = useState(false)
+const [showProductDetails, setShowProductDetails] = useState(false);
 const { showToast } = useToast();
 
     const openWhatsappForProduct = () => {
@@ -73,47 +79,14 @@ const { showToast } = useToast();
         existingCartLS.push({
             productid: product.productid,
             name: product.name,
+            image: product.highlightimage,
+            count: 0
         }); 
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
-        // showToast("Item added to cart ✅", "success");
         showToast(`${product.name || 'Product'} added to cart!`, "success")
         cartUpdated && cartUpdated(existingCartLS.length)
     }
-
-    const renderImage = () => {
-        if (!product.highlightimage) return null;
-
-        const baseProps = {
-            alt: product.name || "Product image",
-            className: "w-full h-32 sm:h-36 md:h-40 object-contain rounded-md",
-        };
-
-        if (typeof product.highlightimage === "string") {
-            return (
-                <img
-                    src={"http://localhost:3000" + product.highlightimage}
-                    {...baseProps}
-                />
-            );
-        }
-
-        if (typeof product.highlightimage === "object" && "url" in product.highlightimage && product.highlightimage.url) {
-            return (
-                <img
-                    src={"http://localhost:3000" + product.highlightimage.url}
-                    {...baseProps}
-                />
-            );
-        }
-
-        return (
-            <img
-                src={URL.createObjectURL(product.highlightimage as Blob)}
-                {...baseProps}
-            />
-        );
-    };
 
     const isProductExistInCart = () => {
         const x = getCartFromLocalStorage().find((el:CartData) => el.productid === product.productid);
@@ -132,21 +105,17 @@ const { showToast } = useToast();
 
     return (
         <span className="border border-gray-300 rounded-md pb-0 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
-            <div className="p-4 flex flex-col flex-1">
-                <div className="flex-1 flex flex-col">
-                    <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
-                    <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
-                        Product ID: {product.productid || "-"}
-                    </span>
-                    <p className="text-gray-600 mb-2 text-sm line-clamp-3 min-h-[3.5rem]">
-                        Product Description: {product.description || "-"}
-                    </p>
-                    <div className="mt-auto">
-                        {renderImage()}
-                    </div>
+            <div className="p-4 flex-1 flex flex-col" onClick={() => setShowProductDetails(true)}>
+                <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
+                <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
+                    Product ID: {product.productid || "-"}
+                </span>
+                <p className="text-gray-600 mb-2 text-sm line-clamp-3 min-h-[3.5rem]">
+                    Product Description: {product.description || "-"}
+                </p>
+                <div className="mt-auto">
+                    {renderImage(product.highlightimage, false)}
                 </div>
-
-
             </div>
             {(canDelete || canEdit || showEnquire) && (
                 <div className="mt-3 ">
@@ -161,14 +130,7 @@ const { showToast } = useToast();
                         </button>
                         <button
                             type="button"
-                              onClick={() => {
-                                    if (availableInCart) {
-                                        removeFromCart();
-                                    } else {
-                                        addToCart();
-                                    }
-                                }}
-
+                            onClick={() => availableInCart ? removeFromCart() : addToCart()}
                             className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
                         ><LuShoppingCart /> 
                         {availableInCart ? 'Remove From cart' : 'Add to cart' }
@@ -195,6 +157,25 @@ const { showToast } = useToast();
                         </button>
                     )}
             </div>
+            )}
+
+            {showProductDetails && (
+                <Modal show={showProductDetails} onHide={() => setShowProductDetails(false)} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{product.name}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {product.description}
+                        {renderImage(product.highlightimage, false)}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="info" 
+                        disabled={canDelete || canEdit}
+                        onClick={() => availableInCart ? removeFromCart() : addToCart()}>
+                            {availableInCart ? 'Remove From cart' : 'Add to cart' }
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             )}
         </span>
     );

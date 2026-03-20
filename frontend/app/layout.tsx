@@ -6,6 +6,7 @@ import { FooterComponent } from "./components/ui/footercomponent";
 import QueryProvider from "@/providers/QueryProvider";
 import { SiteProvider } from "./context/siteContext";
 import { ToastProvider } from "./context/ToastContext";
+import 'bootstrap/dist/css/bootstrap.min.css';  // Single line fix!
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

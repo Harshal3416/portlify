@@ -7,6 +7,8 @@ import { useAuth } from "@/app/context/AuthContext";
 import Card, { Product } from "@/app/components/ui/card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 // type Tab = "login" | "register";
 
@@ -34,6 +36,9 @@ export default function Products() {
 
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+
+  const [showDeletModal, setDeleteModalShow] = useState(false);
+  const [deleteid, setDeleteId] = useState('');
 
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
@@ -113,19 +118,21 @@ export default function Products() {
     }
   };
 
-  const handleDeleteProduct = async (productid: string) => {
+  const handleDeleteProduct = async () => {
+    const productid = deleteid;
     deleteMutation.mutate(
       {
         productid,
       },
       {
-        onSuccess : (data) => {
+        onSuccess: (data) => {
           console.log("DELETED", data);
           // remove from cart
           const remainingProducts = JSON.parse(localStorage.getItem("cart") || "[]").filter((el: any) => {
             return el.productid !== productid
           })
           showToast(`${data.name || 'Product'} Deleted!`, "success")
+          setDeleteModalShow(false)
           localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
         onError: (err) => {
@@ -134,7 +141,6 @@ export default function Products() {
       }
     )
   }
-
 
   const siteSettings = () => {
     router.push("/admin/settings");
@@ -202,17 +208,19 @@ export default function Products() {
             />
 
             <input
-              className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
+              className="p-2 mt-3 border border-gray-300 rounded-md text-sm opacity-50"
               type="text"
               value={productid}
               placeholder="Enter Product ID"
-              disabled={true}
+              disabled
             />
 
             <textarea
-              className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
+              className="p-2 mt-3 border border-gray-300 rounded-md text-sm resize-none"
+              style={{ resize: "none" }}
               name="Description"
               placeholder="Enter Product Description"
+              rows={3}
               maxLength={150}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
@@ -273,13 +281,33 @@ export default function Products() {
                 key={product.productid}
                 product={product}
                 mode="admin"
-                onDelete={() => handleDeleteProduct(product.productid)}
+                onDelete={() => {setDeleteId(product.productid);setDeleteModalShow(true)}}
                 onEdit={startEditingProduct}
               />
             ))
           )}
         </div>
       )}
+
+     {showDeletModal && (
+       <Modal show={showDeletModal} onHide={() => setDeleteModalShow(false)} centered>
+         <Modal.Header closeButton>
+           <Modal.Title>Delete product</Modal.Title>
+         </Modal.Header>
+         <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
+         <Modal.Footer>
+           <Button variant="secondary" onClick={() => setDeleteModalShow(false)}>
+             No
+           </Button>
+           <Button variant="danger" onClick={() => {
+             setDeleteModalShow(true);
+             handleDeleteProduct();
+           }}>
+             Yes, Delete
+           </Button>
+         </Modal.Footer>
+       </Modal>
+     )}
     </div>
   );
 }

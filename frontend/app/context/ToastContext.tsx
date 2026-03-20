@@ -31,9 +31,9 @@ export const ToastProvider = ({
 }) => {
   const [show, setShow] = useState(false);
   const [message, setMessage] = useState("");
-  const [variant, setVariant] = useState<ToastVariant>("success");
+  const [variant, setVariant] = useState<ToastVariant>("info");
 
-  const showToast = (msg: string, type: ToastVariant = "success") => {
+  const showToast = (msg: string, type: ToastVariant = "info") => {
     setMessage(msg);
     setVariant(type);
     setShow(true);
@@ -45,7 +45,7 @@ export const ToastProvider = ({
 
       {/* ✅ Global Toast UI */}
       <ToastContainer
-        position="bottom-center"
+        position="bottom-end"
         className="p-3"
         style={{ zIndex: 9999 }}
       >
@@ -55,9 +55,8 @@ export const ToastProvider = ({
           show={show}
           delay={3000}
           autohide
-          className="p-2 border border-gray-300 rounded-md w-80"
         >
-          <Toast.Body className="text-black">
+          <Toast.Body className="text-white">
             {message}
           </Toast.Body>
         </Toast>
