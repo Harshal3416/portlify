@@ -45,7 +45,7 @@ export const ToastProvider = ({
 
       {/* ✅ Global Toast UI */}
       <ToastContainer
-        position="bottom-end"
+        position="top-center"
         className="p-3"
         style={{ zIndex: 9999 }}
       >

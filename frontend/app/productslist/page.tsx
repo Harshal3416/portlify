@@ -8,6 +8,9 @@ import { useGetProductsQuery } from "@/hooks/useProductMutation";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { renderImage } from "../lib/renderImage";
+import { IoMdAddCircleOutline } from "react-icons/io";
+import { IoRemoveCircleOutline } from "react-icons/io5";
+import { MdDeleteOutline } from "react-icons/md";
 
 interface Product {
     productid: string;
@@ -34,7 +37,7 @@ export default function ProductList() {
 
     // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [cartCount, setCartCount] = useState(0);
+    const [cartCount, setCartCount] = useState(1);
     const itemsPerPage = 20; // show 5 items per page
 
     const [isCartOpen, setCartOpen] = useState(false);
@@ -64,7 +67,7 @@ export default function ProductList() {
 
     const openCart = () => {
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        setCartItems(items)
+        setCartItems([...items]);  // Fresh copy
         setCartOpen(true);
     }
 
@@ -78,18 +81,22 @@ export default function ProductList() {
     }
 
     const handleItemCount = (id: string, action: string) => {
+        if (!isCartOpen) return;
+        
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
         const index = items.findIndex((item: CartData) => item.productid === id);
         if (index !== -1) {
             if (action === 'delete') {
                 items.splice(index, 1);
             } else {
-                items[index].count = action === 'add' ? items[index].count + 1 : Math.max(0, items[index].count - 1);
+                items[index].count = action === 'add' ? items[index].count + 1 : Math.max(1, items[index].count - 1);
             }
         }
         const totalCount = items.reduce((sum: number, item: CartData) => sum + item.count, 0);
         localStorage.setItem('cart', JSON.stringify(items));
+        setCartItems([...items]);  // Update modal display immediately
         handleCart(totalCount);
+        setCartCount([...items].length)
         console.log("Updated cart total:", totalCount, items);
     }
 
@@ -162,29 +169,29 @@ export default function ProductList() {
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.productid, 'add')}
-                                            className="px-3 py-1 bg-green-500 text-white rounded-md hover:bg-green-600"
+                                            className="px-3 py-1 rounded-md hover:text-green-600"
                                         >
-                                            +
+                                            <IoMdAddCircleOutline />
                                         </button>
 
-                                        <span className="px-4 py-1 border border-gray-300 rounded-md bg-white">
+                                        <span className="px-4 py-1 mr-0 border border-gray-300 rounded-md bg-white">
                                             {item.count}
                                         </span>
 
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.productid, 'remove')}
-                                            disabled={item.count === 0}
-                                            className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                            disabled={item.count === 1}
+                                            className="px-3 py-1 rounded-md hover:text-red-600"
                                         >
-                                            -
+                                            <IoRemoveCircleOutline />
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.productid, 'delete')}
-                                            className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
+                                            className="py-1 rounded-md hover:text-red-600"
                                         >
-                                            D
+                                            <MdDeleteOutline />
                                         </button>
                                     </div>
 
