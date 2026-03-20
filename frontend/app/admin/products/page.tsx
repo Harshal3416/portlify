@@ -37,8 +37,8 @@ export default function Products() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const [showDeletModal, setDeleteModalShow] = useState(false);
-  const [deleteid, setDeleteId] = useState('');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState('');
 
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
@@ -119,11 +119,10 @@ export default function Products() {
   };
 
   const handleDeleteProduct = async () => {
-    const productid = deleteid;
+    const productid = deleteId;
     deleteMutation.mutate(
       {
-        productid,
-      },
+        productid},
       {
         onSuccess: (data) => {
           console.log("DELETED", data);
@@ -132,7 +131,7 @@ export default function Products() {
             return el.productid !== productid
           })
           showToast(`${data.name || 'Product'} Deleted!`, "success")
-          setDeleteModalShow(false)
+          setShowDeleteModal(false)
           localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
         onError: (err) => {
@@ -281,7 +280,7 @@ export default function Products() {
                 key={product.productid}
                 product={product}
                 mode="admin"
-                onDelete={() => {setDeleteId(product.productid);setDeleteModalShow(true)}}
+                onDelete={() => {setDeleteId(product.productid);setShowDeleteModal(true)}}
                 onEdit={startEditingProduct}
               />
             ))
@@ -289,18 +288,18 @@ export default function Products() {
         </div>
       )}
 
-     {showDeletModal && (
-       <Modal show={showDeletModal} onHide={() => setDeleteModalShow(false)} centered>
+     {showDeleteModal && (
+       <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
          <Modal.Header closeButton>
            <Modal.Title>Delete product</Modal.Title>
          </Modal.Header>
          <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
          <Modal.Footer>
-           <Button variant="secondary" onClick={() => setDeleteModalShow(false)}>
+           <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
              No
            </Button>
            <Button variant="danger" onClick={() => {
-             setDeleteModalShow(true);
+             setShowDeleteModal(false);
              handleDeleteProduct();
            }}>
              Yes, Delete

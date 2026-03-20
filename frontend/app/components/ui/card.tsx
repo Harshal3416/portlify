@@ -52,9 +52,9 @@ export default function Card({
     const canEdit = mode === "admin" && !!onEdit;
     const showEnquire = mode === "public";
 
-const [availableInCart, setAvailableInCart] = useState(false)
-const [showProductDetails, setShowProductDetails] = useState(false);
-const { showToast } = useToast();
+    const [availableInCart, setAvailableInCart] = useState(false)
+    const [showProductDetails, setShowProductDetails] = useState(false);
+    const { showToast } = useToast();
 
     const openWhatsappForProduct = () => {
         const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
@@ -81,7 +81,7 @@ const { showToast } = useToast();
             name: product.name,
             image: product.highlightimage,
             count: 0
-        }); 
+        });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
         showToast(`${product.name || 'Product'} added to cart!`, "success")
@@ -89,12 +89,12 @@ const { showToast } = useToast();
     }
 
     const isProductExistInCart = () => {
-        const x = getCartFromLocalStorage().find((el:CartData) => el.productid === product.productid);
+        const x = getCartFromLocalStorage().find((el: CartData) => el.productid === product.productid);
         return x ? true : false
     }
 
     const removeFromCart = () => {
-        const remainingProducts = getCartFromLocalStorage().filter((el:CartData) => {
+        const remainingProducts = getCartFromLocalStorage().filter((el: CartData) => {
             return el.productid !== product.productid
         })
         setAvailableInCart(false)
@@ -121,21 +121,21 @@ const { showToast } = useToast();
                 <div className="mt-3 ">
                     {showEnquire && (
                         <div className="flex flec-row gap-0 px-1 mb-3 w-full">
-                        <button
-                            type="button"
-                            onClick={openWhatsappForProduct}
-                            className="px-1 py-1 w-full border-1   text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
-                        > <FaWhatsapp className="inline-block mr-2" />
-                            Enquire now
-                        </button>
-                        <button
-                            type="button"
-                            onClick={() => availableInCart ? removeFromCart() : addToCart()}
-                            className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
-                        ><LuShoppingCart /> 
-                        {availableInCart ? 'Remove From cart' : 'Add to cart' }
-                            
-                        </button>
+                            <button
+                                type="button"
+                                onClick={openWhatsappForProduct}
+                                className="px-1 py-1 w-full border-1   text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
+                            > <FaWhatsapp className="inline-block mr-2" />
+                                Enquire now
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => availableInCart ? removeFromCart() : addToCart()}
+                                className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
+                            ><LuShoppingCart />
+                                {availableInCart ? 'Remove From cart' : 'Add to cart'}
+
+                            </button>
                         </div>
                     )}
                     {canEdit && (
@@ -156,7 +156,7 @@ const { showToast } = useToast();
                             Delete
                         </button>
                     )}
-            </div>
+                </div>
             )}
 
             {showProductDetails && (
@@ -169,10 +169,10 @@ const { showToast } = useToast();
                         {renderImage(product.highlightimage, false)}
                     </Modal.Body>
                     <Modal.Footer>
-                        <Button variant="info" 
-                        disabled={canDelete || canEdit}
-                        onClick={() => availableInCart ? removeFromCart() : addToCart()}>
-                            {availableInCart ? 'Remove From cart' : 'Add to cart' }
+                        <Button variant="info"
+                            disabled={canDelete || canEdit}
+                            onClick={() => availableInCart ? removeFromCart() : addToCart()}>
+                            {availableInCart ? 'Remove From cart' : 'Add to cart'}
                         </Button>
                     </Modal.Footer>
                 </Modal>

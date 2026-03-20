@@ -28,25 +28,25 @@ interface CartData {
 }
 
 export default function ProductList() {
-    
+
     const { user } = useAuth();
     const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(user?.shopid);
-    
+
     // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [cartCount, setCartCount] = useState(0);
     const itemsPerPage = 20; // show 5 items per page
 
     const [isCartOpen, setCartOpen] = useState(false);
-    const [cartItems, setCartItems] = useState<[]>()
+    const [cartItems, setCartItems] = useState<CartData[]>([])
 
     useEffect(() => {
         // get product details and filter from local storage
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        const productids = products.map((item:Product) => item.productid);
+        const productids = products.map((item: Product) => item.productid);
         console.log("Product ids", productids, products)
-        const x = items.filter((item:CartData) => {
-            productids.includes(item.productid) 
+        const x = items.filter((item: CartData) => {
+            productids.includes(item.productid)
         })
         console.log("items", items, x)
         handleCart(items.length);
@@ -77,16 +77,20 @@ export default function ProductList() {
         console.log("Whatsapp")
     }
 
-    const handleItemCount = (id:string, action:string) => {
+    const handleItemCount = (id: string, action: string) => {
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        items.map((item:CartData) => {
-            if(item.productid === id){
-                item.count = action === 'add' ? item.count+1 : (action === 'delete'? 0 : Math.max(0, item.count-1));
+        const index = items.findIndex((item: CartData) => item.productid === id);
+        if (index !== -1) {
+            if (action === 'delete') {
+                items.splice(index, 1);
+            } else {
+                items[index].count = action === 'add' ? items[index].count + 1 : Math.max(0, items[index].count - 1);
             }
-            return item;
-        })
-        console.log("storing", items)
-        localStorage.setItem('cart', JSON.stringify(items))
+        }
+        const totalCount = items.reduce((sum: number, item: CartData) => sum + item.count, 0);
+        localStorage.setItem('cart', JSON.stringify(items));
+        handleCart(totalCount);
+        console.log("Updated cart total:", totalCount, items);
     }
 
     return (
@@ -101,12 +105,12 @@ export default function ProductList() {
             {products.length > 0 ? (
                 <>
                     <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                        {paginatedProducts.map((product:any) => (
+                        {paginatedProducts.map((product: any) => (
                             <Card
-                              key={product.productid}
-                              product={product}
-                              mode="public"
-                              cartUpdated={(count:number) => handleCart(count)}
+                                key={product.productid}
+                                product={product}
+                                mode="public"
+                                cartUpdated={(count: number) => handleCart(count)}
                             />
                         ))}
                     </div>
@@ -170,7 +174,7 @@ export default function ProductList() {
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.productid, 'remove')}
-                                            disabled={item.count===0}
+                                            disabled={item.count === 0}
                                             className="px-3 py-1 bg-red-500 text-white rounded-md hover:bg-red-600"
                                         >
                                             -
