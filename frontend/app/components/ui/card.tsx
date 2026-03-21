@@ -8,6 +8,8 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { renderImage } from "@/app/lib/renderImage";
+import { MdDeleteOutline } from "react-icons/md";
+import { TbEdit } from "react-icons/tb";
 
 export interface Product {
     productid: string;
@@ -102,7 +104,7 @@ export default function Card({
     }
 
     return (
-        <span className="border border-gray-300 rounded-md pb-0 m-2 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
+        <span className="border border-gray-300 rounded-md pb-0 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
             <div className="p-2 flex-1 flex flex-col" onClick={() => setShowProductDetails(true)}>
                 <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
                 <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
@@ -126,22 +128,12 @@ export default function Card({
                             </ButtonGroup>
                     )}
                     {canEdit && (
-                        <button
-                            type="button"
-                            onClick={() => onEdit && onEdit(product)}
-                            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        >
-                            Edit
-                        </button>
-                    )}
-                    {canDelete && (
-                        <button
-                            type="button"
-                            onClick={() => onDelete && onDelete(product.productid)}
-                            className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
-                        >
-                            Delete
-                        </button>
+                        <ButtonGroup aria-label="Basic example" size="sm" className="w-full">
+                            <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-danger" onClick={() => onDelete && onDelete(product.productid)}><MdDeleteOutline />
+                                Delete</Button>
+                            <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-secondary" onClick={() => onEdit && onEdit(product)}><TbEdit />Edit
+                            </Button>
+                        </ButtonGroup>
                     )}
                 </div>
             )}

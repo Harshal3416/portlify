@@ -102,16 +102,16 @@ export default function ProductList() {
 
     return (
         <div className="flex flex-col my-10 border-t-2 border-gray-300 m-2 px-4 w-[80%] mx-auto">
-            <header className="flex flex-row justify-between items-center m-4">
+            <header className="flex flex-row justify-between items-center my-4">
                 <div className="text-2xl m-2">Gallery</div>
 
-                <button className="px-4 py-2 bg-black text-white rounded-md" onClick={openCart}>
+                <button className="flex flex-row items-center p-2 bg-black text-white rounded-md" onClick={openCart}>
                     <span><LuShoppingCart /> </span><span className="m-2">{cartCount}</span>
                 </button>
             </header>
             {products.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
                         {paginatedProducts.map((product: any) => (
                             <Card
                                 key={product.productid}
@@ -156,7 +156,7 @@ export default function ProductList() {
             )}
 
             {isCartOpen && cartItems && cartItems.length > 0 && (
-                <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered>
+                <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
                     <Modal.Header closeButton>
                         <Modal.Title>Cart</Modal.Title>
                     </Modal.Header>

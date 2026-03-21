@@ -156,15 +156,20 @@ export default function Products() {
   };
 
   return (
-    <>
-      <div className="flex flex-col w-full justify-between mb-4">
-        <h6 className="text-2xl">Products</h6>
-        <div className="flex flex-row ml-auto">
-                    <button
+    <div className="m-4 w-[80%] mx-auto">
+
+      <header className="flex flex-row justify-between items-center my-4">
+        <div className="text-2xl m-2">Products</div>
+
+        <div className="flex flex-row justify-end my-4">
+
+
+          <button
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
             onClick={() => {
-              setAddProductModal(true)
+              setAddProductModal(true);
+              resetProductForm()
               console.log("addProductsModal", addProductsModal)
             }}
           >
@@ -190,9 +195,13 @@ export default function Products() {
             Customer Portal
           </button>
 
-          <IoSettingsOutline className="m-4" onClick={() => siteSettings()} />
+          <button
+            className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+            onClick={() => siteSettings()}> Site Settings
+          </button>
         </div>
-      </div>
+      </header>
+      
 
       {submitError && (
         <p className="text-red-600 mb-2 text-sm max-w-md">
@@ -204,7 +213,7 @@ export default function Products() {
         <p>Loading products...</p>
       )}
 
-      <div className="flex min-h-screen flex-row items-start justify-start w-auto mt-10 px-4">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
         {/* Existing product cards */}
         {products.length === 0 ? (
           <p className="text-sm text-gray-500 self-center">
@@ -217,7 +226,7 @@ export default function Products() {
               product={product}
               mode="admin"
               onDelete={() => { setDeleteId(product.productid); setShowDeleteModal(true) }}
-              onEdit={() => { startEditingProduct; setAddProductModal(true) } }
+              onEdit={() => { startEditingProduct(product); setAddProductModal(true) } }
             />
           ))
         )}
@@ -225,7 +234,7 @@ export default function Products() {
 
       {addProductsModal &&
         <Modal show={addProductsModal} centered>
-          <Modal.Header>{editingProductId ? "Edit product" : "Add a product"}</Modal.Header>
+          <Modal.Header><Modal.Title>{editingProductId ? "Edit product" : "Add a product"}</Modal.Title></Modal.Header>
           <Modal.Body>
               <div className="rounded-md p-4 flex flex-col h-full w-full">
                 <input
@@ -328,7 +337,7 @@ export default function Products() {
         </Modal>
       )}
 
-    </>
+    </div>
   );
 }
 
