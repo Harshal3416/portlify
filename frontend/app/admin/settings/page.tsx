@@ -222,7 +222,7 @@ export default function Settings() {
             
             {/* Site Title */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Site Title<span className="text-red-700">*</span></label>
+                <label className="w-1/4 text-center pr-4 font-medium">Site Title<span className="text-red-700">*</span></label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="sitetitle"
@@ -236,7 +236,7 @@ export default function Settings() {
 
             {/* Site Logo */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Site Logo</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Site Logo</label>
                 <div className="w-2/3">
                     <input
                         className="p-2 border border-gray-300 rounded-md w-full"
@@ -251,7 +251,7 @@ export default function Settings() {
 
             {/* Owner Name */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Owner Name</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Owner Name</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="ownername"
@@ -264,7 +264,7 @@ export default function Settings() {
 
             {/* Site Description */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium pt-2">Site Description</label>
+                <label className="w-1/4 text-center pr-4 font-medium pt-2">Site Description</label>
                 <textarea
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="sitedescription"
@@ -276,7 +276,7 @@ export default function Settings() {
 
             {/* Contact Email */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Contact Email</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Contact Email</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="contactemail"
@@ -289,7 +289,7 @@ export default function Settings() {
 
             {/* Phone Number */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Phone Number</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Phone Number</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="contactphone"
@@ -302,7 +302,7 @@ export default function Settings() {
 
             {/* Alternate Phone */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Alternate Phone</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Alternate Phone</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="alternatecontactphone"
@@ -315,7 +315,7 @@ export default function Settings() {
 
             {/* Address */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium pt-2">Address</label>
+                <label className="w-1/4 text-center pr-4 font-medium pt-2">Address</label>
                 <textarea
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="address"
@@ -328,7 +328,7 @@ export default function Settings() {
 
             {/* Social Links */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Instagram URL</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Instagram URL</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="instagramurl"
@@ -340,7 +340,7 @@ export default function Settings() {
             </div>
 
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Google URL</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Google URL</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="googleurl"
@@ -352,7 +352,7 @@ export default function Settings() {
             </div>
 
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium">Just Dial URL</label>
+                <label className="w-1/4 text-center pr-4 font-medium">Just Dial URL</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="justdialurl"
@@ -365,7 +365,7 @@ export default function Settings() {
 
             {/* Opening Hours */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-left pr-4 font-medium pt-2">Opening Hours</label>
+                <label className="w-1/4 text-center pr-4 font-medium pt-2">Opening Hours</label>
                 <div className="w-2/3 space-y-2">
                     <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Monday:</span>
