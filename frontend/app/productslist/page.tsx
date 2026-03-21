@@ -89,7 +89,7 @@ export default function ProductList() {
             if (action === 'delete') {
                 items.splice(index, 1);
             } else {
-                items[index].count = action === 'add' ? items[index].count + 1 : Math.max(1, items[index].count - 1);
+                items[index].count = action === 'add' ? items[index].count + 1 : Math.max(0, items[index].count - 1);
             }
         }
         const totalCount = items.reduce((sum: number, item: CartData) => sum + item.count, 0);

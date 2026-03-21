@@ -6,6 +6,7 @@ import { LuShoppingCart } from "react-icons/lu";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { renderImage } from "@/app/lib/renderImage";
 
 export interface Product {
@@ -65,14 +66,11 @@ export default function Card({
 
     useEffect(() => {
         setAvailableInCart(isProductExistInCart);
-    }, [])
+    })
 
     const getCartFromLocalStorage = () => {
         return JSON.parse(localStorage.getItem("cart") || "[]");
     }
-
-    // Todo: If the product is already in the cart, we can show "Remove from cart" instead of "Add to cart"
-    // Add a cart option with items in cart count badge, and a simple popup to show items in cart with a order now option that leads to whatsapp with the list of products in the message.
 
     const addToCart = () => {
         const existingCartLS = getCartFromLocalStorage();
@@ -104,8 +102,8 @@ export default function Card({
     }
 
     return (
-        <span className="border border-gray-300 rounded-md pb-0 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
-            <div className="p-4 flex-1 flex flex-col" onClick={() => setShowProductDetails(true)}>
+        <span className="border border-gray-300 rounded-md pb-0 m-2 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
+            <div className="p-2 flex-1 flex flex-col" onClick={() => setShowProductDetails(true)}>
                 <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
                 <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
                     Product ID: {product.productid || "-"}
@@ -120,23 +118,12 @@ export default function Card({
             {(canDelete || canEdit || showEnquire) && (
                 <div className="mt-3 ">
                     {showEnquire && (
-                        <div className="flex flec-row gap-0 px-1 mb-3 w-full">
-                            <button
-                                type="button"
-                                onClick={openWhatsappForProduct}
-                                className="px-1 py-1 w-full border-1   text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
-                            > <FaWhatsapp className="inline-block mr-2" />
-                                Enquire now
-                            </button>
-                            <button
-                                type="button"
-                                onClick={() => availableInCart ? removeFromCart() : addToCart()}
-                                className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
-                            ><LuShoppingCart />
-                                {availableInCart ? 'Remove From cart' : 'Add to cart'}
-
-                            </button>
-                        </div>
+                            <ButtonGroup aria-label="Basic example" size="sm" className="w-full">
+                                <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-secondary" onClick={openWhatsappForProduct}><FaWhatsapp />Enquire
+                                </Button>
+                                <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-secondary" onClick={() => availableInCart ? removeFromCart() : addToCart()}><LuShoppingCart />
+                                {availableInCart ? 'Remove' : 'Add'}</Button>
+                            </ButtonGroup>
                     )}
                     {canEdit && (
                         <button
