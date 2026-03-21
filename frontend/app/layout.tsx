@@ -5,6 +5,8 @@ import { AuthProvider } from "./context/AuthContext";
 import { FooterComponent } from "./components/ui/footercomponent";
 import QueryProvider from "@/providers/QueryProvider";
 import { SiteProvider } from "./context/siteContext";
+import { ToastProvider } from "./context/ToastContext";
+import 'bootstrap/dist/css/bootstrap.min.css';  // Single line fix!
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -32,14 +34,16 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         {/* auth provider covers the entire app */}
-          <AuthProvider>
-        <SiteProvider>
+        <AuthProvider>
+          <SiteProvider>
             <QueryProvider>
-              {children}
+              <ToastProvider>
+                {children}
+              </ToastProvider>
             </QueryProvider>
             <FooterComponent></FooterComponent>
-        </SiteProvider>
-          </AuthProvider>
+          </SiteProvider>
+        </AuthProvider>
       </body>
     </html>
   );

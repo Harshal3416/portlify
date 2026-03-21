@@ -6,6 +6,9 @@ import { IoSettingsOutline } from "react-icons/io5";
 import { useAuth } from "@/app/context/AuthContext";
 import Card, { Product } from "@/app/components/ui/card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
+import { useToast } from "@/app/context/ToastContext";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
 
 // type Tab = "login" | "register";
 
@@ -15,6 +18,7 @@ export default function Products() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
+  const { showToast } = useToast();
 
   const shopid = user?.shopid || '';
 
@@ -33,10 +37,14 @@ export default function Products() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteId, setDeleteId] = useState('');
+  const [addProductsModal, setAddProductModal] = useState(false);
+
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
-    const id = Math.floor(100000 + Math.random() * 900000)+'';
-    if (products.find((p:any) => p.productid === id)) {
+    const id = Math.floor(100000 + Math.random() * 900000) + '';
+    if (products.find((p: any) => p.productid === id)) {
       return generateProductId(); // ensure uniqueness
     }
     return id;
@@ -101,6 +109,7 @@ export default function Products() {
         await createMutation.mutateAsync(form);
         // React Query handles cache invalidation via onSuccess in the mutation hook
       }
+      showToast(`Product Added!`, "success")
 
       // Reset form after successful submit
       resetProductForm();
@@ -110,18 +119,21 @@ export default function Products() {
     }
   };
 
-  const handleDeleteProduct = async (productid: string) => {
+  const handleDeleteProduct = async () => {
+    const productid = deleteId;
     deleteMutation.mutate(
       {
-        productid,
+        productid
       },
       {
-        onSuccess : (data) => {
+        onSuccess: (data) => {
           console.log("DELETED", data);
           // remove from cart
           const remainingProducts = JSON.parse(localStorage.getItem("cart") || "[]").filter((el: any) => {
             return el.productid !== productid
           })
+          showToast(`${data.name || 'Product'} Deleted!`, "success")
+          setShowDeleteModal(false)
           localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
         onError: (err) => {
@@ -130,7 +142,6 @@ export default function Products() {
       }
     )
   }
-
 
   const siteSettings = () => {
     router.push("/admin/settings");
@@ -144,33 +155,51 @@ export default function Products() {
     setHighlightImage(null);
   };
 
- return (
-    <div className="flex min-h-screen flex-col items-start justify-start w-auto mt-10 px-4">
-      <div className="flex w-full items-center justify-between mb-4">
-        <h6 className="text-2xl">Products</h6>
-        <div className="flex flex-row ml-auto">
-        <button
-          type="button"
-          className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-          onClick={() => {
-            logout();
-            router.push("/admin/login");
-          }}
-        >
-          Logout
-        </button>
-        <button
-          type="button"
-          className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-          onClick={() => {
-            router.push(`/store?shop=${shopid}`);
-          }}
-        >
-          Customer Portal
-        </button>
-        <IoSettingsOutline className="m-4" onClick={() => siteSettings()}/>
+  return (
+    <div className="m-4 w-[80%] mx-auto">
+
+      <header className="flex flex-row justify-between items-center my-4">
+        <div className="text-2xl m-2">Products</div>
+
+        <div className="flex flex-row justify-end my-4">
+          <button
+            type="button"
+            className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+            onClick={() => {
+              setAddProductModal(true);
+              resetProductForm()
+              console.log("addProductsModal", addProductsModal)
+            }}
+          >
+            Add new Product
+          </button>
+          <button
+            type="button"
+            className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+            onClick={() => {
+              logout();
+              router.push("/admin/login");
+            }}
+          >
+            Logout
+          </button>
+          <button
+            type="button"
+            className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+            onClick={() => {
+              router.push(`/store?shop=${shopid}`);
+            }}
+          >
+            Customer Portal
+          </button>
+
+          <button
+            className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+            onClick={() => siteSettings()}> Site Settings
+          </button>
         </div>
-      </div>
+      </header>
+      
 
       {submitError && (
         <p className="text-red-600 mb-2 text-sm max-w-md">
@@ -178,61 +207,94 @@ export default function Products() {
         </p>
       )}
 
-      {loadingProducts ? (
+      {loadingProducts && (
         <p>Loading products...</p>
-      ) : (
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4 w-full">
-          {/* First card: Add / edit product */}
-          <div className="border border-gray-300 rounded-md p-4 flex flex-col h-full">
-            <h4 className="text-xl font-bold mb-2">
-              {editingProductId ? "Edit product" : "Add a product"}
-            </h4>
-            <input
-              className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
-              name="Product Name"
-              type="text"
-              placeholder="Enter Product Name"
-              value={productName}
-              onChange={(e) => setProductName(e.target.value)}
-              required
-            />
+      )}
 
-            <input
-              className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
-              type="text"
-              value={productid}
-              placeholder="Enter Product ID"
-              disabled={true}
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+        {/* Existing product cards */}
+        {products.length === 0 ? (
+          <p className="text-sm text-gray-500 self-center">
+            No products added yet. Use the first card to add one.
+          </p>
+        ) : (
+          products.map((product: any) => (
+            <Card
+              key={product.productid}
+              product={product}
+              mode="admin"
+              onDelete={() => { setDeleteId(product.productid); setShowDeleteModal(true) }}
+              onEdit={() => { startEditingProduct(product); setAddProductModal(true) } }
             />
+          ))
+        )}
+      </div>
 
-            <textarea
-              className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
-              name="Description"
-              placeholder="Enter Product Description"
-              maxLength={150}
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-            <p className="text-xs text-gray-500 mt-1">
-              {description.length}/150 characters
-            </p>
+      {addProductsModal &&
+        <Modal show={addProductsModal} centered>
+          <Modal.Header><Modal.Title>{editingProductId ? "Edit product" : "Add a product"}</Modal.Title></Modal.Header>
+          <Modal.Body>
+              <div className="rounded-md p-4 flex flex-col h-full w-full">
+                <input
+                  className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
+                  name="Product Name"
+                  type="text"
+                  placeholder="Enter Product Name"
+                  value={productName}
+                  onChange={(e) => setProductName(e.target.value)}
+                  required
+                />
 
-            <label className="mt-3 text-xs font-medium text-gray-700">
-              Upload Highlight Image <span className="text-red-700">*</span>
-            </label>
-            <input
-              ref={fileInputRef}
-              className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
-              name="highlightimage"
-              placeholder="Upload Highlight Image"
-              type="file"
-              accept="image/*"
-              onChange={(e) =>
-                setHighlightImage(e.target.files?.[0] || null)
-              }
-            />
+                <input
+                  className="p-2 mt-3 border border-gray-300 rounded-md text-sm opacity-50"
+                  type="text"
+                  value={productid}
+                  placeholder="Enter Product ID"
+                  disabled
+                />
 
+                <textarea
+                  className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
+                  name="Description"
+                  placeholder="Enter Product Description"
+                  rows={4}
+                  maxLength={150}
+                  value={description}
+                  onChange={(e) => setDescription(e.target.value)}
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {description.length}/150 characters
+                </p>
+
+                <label className="mt-3 text-xs font-medium text-gray-700">
+                  Upload Highlight Image <span className="text-red-700">*</span>
+                </label>
+                <input
+                  ref={fileInputRef}
+                  className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
+                  name="highlightimage"
+                  placeholder="Upload Highlight Image"
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setHighlightImage(e.target.files?.[0] || null)
+                  }
+                />
+              </div>
+          </Modal.Body>
+          <Modal.Footer>
             <div className="flex gap-2 mt-3">
+              <button
+                className="px-4 py-2 border border-gray-400 rounded-md text-sm"
+                type="button"
+                onClick={() => {
+                  resetProductForm
+                  setAddProductModal(false);
+                }
+                }
+              >
+                Cancel
+              </button>
               <button
                 className="px-4 py-2 bg-black text-white rounded-md text-sm disabled:opacity-60"
                 onClick={handleSubmitProduct}
@@ -246,36 +308,33 @@ export default function Products() {
               >
                 {editingProductId ? "Save changes" : "+ Add this product"}
               </button>
-              {editingProductId && (
-                <button
-                  className="px-4 py-2 border border-gray-400 rounded-md text-sm"
-                  type="button"
-                  onClick={resetProductForm}
-                >
-                  Cancel
-                </button>
-              )}
-            </div>
-          </div>
 
-          {/* Existing product cards */}
-          {products.length === 0 ? (
-            <p className="text-sm text-gray-500 self-center">
-              No products added yet. Use the first card to add one.
-            </p>
-          ) : (
-            products.map((product:any) => (
-              <Card
-                key={product.productid}
-                product={product}
-                mode="admin"
-                onDelete={() => handleDeleteProduct(product.productid)}
-                onEdit={startEditingProduct}
-              />
-            ))
-          )}
-        </div>
+
+
+            </div>
+          </Modal.Footer>
+        </Modal>}
+
+      {showDeleteModal && (
+        <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
+          <Modal.Header closeButton>
+            <Modal.Title>Delete product</Modal.Title>
+          </Modal.Header>
+          <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
+          <Modal.Footer>
+            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+              No
+            </Button>
+            <Button variant="danger" onClick={() => {
+              setShowDeleteModal(false);
+              handleDeleteProduct();
+            }}>
+              Yes, Delete
+            </Button>
+          </Modal.Footer>
+        </Modal>
       )}
+
     </div>
   );
 }

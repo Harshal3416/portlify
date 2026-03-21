@@ -3,6 +3,13 @@
 import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 import { LuShoppingCart } from "react-icons/lu";
+import { useToast } from "@/app/context/ToastContext";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import ButtonGroup from 'react-bootstrap/ButtonGroup';
+import { renderImage } from "@/app/lib/renderImage";
+import { MdDeleteOutline } from "react-icons/md";
+import { TbEdit } from "react-icons/tb";
 
 export interface Product {
     productid: string;
@@ -28,7 +35,9 @@ interface CardProps {
 
 interface CartData {
     productid: string,
-    name: string
+    name: string,
+    image: Blob | string | { filename: string; size: number; url?: string } | null,
+    count: number
 }
 
 const DEFAULT_WHATSAPP_NUMBER = "9164735164"; // change to your business number
@@ -47,6 +56,8 @@ export default function Card({
     const showEnquire = mode === "public";
 
     const [availableInCart, setAvailableInCart] = useState(false)
+    const [showProductDetails, setShowProductDetails] = useState(false);
+    const { showToast } = useToast();
 
     const openWhatsappForProduct = () => {
         const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
@@ -57,132 +68,93 @@ export default function Card({
 
     useEffect(() => {
         setAvailableInCart(isProductExistInCart);
-    }, [])
+    })
 
     const getCartFromLocalStorage = () => {
         return JSON.parse(localStorage.getItem("cart") || "[]");
     }
-
-    // Todo: If the product is already in the cart, we can show "Remove from cart" instead of "Add to cart"
-    // Add a cart option with items in cart count badge, and a simple popup to show items in cart with a order now option that leads to whatsapp with the list of products in the message.
 
     const addToCart = () => {
         const existingCartLS = getCartFromLocalStorage();
         existingCartLS.push({
             productid: product.productid,
             name: product.name,
+            image: product.highlightimage,
+            count: 0
         });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
+        showToast(`${product.name || 'Product'} added to cart!`, "success")
         cartUpdated && cartUpdated(existingCartLS.length)
     }
 
-    const renderImage = () => {
-        if (!product.highlightimage) return null;
-
-        const baseProps = {
-            alt: product.name || "Product image",
-            className: "w-full h-32 sm:h-36 md:h-40 object-contain rounded-md",
-        };
-
-        if (typeof product.highlightimage === "string") {
-            return (
-                <img
-                    src={"http://localhost:3000" + product.highlightimage}
-                    {...baseProps}
-                />
-            );
-        }
-
-        if (typeof product.highlightimage === "object" && "url" in product.highlightimage && product.highlightimage.url) {
-            return (
-                <img
-                    src={"http://localhost:3000" + product.highlightimage.url}
-                    {...baseProps}
-                />
-            );
-        }
-
-        return (
-            <img
-                src={URL.createObjectURL(product.highlightimage as Blob)}
-                {...baseProps}
-            />
-        );
-    };
-
     const isProductExistInCart = () => {
-        const x = getCartFromLocalStorage().find((el:CartData) => el.productid === product.productid);
+        const x = getCartFromLocalStorage().find((el: CartData) => el.productid === product.productid);
         return x ? true : false
     }
 
     const removeFromCart = () => {
-        const remainingProducts = getCartFromLocalStorage().filter((el:CartData) => {
+        const remainingProducts = getCartFromLocalStorage().filter((el: CartData) => {
             return el.productid !== product.productid
         })
         setAvailableInCart(false)
         localStorage.setItem('cart', JSON.stringify(remainingProducts))
+        showToast(`${product.name || 'Product'} removed from cart!`, "success")
         cartUpdated && cartUpdated(remainingProducts.length)
     }
 
     return (
         <span className="border border-gray-300 rounded-md pb-0 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
-            <div className="p-4 flex flex-col flex-1">
-                <div className="flex-1 flex flex-col">
-                    <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
-                    <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
-                        Product ID: {product.productid || "-"}
-                    </span>
-                    <p className="text-gray-600 mb-2 text-sm line-clamp-3 min-h-[3.5rem]">
-                        Product Description: {product.description || "-"}
-                    </p>
-                    <div className="mt-auto">
-                        {renderImage()}
-                    </div>
+            <div className="p-2 flex-1 flex flex-col" onClick={() => setShowProductDetails(true)}>
+                <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
+                <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
+                    Product ID: {product.productid || "-"}
+                </span>
+                <p className="text-gray-600 mb-2 text-sm line-clamp-3 min-h-[3.5rem]">
+                    Product Description: {product.description || "-"}
+                </p>
+                <div className="mt-auto">
+                    {renderImage(product.highlightimage, false)}
                 </div>
-
-
             </div>
             {(canDelete || canEdit || showEnquire) && (
                 <div className="mt-3 ">
                     {showEnquire && (
-                        <div className="flex flec-row gap-0 px-1 mb-3 w-full">
-                        <button
-                            type="button"
-                            onClick={openWhatsappForProduct}
-                            className="px-1 py-1 w-full border-1   text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
-                        > <FaWhatsapp className="inline-block mr-2" />
-                            Enquire now
-                        </button>
-                        <button
-                            type="button"
-                            onClick={ availableInCart ? removeFromCart : addToCart }
-                            className="px-1 py-1 w-full border-1 border-l-0 text-sm mt-3 hover:bg-green-500 hover:text-white transition-colors duration-300"
-                        ><LuShoppingCart /> 
-                        {availableInCart ? 'Remove From cart' : 'Add to cart' }
-                            
-                        </button>
-                        </div>
+                            <ButtonGroup aria-label="Basic example" size="sm" className="w-full">
+                                <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-secondary" onClick={openWhatsappForProduct}><FaWhatsapp />Enquire
+                                </Button>
+                                <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-secondary" onClick={() => availableInCart ? removeFromCart() : addToCart()}><LuShoppingCart />
+                                {availableInCart ? 'Remove' : 'Add'}</Button>
+                            </ButtonGroup>
                     )}
                     {canEdit && (
-                        <button
-                            type="button"
-                            onClick={() => onEdit && onEdit(product)}
-                            className="px-3 py-1 text-sm bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                        >
-                            Edit
-                        </button>
-                    )}
-                    {canDelete && (
-                        <button
-                            type="button"
-                            onClick={() => onDelete && onDelete(product.productid)}
-                            className="px-3 py-1 text-sm bg-red-500 text-white rounded-md hover:bg-red-600"
-                        >
-                            Delete
-                        </button>
+                        <ButtonGroup aria-label="Basic example" size="sm" className="w-full">
+                            <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-danger" onClick={() => onDelete && onDelete(product.productid)}><MdDeleteOutline />
+                                Delete</Button>
+                            <Button className="d-flex flex-row flex-1 items-center justify-evenly" variant="outline-secondary" onClick={() => onEdit && onEdit(product)}><TbEdit />Edit
+                            </Button>
+                        </ButtonGroup>
                     )}
                 </div>
+            )}
+
+            {showProductDetails && (
+                <Modal show={showProductDetails} onHide={() => setShowProductDetails(false)} centered>
+                    <Modal.Header closeButton>
+                        <Modal.Title>{product.name}</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {product.description}
+                        {renderImage(product.highlightimage, false)}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="info"
+                            disabled={canDelete || canEdit}
+                            onClick={() => availableInCart ? removeFromCart() : addToCart()}>
+                            {availableInCart ? 'Remove From cart' : 'Add to cart'}
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             )}
         </span>
     );

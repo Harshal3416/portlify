@@ -201,33 +201,28 @@ export default function Settings() {
     };
 
     return (
-        <div className="flex min-h-screen flex-col items-center justify-center w-[60%] mt-2 px-4 mx-auto">
-            <h6 className="text-2xl mb-4">Site Settings</h6>
-            <div className="flex flex-row ml-auto">
-                <button
-                    type="button"
-                    className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-                    onClick={() => {
-                        logout();
-                        router.push("/admin/login");
-                    }}
-                >
-                    Logout
+        <>
+        <div className="m-4 w-[80%] mx-auto">
+            <header className="flex flex-col lg:flex-row justify-between items-start lg:items-start mb-8 gap-4">
+                <div className="text-2xl">Site Settings</div>
+                <div className="flex flex-row gap-2">
+                <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100" onClick={() => {
+                    logout();
+                    router.push("/admin/login");
+                }}>Logout
                 </button>
-                <button
-                    type="button"
-                    className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
+                <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
                     onClick={() => {
                         router.push(`/store?shop=${shopid}`);
                     }}
-                >
-                    Customer Portal
+                >Customer Portal
                 </button>
-            </div>
+                </div>
+            </header>
             
             {/* Site Title */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Site Title<span className="text-red-700">*</span></label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Site Title<span className="text-red-700">*</span></label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="sitetitle"
@@ -240,8 +235,8 @@ export default function Settings() {
             </div>
 
             {/* Site Logo */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Site Logo</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Site Logo</label>
                 <div className="w-2/3">
                     <input
                         className="p-2 border border-gray-300 rounded-md w-full"
@@ -255,8 +250,8 @@ export default function Settings() {
             </div>
 
             {/* Owner Name */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Owner Name</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Owner Name</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="ownername"
@@ -269,7 +264,7 @@ export default function Settings() {
 
             {/* Site Description */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium pt-2">Site Description</label>
+                <label className="w-1/4 text-center pr-4 font-medium pt-2">Site Description</label>
                 <textarea
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="sitedescription"
@@ -280,8 +275,8 @@ export default function Settings() {
             </div>
 
             {/* Contact Email */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Contact Email</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Contact Email</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="contactemail"
@@ -293,8 +288,8 @@ export default function Settings() {
             </div>
 
             {/* Phone Number */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Phone Number</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Phone Number</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="contactphone"
@@ -306,8 +301,8 @@ export default function Settings() {
             </div>
 
             {/* Alternate Phone */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Alternate Phone</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Alternate Phone</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="alternatecontactphone"
@@ -320,7 +315,7 @@ export default function Settings() {
 
             {/* Address */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium pt-2">Address</label>
+                <label className="w-1/4 text-center pr-4 font-medium pt-2">Address</label>
                 <textarea
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="address"
@@ -332,8 +327,8 @@ export default function Settings() {
             </div>
 
             {/* Social Links */}
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Instagram URL</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Instagram URL</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="instagramurl"
@@ -344,8 +339,8 @@ export default function Settings() {
                 />
             </div>
 
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Google URL</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Google URL</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="googleurl"
@@ -356,8 +351,8 @@ export default function Settings() {
                 />
             </div>
 
-            <div className="flex flex-row items-center w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium">Just Dial URL</label>
+            <div className="flex flex-row items-start w-full mb-4">
+                <label className="w-1/4 text-center pr-4 font-medium">Just Dial URL</label>
                 <input
                     className="p-2 border border-gray-300 rounded-md w-2/3"
                     name="justdialurl"
@@ -370,9 +365,9 @@ export default function Settings() {
 
             {/* Opening Hours */}
             <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/3 text-right pr-4 font-medium pt-2">Opening Hours</label>
+                <label className="w-1/4 text-center pr-4 font-medium pt-2">Opening Hours</label>
                 <div className="w-2/3 space-y-2">
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Monday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -382,7 +377,7 @@ export default function Settings() {
                             onChange={updateField('monday' as keyof SiteDetail)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Tuesday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -392,7 +387,7 @@ export default function Settings() {
                             onChange={updateField('tuesday' as keyof SiteDetail)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Wednesday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -402,7 +397,7 @@ export default function Settings() {
                             onChange={updateField('wednesday' as keyof SiteDetail)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Thursday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -412,7 +407,7 @@ export default function Settings() {
                             onChange={updateField('thursday' as keyof SiteDetail)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Friday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -422,7 +417,7 @@ export default function Settings() {
                             onChange={updateField('friday' as keyof SiteDetail)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Saturday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -432,7 +427,7 @@ export default function Settings() {
                             onChange={updateField('saturday' as keyof SiteDetail)}
                         />
                     </div>
-                    <div className="flex items-center">
+                    <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Sunday:</span>
                         <input
                             className="p-2 border border-gray-300 rounded-md flex-1"
@@ -450,11 +445,13 @@ export default function Settings() {
                     {error}
                 </p>
             )}
-
+        </div>
+        <div className="flex justify-center">
             <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateSettings}
             disabled={!localDetails?.sitetitle}>
                 Save Settings
             </button>
         </div>
+        </>
     );
 }

@@ -5,6 +5,12 @@ import Card from "../components/ui/card";
 import { LuShoppingCart } from "react-icons/lu";
 import { useAuth } from "../context/AuthContext";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
+import Modal from 'react-bootstrap/Modal';
+import Button from 'react-bootstrap/Button';
+import { renderImage } from "../lib/renderImage";
+import { IoMdAddCircleOutline } from "react-icons/io";
+import { IoRemoveCircleOutline } from "react-icons/io5";
+import { MdDeleteOutline } from "react-icons/md";
 
 interface Product {
     productid: string;
@@ -17,47 +23,37 @@ interface Product {
     highlightimage?: Blob | string | { filename: string; size: number; url?: string } | null;
 }
 
+interface CartData {
+    productid: string,
+    name: string,
+    image: Blob | string | { filename: string; size: number; url?: string } | null,
+    count: number
+}
+
 export default function ProductList() {
-    
+
     const { user } = useAuth();
     const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(user?.shopid);
-    
+
     // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
-    const [cartCount, setCartCount] = useState(0);
+    const [cartCount, setCartCount] = useState(1);
     const itemsPerPage = 20; // show 5 items per page
+
+    const [isCartOpen, setCartOpen] = useState(false);
+    const [cartItems, setCartItems] = useState<CartData[]>([])
 
     useEffect(() => {
         // get product details and filter from local storage
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        const productids = products.map((item:Product) => item.productid);
+        const productids = products.map((item: Product) => item.productid);
         console.log("Product ids", productids, products)
-        const x = items.filter((item:Product) => {
-            productids.includes(item.productid) 
+        const x = items.filter((item: CartData) => {
+            productids.includes(item.productid)
         })
         console.log("items", items, x)
         handleCart(items.length);
     })
-
-    // useEffect(() => {
-    //     console.log("PRODUCTLIST page")
-    //     // Fetch products from the backend API
-    //     fetch(`http://localhost:3000/api/products?shopid=${user?.shopid}`)
-    //         .then(response => response.json())
-    //         .then(data => {
-    //             console.log('Fetched products:', data);
-    //             // show newest products first
-    //             const list = (data.data || []).slice().reverse();
-    //             setProducts(list);
-    //             // always start from first page when data changes
-    //             setCurrentPage(1);
-    //         })
-    //         .catch(error => {
-    //             console.error('Error fetching products:', error);
-    //         });
-
-    //         setCartCount(JSON.parse(localStorage.getItem("cart") || "[]").length);
-    // }, []);
 
     // Calculate pagination
     const totalPages = Math.ceil(products.length / itemsPerPage);
@@ -70,8 +66,9 @@ export default function ProductList() {
     // };
 
     const openCart = () => {
-        alert("This is a placeholder for the cart! You have " + cartCount + " items in your cart.");
-        // In a real app, you would navigate to the cart page or open a cart modal here.
+        const items = JSON.parse(localStorage.getItem("cart") || "[]");
+        setCartItems([...items]);  // Fresh copy
+        setCartOpen(true);
     }
 
     const handleCart = (count: number) => {
@@ -79,24 +76,48 @@ export default function ProductList() {
         setCartCount(count)
     }
 
+    const contactOverWhatsapp = () => {
+        console.log("Whatsapp")
+    }
+
+    const handleItemCount = (id: string, action: string) => {
+        if (!isCartOpen) return;
+        
+        const items = JSON.parse(localStorage.getItem("cart") || "[]");
+        const index = items.findIndex((item: CartData) => item.productid === id);
+        if (index !== -1) {
+            if (action === 'delete') {
+                items.splice(index, 1);
+            } else {
+                items[index].count = action === 'add' ? items[index].count + 1 : Math.max(0, items[index].count - 1);
+            }
+        }
+        const totalCount = items.reduce((sum: number, item: CartData) => sum + item.count, 0);
+        localStorage.setItem('cart', JSON.stringify(items));
+        setCartItems([...items]);  // Update modal display immediately
+        handleCart(totalCount);
+        setCartCount([...items].length)
+        console.log("Updated cart total:", totalCount, items);
+    }
+
     return (
         <div className="flex flex-col my-10 border-t-2 border-gray-300 m-2 px-4 w-[80%] mx-auto">
-            <header className="flex flex-row justify-between items-center m-4">
+            <header className="flex flex-row justify-between items-center my-4">
                 <div className="text-2xl m-2">Gallery</div>
 
-                <button className="px-4 py-2 bg-black text-white rounded-md" onClick={openCart}>
+                <button className="flex flex-row items-center p-2 bg-black text-white rounded-md" onClick={openCart}>
                     <span><LuShoppingCart /> </span><span className="m-2">{cartCount}</span>
                 </button>
             </header>
             {products.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
-                        {paginatedProducts.map((product:any) => (
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                        {paginatedProducts.map((product: any) => (
                             <Card
-                              key={product.productid}
-                              product={product}
-                              mode="public"
-                              cartUpdated={(count:number) => handleCart(count)}
+                                key={product.productid}
+                                product={product}
+                                mode="public"
+                                cartUpdated={(count: number) => handleCart(count)}
                             />
                         ))}
                     </div>
@@ -132,6 +153,64 @@ export default function ProductList() {
                 </>
             ) : (
                 <p>No products available.</p>
+            )}
+
+            {isCartOpen && cartItems && cartItems.length > 0 && (
+                <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Cart</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {cartItems.map((item: CartData, index) => {
+                            return (
+                                <div key={index} className="flex flex-row items-center border-1 border-gray-200 p-4">
+                                    <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'add')}
+                                            className="px-3 py-1 rounded-md hover:text-green-600"
+                                        >
+                                            <IoMdAddCircleOutline />
+                                        </button>
+
+                                        <span className="px-4 py-1 mr-0 border border-gray-300 rounded-md bg-white">
+                                            {item.count}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'remove')}
+                                            disabled={item.count === 1}
+                                            className="px-3 py-1 rounded-md hover:text-red-600"
+                                        >
+                                            <IoRemoveCircleOutline />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'delete')}
+                                            className="py-1 rounded-md hover:text-red-600"
+                                        >
+                                            <MdDeleteOutline />
+                                        </button>
+                                    </div>
+
+                                </div>
+                            )
+                        })}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <Button variant="secondary" onClick={() => setCartOpen(false)}>
+                            Cancel
+                        </Button>
+                        <Button variant="danger" onClick={() => {
+                            setCartOpen(false);
+                            contactOverWhatsapp();
+                        }}>
+                            Buy Now
+                        </Button>
+                    </Modal.Footer>
+                </Modal>
             )}
         </div>
     );
