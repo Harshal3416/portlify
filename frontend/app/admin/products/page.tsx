@@ -55,12 +55,12 @@ export default function Products() {
   }, []);
 
   // Route protection - redirect to login if not authenticated
-  useEffect(() => {
-    if (!user) {
-      router.push("/admin/login");
-      return;
-    }
-  }, [user, router]);
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push("/admin/login");
+  //     return;
+  //   }
+  // }, [user, router]);
 
   // Note: Products are now fetched via useGetProductsQuery hook above
   // No need for manual useEffect fetch anymore
@@ -173,7 +173,7 @@ export default function Products() {
           >
             Add new Product
           </button>
-          <button
+          {/* <button
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
             onClick={() => {
@@ -182,7 +182,7 @@ export default function Products() {
             }}
           >
             Logout
-          </button>
+          </button> */}
           <button
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"

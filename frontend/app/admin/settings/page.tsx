@@ -58,12 +58,12 @@ export default function Settings() {
 
 
     // Route protection - redirect to login if not authenticated
-    useEffect(() => {
-        if (!user) {
-            router.push("/admin/login");
-            return;
-        }
-    }, [user, router]);
+    // useEffect(() => {
+    //     if (!user) {
+    //         router.push("/admin/login");
+    //         return;
+    //     }
+    // }, [user, router]);
 
     // Load initial details from context or mutation
     useEffect(() => {
@@ -207,9 +207,8 @@ export default function Settings() {
                 <div className="text-2xl">Site Settings</div>
                 <div className="flex flex-row gap-2">
                 <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100" onClick={() => {
-                    logout();
-                    router.push("/admin/login");
-                }}>Logout
+                    router.push("/admin/products");
+                }}>Products
                 </button>
                 <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
                     onClick={() => {
