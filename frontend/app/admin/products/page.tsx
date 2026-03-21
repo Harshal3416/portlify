@@ -162,8 +162,6 @@ export default function Products() {
         <div className="text-2xl m-2">Products</div>
 
         <div className="flex flex-row justify-end my-4">
-
-
           <button
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
