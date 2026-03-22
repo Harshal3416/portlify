@@ -9,8 +9,6 @@ router.post("/", clerkAuth, async (req, res) => {
   const { tenantid, tenantdomain } = req.body;
   const clerkId = req.clerkId  // injected by middleware
 
-  console.log("clerkId", clerkId)
-
   if (!tenantid || !tenantdomain) {
     return res.status(400).json({ error: 'tenantid and tenantdomain are required' })
   }
@@ -36,7 +34,6 @@ router.post("/", clerkAuth, async (req, res) => {
 // GET — fetch admin details for logged-in user
 router.get("/", clerkAuth, async (req, res) => {
   const clerkId = req.clerkId  // injected by middleware
-  console.log("clerkId", clerkId)
 
   try {
     const result = await pool.query(

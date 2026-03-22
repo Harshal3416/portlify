@@ -13,16 +13,16 @@ export default function Settings() {
     const router = useRouter();
     // const { user, logout } = useAuth();
     // const shopid = user?.shopid || '';
-    const shopid = 'harshal';
+    // const shopid = 'harshal';
 
     const siteContextDetails = useSiteDetails();
-    const settingsMutation = useSettings(shopid)
     const updateSettingsMutation = useUpdateSettings()
-
+    
     const [localDetails, setLocalDetails] = useState<SiteDetail | null>(null)
     const [error, setError] = useState('')
-
+    
     const [tenantid, setTenantid] = useState('');
+    const settingsMutation = useSettings(tenantid)
     const [tenantdomain, setTenantDomain] = useState("");
     const [selectedOption, setSelectedOption] = useState("");
 
@@ -67,7 +67,7 @@ export default function Settings() {
 
     // Load initial details from context or mutation
     useEffect(() => {
-        if (!shopid) return;
+        if (!tenantid) return;
 
         console.log("siteContextDetails", siteContextDetails)
         if (siteContextDetails) {
@@ -96,7 +96,7 @@ export default function Settings() {
                 console.log("MUTATION ERROR-SETTING", err)
             }
         });
-    }, [shopid, siteContextDetails]);
+    }, [tenantid, siteContextDetails]);
 
     const updateSettings = () => {
 
@@ -120,7 +120,7 @@ export default function Settings() {
         const form = new FormData();
 
         // Add shopid to form data
-        form.append('shopid', shopid);
+        form.append('shopid', tenantid);
 
         form.append('sitetitle', localDetails?.sitetitle || '');
         form.append('ownername', localDetails?.ownername || '');
@@ -231,7 +231,8 @@ export default function Settings() {
         });
 
         const data = await res.json();
-        console.log(data);
+        console.log("tenantid", data.data, data.data.tenantid);
+        setTenantid(data.data.tenantid)
     }
 
     const hasSpecialCharacter = (value: string) => {
@@ -253,7 +254,7 @@ export default function Settings() {
                 </button>
                 <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
                     onClick={() => {
-                        router.push(`/store?shop=${shopid}`);
+                        router.push(`/store?shop=${tenantid}`);
                     }}
                 >Customer Portal
                 </button>
