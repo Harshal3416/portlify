@@ -160,7 +160,6 @@ export default function Products() {
 
       <header className="flex flex-row justify-between items-center my-4">
         <div className="text-2xl m-2">Products</div>
-
         <div className="flex flex-row justify-end my-4">
           <button
             type="button"

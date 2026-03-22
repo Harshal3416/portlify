@@ -1,13 +1,11 @@
 import { clerkMiddleware, createRouteMatcher } from '@clerk/nextjs/server';
 
-const isAdminRoute = createRouteMatcher(['/admin(.*)']);
+const isAdminRoute = createRouteMatcher(['/', '/admin(.*)']);
 
 export default clerkMiddleware(async (auth, req) => {
   if (isAdminRoute(req)) {
-    // await auth.protect();
-        await auth.protect({
-      unauthenticatedUrl: new URL('/admin/products', req.url).toString(),
-    });
+    await auth.protect();
+    
     // Optional: restrict by role
     // const { sessionClaims } = await auth();
     // if (sessionClaims?.metadata?.role !== 'admin') {
