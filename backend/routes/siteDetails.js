@@ -21,9 +21,6 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
   const existingResult = await pool.query("SELECT sitelogourl FROM sitedetails WHERE shopid = $1", [shopid]);
   const existingLogo = existingResult.rows[0]?.sitelogourl || null;
 
-  console.log("sitelogourl", req.files?.sitelogourl)
-  console.log("existingLogo", existingLogo)
-
   const siteDetails = {
     shopid,
     sitetitle,
@@ -105,7 +102,7 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
     ]
   );
 
-  setSiteDetails(result.rows[0])
+  // setSiteDetails(result.rows[0])
   return res.status(201).json({ success: true, data: result.rows[0] });
 })
 

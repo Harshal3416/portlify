@@ -2,16 +2,18 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/context/AuthContext";
+// import { useAuth } from "@/app/context/AuthContext";
 import { useSiteDetails } from "@/app/context/siteContext";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 import { SiteDetail } from "@/app/interfaces/interface"
+import { useAuth } from "@clerk/nextjs";
 
 export default function Settings() {
 
     const router = useRouter();
-    const { user, logout } = useAuth();
-    const shopid = user?.shopid || '';
+    // const { user, logout } = useAuth();
+    // const shopid = user?.shopid || '';
+    const shopid = 'harshal';
 
     const siteContextDetails = useSiteDetails();
     const settingsMutation = useSettings(shopid)
@@ -21,8 +23,10 @@ export default function Settings() {
     const [error, setError] = useState('')
 
     const [tenantid, setTenantid] = useState('');
-    const [tenantDomain, setTenantDomain] = useState("");
+    const [tenantdomain, setTenantDomain] = useState("");
     const [selectedOption, setSelectedOption] = useState("");
+
+    const { getToken } = useAuth();
 
 
     const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -196,8 +200,38 @@ export default function Settings() {
         return null;
     };
 
-    const updateAdminDetails = () => {
+    const updateAdminDetails = async () => {
+        const token = await getToken();  // gets the Clerk session JWT
 
+        // POST — save details
+        await fetch("http://localhost:3000/api/admin-details", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,  // send JWT to Express
+            },
+            body: JSON.stringify({ tenantid, tenantdomain }),
+        });
+    }
+
+    useEffect(() => {
+        fetchAdminDetails()
+    }, [])
+
+    async function fetchAdminDetails() {
+        console.log("fetchAdminDetails called");
+        const token = await getToken();
+        console.log("User token", token)
+
+        // GET — fetch details
+        const res = await fetch("http://localhost:3000/api/admin-details", {
+            headers: {
+                "Authorization": `Bearer ${token}`,  // send JWT to Express
+            },
+        });
+
+        const data = await res.json();
+        console.log(data);
     }
 
     const hasSpecialCharacter = (value: string) => {
@@ -302,7 +336,7 @@ export default function Settings() {
 
             <div className="flex justify-center">
                 <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateAdminDetails}
-                    disabled={!tenantDomain || !tenantid}>
+                    disabled={!tenantdomain || !tenantid}>
                     Save Admin Details
                 </button>
             </div>
