@@ -32,7 +32,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased pb-40`}
       >
         {/* auth provider covers the entire app */}
         <AuthProvider>
@@ -52,9 +52,9 @@ export default function RootLayout({
                 </ClerkProvider>
               </ToastProvider>
             </QueryProvider>
-            <FooterComponent></FooterComponent>
           </SiteProvider>
         </AuthProvider>
+            <FooterComponent></FooterComponent>
       </body>
     </html>
   );

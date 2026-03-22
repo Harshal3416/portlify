@@ -1,30 +1,56 @@
-// import { Link } from "wouter";
+'use client'
+
 import { Mail } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 export function FooterComponent() {
 
+  const phoneNumber = 1234;
+
+  const openGmail = () => {
+    const subject = "Inquiry about products"; // replace with your default subject
+    const body = "Hello, I would like to inquire about your products."; // replace with your default message
+    const url = `mailto:${process.env.DEVELOPER_EMAIL_ID}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.open(url, "_blank");
+  }
+
+  const openWhatsapp = () => {
+    if(!phoneNumber) return;
+    const message = "Hello, I would like to inquire about your products."; // replace with your default message
+    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    window.open(url, "_blank");
+  }
+
   return (
-    <footer className="border-t bg-card mt-10">
-      <div className="w-full mx-auto px-4 sm:px-6 lg:px-8 py-10">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 md:gap-12">
-          <div>
-            <h3 className="font-serif text-lg font-semibold mb-4">Contact Us</h3>
-            <div className="space-y-3">
-              <a
-                href='/'
-                className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors"
-                data-testid="link-email"
-              >
-                <Mail className="h-4 w-4" />
-                professor3416@gmail.com
-              </a>
-            </div>
+    <footer className="fixed bottom-0 left-0 w-full border-t bg-card bg-white">
+      {/* Floating WhatsApp button */}
+      <span
+        className="fixed bottom-4 right-4 border border-gray-300 shadow-lg rounded-full p-2 flex justify-center items-center cursor-pointer"
+        onClick={openWhatsapp}
+      >
+        <img
+          src="/whatsapp.jpg"
+          alt="Whatsapp Icon"
+          className="w-10 h-10 inline-block"
+        />
+      </span>
+
+      {/* Footer content */}
+      <div className="mt-2 pt-2 text-center text-sm text-muted-foreground">
+        <div className="flex flex-col md:flex-row items-center justify-center my-2 gap-2">
+          <div>Contact developer over&nbsp;</div>
+
+          <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground transition-colors">
+            <Mail className="h-4 w-4" />
+            <span className="truncate cursor-pointer" onClick={openGmail}>
+              professor3416@gmail.com /
+            </span>
+            <FaWhatsapp className="cursor-pointer" />
+            <span onClick={openWhatsapp}>Whatsapp</span>
           </div>
         </div>
 
-        <div className="mt-8 pt-8 border-t-2 border-gray-300 text-center text-sm text-muted-foreground">
-          <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
-        </div>
+        <p>&copy; {new Date().getFullYear()} All rights reserved.</p>
       </div>
     </footer>
   );

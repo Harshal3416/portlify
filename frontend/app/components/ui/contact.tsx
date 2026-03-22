@@ -83,9 +83,9 @@ export default function Contact() {
           <div className="flex flex-col justify-between my-2">
               <p className="text-lg m-2" onClick={openGmail}><span><img src="/gmail.jpg" alt="Email Icon" width={800}
                 height={500} className="w-12 h-12 mr-2 inline-block"></img></span>{gmailId}</p>
-              <p className="text-lg m-2"><span><img src="/phone.jpg" alt="Email Icon" width={800}
+              <p className="text-lg m-2"><span><img src="/phone.jpg" alt="Phone Icon" width={800}
                 height={500} className="w-12 h-12 mr-2 inline-block"></img></span><span onClick={() => openPhoneDialer(Number(phoneNumber))}>{phoneNumber}</span> | <span onClick={() => openPhoneDialer(Number(alternatePhoneNumber))}>{alternatePhoneNumber}</span></p>
-              <p className="text-lg m-2" onClick={() => openLink(gmapLink)}><span><img src="/gmap.jpg" alt="Email Icon" width={800}
+              <p className="text-lg m-2" onClick={() => openLink(gmapLink)}><span><img src="/gmap.jpg" alt="Gmap Icon" width={800}
                 height={500} className="w-12 h-12 mr-2 inline-block"></img></span>{address}</p>
               <button className="bg-green-500 text-white font-bold p-2 rounded m-2" onClick={openWhatsapp}><span><img src="/whatsapp.jpg" alt="WhatsApp Icon" width={800} height={500} className="w-12 h-12 mr-2 inline-block"></img></span>Chat over WhatsApp</button>
           </div>
