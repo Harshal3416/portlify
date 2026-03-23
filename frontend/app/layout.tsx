@@ -43,9 +43,6 @@ export default function RootLayout({
                 <ClerkProvider>
                   <AuthInitializer />
                   <header className="flex justify-end items-center p-4 gap-4 h-16 position-fixed top-0 right-0">
-                    <Show when="signed-out">
-                      <SignInButton />
-                    </Show>
                     <Show when="signed-in">
                       <UserButton />
                     </Show>

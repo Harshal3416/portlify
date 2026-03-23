@@ -31,47 +31,49 @@ export default function OpeningHours() {
   }, [siteDetails]);
 
   return (
-    <div className="w-[80%] mx-auto border-1 border-gray-300 rounded-md my-2">
-      <div className="flex flex-row justify-between p-4" onClick={() => setOpen(!open)}>
-        <span>
-          Opening Hours
-        </span>
-        <span>
-          {open ? <FaArrowUp /> : <FaArrowDown />}
-        </span>
+  (monday || tuesday || wednesday || thursday || friday || saturday || sunday) && (
+    <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-2">
+      <div
+        className="flex flex-row justify-between p-4 cursor-pointer"
+        onClick={() => setOpen(!open)}
+      >
+        <span>Opening Hours</span>
+        <span>{open ? <FaArrowUp /> : <FaArrowDown />}</span>
       </div>
+
       {open && (
         <div className="flex flex-col justify-between border-t border-gray-300 p-2">
-          <p className="text-lg mt-2 flex flex-row justify-between w-70">
-            <span>Monday: </span>
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Monday:</span>
             <span>{monday}</span>
           </p>
-          <p className="text-lg mt-2 flex flex-row justify-between  w-70">
-            <span>Tuesday: </span>
-            {tuesday}
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Tuesday:</span>
+            <span>{tuesday}</span>
           </p>
-          <p className="text-lg mt-2 flex flex-row justify-between  w-70">
-            <span>Wednesday: </span>
-            {wednesday}
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Wednesday:</span>
+            <span>{wednesday}</span>
           </p>
-          <p className="text-lg mt-2 flex flex-row justify-between  w-70">
-            <span>Thursday: </span>
-            {thursday}
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Thursday:</span>
+            <span>{thursday}</span>
           </p>
-          <p className="text-lg mt-2 flex flex-row justify-between  w-70">
-            <span>Friday: </span>
-            {friday}
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Friday:</span>
+            <span>{friday}</span>
           </p>
-          <p className="text-lg mt-2 flex flex-row justify-between  w-70">
-            <span>Saturday: </span>
-            {saturday}
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Saturday:</span>
+            <span>{saturday}</span>
           </p>
-          <p className="text-lg mt-2 flex flex-row justify-between  w-70">
-            <span>Sunday: </span>
-            {sunday}
+          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
+            <span>Sunday:</span>
+            <span>{sunday}</span>
           </p>
         </div>
       )}
     </div>
-  );
+  )
+);
 }

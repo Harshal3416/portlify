@@ -116,7 +116,7 @@ export default function ProductList() {
             </header>
             {products.length > 0 ? (
                 <>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
                         {paginatedProducts.map((product: any) => (
                             <Card
                                 key={product.productid}
