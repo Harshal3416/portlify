@@ -6,7 +6,9 @@ import { FooterComponent } from "./components/ui/footercomponent";
 import QueryProvider from "@/providers/QueryProvider";
 import { SiteProvider } from "./context/siteContext";
 import { ToastProvider } from "./context/ToastContext";
+import { ClerkProvider, Show, SignInButton, UserButton } from '@clerk/nextjs'
 import 'bootstrap/dist/css/bootstrap.min.css';  // Single line fix!
+import AuthInitializer from "./components/ui/AuthInitializer";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -38,7 +40,18 @@ export default function RootLayout({
           <SiteProvider>
             <QueryProvider>
               <ToastProvider>
-                {children}
+                <ClerkProvider>
+                  <AuthInitializer />
+                  <header className="flex justify-end items-center p-4 gap-4 h-16 position-fixed top-0 right-0">
+                    <Show when="signed-out">
+                      <SignInButton />
+                    </Show>
+                    <Show when="signed-in">
+                      <UserButton />
+                    </Show>
+                  </header>
+                  {children}
+                </ClerkProvider>
               </ToastProvider>
             </QueryProvider>
           </SiteProvider>

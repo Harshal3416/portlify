@@ -9,6 +9,7 @@ const { uploadsDir } = require('./middleware/upload')
 const authRoutes = require('./routes/auth')
 const productRoutes = require('./routes/products')
 const siteDetailsRoutes = require('./routes/siteDetails')
+const adminDetailsRoutes = require('./routes/adminDetails')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -19,7 +20,10 @@ app.use('/uploads', express.static(uploadsDir))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use( cors({ origin: ["http://localhost:4000"], credentials: true }) );
+app.use( cors({ origin: ["http://localhost:4000"], credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization'],  // 👈 Authorization is required for your Bearer token
+ }) );
 
 
 // Routes
@@ -27,6 +31,7 @@ app.get('/', (req, res) => res.send('Enquiry App backend'))
 app.use('/api/auth', authRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/site-details', siteDetailsRoutes)
+app.use('/api/admin-details', adminDetailsRoutes)
 
 // Global error handler (catches multer and other errors)
 app.use((err, req, res, next) => {

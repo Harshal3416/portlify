@@ -9,6 +9,7 @@ import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProdu
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { getAdminDetails } from "@/services/settingsService";
 
 // type Tab = "login" | "register";
 
@@ -19,12 +20,13 @@ export default function Products() {
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
   const { showToast } = useToast();
+    const [tenantid, setTenantid] = useState('');
 
-  const shopid = user?.shopid || '';
+  // const tenantid = user?.shopid || '';
 
   // Use React Query for fetching products - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
-  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(shopid);
+  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantid);
 
   // shared state for add / edit form
   const [productName, setProductName] = useState("");
@@ -51,16 +53,23 @@ export default function Products() {
   };
 
   useEffect(() => {
+    fetchAdminDetails()
     setProductId(generateProductId());
   }, []);
 
-  // Route protection - redirect to login if not authenticated
-  useEffect(() => {
-    if (!user) {
-      router.push("/admin/login");
-      return;
+      async function fetchAdminDetails() {
+        const data = await getAdminDetails(); 
+        console.log("products page tenand id", data, data.tenantid, data.tenantdomain);
+        setTenantid(data.tenantid)
     }
-  }, [user, router]);
+
+  // Route protection - redirect to login if not authenticated
+  // useEffect(() => {
+  //   if (!user) {
+  //     router.push("/admin/login");
+  //     return;
+  //   }
+  // }, [user, router]);
 
   // Note: Products are now fetched via useGetProductsQuery hook above
   // No need for manual useEffect fetch anymore
@@ -89,7 +98,7 @@ export default function Products() {
     form.append("productid", productid);
     form.append("name", productName);
     form.append("description", description);
-    form.append("shopid", shopid);
+    form.append("shopid", tenantid);
 
     // Only append image if a new file is selected
     if (highlightimage) {
@@ -160,7 +169,6 @@ export default function Products() {
 
       <header className="flex flex-row justify-between items-center my-4">
         <div className="text-2xl m-2">Products</div>
-
         <div className="flex flex-row justify-end my-4">
           <button
             type="button"
@@ -173,7 +181,7 @@ export default function Products() {
           >
             Add new Product
           </button>
-          <button
+          {/* <button
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
             onClick={() => {
@@ -182,12 +190,12 @@ export default function Products() {
             }}
           >
             Logout
-          </button>
+          </button> */}
           <button
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
             onClick={() => {
-              router.push(`/store?shop=${shopid}`);
+              router.push(`/store?shop=${tenantid}`);
             }}
           >
             Customer Portal

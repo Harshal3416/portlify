@@ -11,6 +11,7 @@ import { renderImage } from "../lib/renderImage";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { IoRemoveCircleOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
+import { useSearchParams } from "next/navigation";
 
 interface Product {
     productid: string;
@@ -32,8 +33,12 @@ interface CartData {
 
 export default function ProductList() {
 
-    const { user } = useAuth();
-    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(user?.shopid);
+    // const { user } = useAuth();
+
+      const searchParams = useSearchParams();
+      const shopidFromUrl = searchParams.get('shop');
+
+    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(shopidFromUrl);
 
     // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);

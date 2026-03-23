@@ -2,23 +2,35 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/app/context/AuthContext";
+// import { useAuth } from "@/app/context/AuthContext";
 import { useSiteDetails } from "@/app/context/siteContext";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 import { SiteDetail } from "@/app/interfaces/interface"
+import { useAuth } from "@clerk/nextjs";
+import { getAdminDetails, updateAdminDetails } from "@/services/settingsService";
 
 export default function Settings() {
 
     const router = useRouter();
-    const { user, logout } = useAuth();
-    const shopid = user?.shopid || '';
+    // const { user, logout } = useAuth();
+    // const shopid = user?.shopid || '';
+    // const shopid = 'harshal';
 
     const siteContextDetails = useSiteDetails();
-    const settingsMutation = useSettings(shopid)
     const updateSettingsMutation = useUpdateSettings()
-
+    
     const [localDetails, setLocalDetails] = useState<SiteDetail | null>(null)
     const [error, setError] = useState('')
+    
+    const [tenantid, setTenantid] = useState('');
+    const settingsMutation = useSettings(tenantid)
+    const [tenantdomain, setTenantDomain] = useState("");
+    const [selectedOption, setSelectedOption] = useState("");
+    const [isAdminDetailsFromDb, setIsAdminDetailsFromDb] = useState(false)
+
+    // const getAdminDetails = useAdminDetails();
+    const { getToken } = useAuth();
+
 
     const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         console.log("setting value", field, e.target.value)
@@ -56,18 +68,9 @@ export default function Settings() {
         }
     }
 
-
-    // Route protection - redirect to login if not authenticated
-    useEffect(() => {
-        if (!user) {
-            router.push("/admin/login");
-            return;
-        }
-    }, [user, router]);
-
     // Load initial details from context or mutation
     useEffect(() => {
-        if (!shopid) return;
+        if (!tenantid) return;
 
         console.log("siteContextDetails", siteContextDetails)
         if (siteContextDetails) {
@@ -96,22 +99,22 @@ export default function Settings() {
                 console.log("MUTATION ERROR-SETTING", err)
             }
         });
-    }, [shopid, siteContextDetails]);
+    }, [tenantid, siteContextDetails]);
 
     const updateSettings = () => {
 
-        if(((localDetails?.contactphone !== '' && !validatePhone(localDetails?.contactphone+'')) || 
-        (localDetails?.alternatecontactphone !== '' && !validatePhone(localDetails?.alternatecontactphone+'')))) {
+        if(((localDetails?.contactphone && localDetails?.contactphone !== '' && !validatePhone(localDetails?.contactphone+'')) || 
+        (localDetails?.alternatecontactphone && localDetails?.alternatecontactphone !== '' && !validatePhone(localDetails?.alternatecontactphone+'')))) {
             return setError("Enter a valid Phone number")
         };
 
-        if(localDetails?.contactemail !== '' && !validateEmail(localDetails?.contactemail || '')) {
+        if(localDetails?.contactemail && localDetails?.contactemail !== '' && !validateEmail(localDetails?.contactemail || '')) {
             return setError("Enter a valid Email")
         };
 
-        if ((localDetails?.instagramurl !== '' && !isValidUrl(localDetails?.instagramurl || '')) ||
-            (localDetails?.googleurl !== '' && !isValidUrl(localDetails?.googleurl || '')) ||
-            (localDetails?.justdialurl !== '' && !isValidUrl(localDetails?.justdialurl || ''))) {
+        if ((localDetails?.instagramurl && localDetails?.instagramurl !== '' && !isValidUrl(localDetails?.instagramurl || '')) ||
+            (localDetails?.googleurl && localDetails?.googleurl !== '' && !isValidUrl(localDetails?.googleurl || '')) ||
+            (localDetails?.justdialurl && localDetails?.justdialurl !== '' && !isValidUrl(localDetails?.justdialurl || ''))) {
             return setError("Enter valid URL")
         }
 
@@ -120,7 +123,7 @@ export default function Settings() {
         const form = new FormData();
 
         // Add shopid to form data
-        form.append('shopid', shopid);
+        form.append('shopid', tenantid);
 
         form.append('sitetitle', localDetails?.sitetitle || '');
         form.append('ownername', localDetails?.ownername || '');
@@ -200,6 +203,32 @@ export default function Settings() {
         return null;
     };
 
+    const updateAdminDetailsFn = async () => {
+        // Save via service as JSON object
+        const data = await updateAdminDetails({ tenantid, tenantdomain });
+        console.log("Admin details saved:", data);
+        setIsAdminDetailsFromDb(true);
+    }
+
+    useEffect(() => {
+        fetchAdminDetails()
+    }, [])
+
+    async function fetchAdminDetails() {
+        const data = await getAdminDetails(); 
+        console.log("fetchAdminDetails", data, data.tenantid, data.tenantdomain);
+        setTenantid(data.tenantid)
+        setTenantDomain(data.tenantdomain)
+        setIsAdminDetailsFromDb(true)
+    }
+
+    const hasSpecialCharacter = (value: string) => {
+        const regex = /[^a-zA-Z0-9]/;
+        const isValid = regex.test(value);
+        console.log("Validity", isValid)
+        return !isValid;
+    }
+
     return (
         <>
         <div className="m-4 w-[80%] mx-auto">
@@ -207,24 +236,112 @@ export default function Settings() {
                 <div className="text-2xl">Site Settings</div>
                 <div className="flex flex-row gap-2">
                 <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100" onClick={() => {
-                    logout();
-                    router.push("/admin/login");
-                }}>Logout
+                    router.push("/admin/products");
+                }}>Products
                 </button>
                 <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
                     onClick={() => {
-                        router.push(`/store?shop=${shopid}`);
+                        router.push(`/store?shop=${tenantid}`);
                     }}
                 >Customer Portal
                 </button>
                 </div>
             </header>
-            
-            {/* Site Title */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Site Title<span className="text-red-700">*</span></label>
+
+                    <div className="w-[60%] mx-auto">
+            {/* Tenant details */}
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Tenant ID:<span className="text-red-700">*</span><span className="text-sm text-muted"> (Special characters are not allowed)</span></label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
+                    name="tenantid"
+                    type="text"
+                    placeholder="Create Your Own Tenant ID"
+                    maxLength={10}
+                    disabled={isAdminDetailsFromDb}
+                    value={tenantid}
+                    onChange={(e) =>
+                        hasSpecialCharacter(e.target.value) && 
+                    setTenantid(e.target.value)
+                  }
+                />
+            </div>
+
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="font-medium mb-2">
+                    I am a <span className="text-red-700">*</span>
+                    <span className="text-sm text-muted">
+                        {" "}About Yourself. (example: Shop Owner, Broker)
+                    </span>
+                </label>
+
+                {/* Option 1 */}
+                <div className="flex items-center gap-2 mb-2">
+                    <input
+                        type="radio"
+                        name="tenantdomain"
+                        value="Shop Owner"
+                        checked={selectedOption === "Shop Owner"}
+                        disabled={isAdminDetailsFromDb}
+                        onChange={(e) => {
+                            setSelectedOption(e.target.value);
+                            setTenantDomain(e.target.value);
+                        }}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span>Shop Owner</span>
+                </div>
+
+                {/* Option 2 */}
+                <div className="flex items-center gap-2 mb-2">
+                    <input
+                        type="radio"
+                        name="tenantdomain"
+                        value="Broker"
+                        checked={selectedOption === "Broker"}
+                        disabled={isAdminDetailsFromDb}
+                        onChange={(e) => {
+                            setSelectedOption(e.target.value);
+                            setTenantDomain(e.target.value);
+                        }}
+                        className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
+                    />
+                    <span>Broker</span>
+                </div>
+
+                {/* Option 3: Custom input */}
+                <div className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        placeholder="Enter your own"
+                        value={tenantdomain}
+                        disabled={isAdminDetailsFromDb}
+                        onFocus={() => {
+                            setSelectedOption("Custom");
+                            setTenantDomain(""); // clear when focusing
+                        }}
+                        onChange={(e) => setTenantDomain(e.target.value)}
+                        className="p-2 border border-gray-300 rounded-md w-full text-sm"
+                    />
+                </div>
+            </div>
+                    
+            {!isAdminDetailsFromDb &&
+                <div className="flex justify-center">
+                    <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateAdminDetailsFn}
+                        disabled={!tenantdomain || !tenantid}>
+                        Save Admin Details
+                    </button>
+                </div>
+            }
+
+            <hr></hr>
+
+            {/* Site Title */}
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Site Title:<span className="text-red-700">*</span></label>
+                <input
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="sitetitle"
                     type="text"
                     placeholder="Enter Site Title"
@@ -235,9 +352,9 @@ export default function Settings() {
             </div>
 
             {/* Site Logo */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Site Logo</label>
-                <div className="w-2/3">
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Site Logo:</label>
+                <div className="w-full">
                     <input
                         className="p-2 border border-gray-300 rounded-md w-full"
                         name="sitelogourl"
@@ -250,10 +367,10 @@ export default function Settings() {
             </div>
 
             {/* Owner Name */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Owner Name</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Owner Name:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="ownername"
                     type="text"
                     placeholder="Enter Owner Name"
@@ -263,10 +380,10 @@ export default function Settings() {
             </div>
 
             {/* Site Description */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium pt-2">Site Description</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium pt-2">Site Description:</label>
                 <textarea
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="sitedescription"
                     placeholder="Enter Site Description"
                     value={localDetails?.sitedescription ?? ''}
@@ -275,10 +392,10 @@ export default function Settings() {
             </div>
 
             {/* Contact Email */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Contact Email</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Contact Email:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="contactemail"
                     type="email"
                     placeholder="Enter Contact Email"
@@ -288,10 +405,10 @@ export default function Settings() {
             </div>
 
             {/* Phone Number */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Phone Number</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Phone Number:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="contactphone"
                     type="tel"
                     placeholder="Enter Phone Number"
@@ -301,10 +418,10 @@ export default function Settings() {
             </div>
 
             {/* Alternate Phone */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Alternate Phone</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Alternate Phone:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="alternatecontactphone"
                     type="tel"
                     placeholder="Enter Alternate Phone Number"
@@ -314,10 +431,10 @@ export default function Settings() {
             </div>
 
             {/* Address */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium pt-2">Address</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium pt-2">Address:</label>
                 <textarea
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="address"
                     placeholder="Enter Address"
                     maxLength={200}
@@ -327,10 +444,10 @@ export default function Settings() {
             </div>
 
             {/* Social Links */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Instagram URL</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Instagram URL:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="instagramurl"
                     type="url"
                     placeholder="Enter Instagram URL"
@@ -339,10 +456,10 @@ export default function Settings() {
                 />
             </div>
 
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Google URL</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Google URL:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="googleurl"
                     type="url"
                     placeholder="Enter Google URL"
@@ -351,10 +468,10 @@ export default function Settings() {
                 />
             </div>
 
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium">Just Dial URL</label>
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left pr-4 font-medium">Just Dial URL:</label>
                 <input
-                    className="p-2 border border-gray-300 rounded-md w-2/3"
+                    className="p-2 border border-gray-300 rounded-md w-full"
                     name="justdialurl"
                     type="url"
                     placeholder="Enter Just Dial URL"
@@ -364,9 +481,9 @@ export default function Settings() {
             </div>
 
             {/* Opening Hours */}
-            <div className="flex flex-row items-start w-full mb-4">
-                <label className="w-1/4 text-center pr-4 font-medium pt-2">Opening Hours</label>
-                <div className="w-2/3 space-y-2">
+            <div className="flex flex-col items-start w-full mb-4">
+                <label className="text-left font-medium py-2">Opening Hours:</label>
+                <div className="w-full space-y-2">
                     <div className="flex items-start">
                         <span className="w-24 text-sm font-medium">Monday:</span>
                         <input
@@ -441,14 +558,15 @@ export default function Settings() {
             </div>
 
             {error && (
-                <p className="text-red-600 mb-2 text-sm max-w-md text-center">
+                <p className="text-red-600 mb-2 text-sm max-w-md text-left">
                     {error}
                 </p>
             )}
         </div>
+        </div>
         <div className="flex justify-center">
             <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateSettings}
-            disabled={!localDetails?.sitetitle}>
+            disabled={!localDetails?.sitetitle || tenantid === ''}>
                 Save Settings
             </button>
         </div>

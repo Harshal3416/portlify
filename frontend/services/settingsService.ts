@@ -16,3 +16,14 @@ export const updateUserSettings = async (formData: FormData) => {
   const res = await apiClient.post(`/site-details`, formData);
   return res.data;
 };
+
+export const getAdminDetails = async () => {
+  const res = await apiClient.get(`/admin-details`);
+  return res.data?.data ?? null;
+}
+
+export const updateAdminDetails = async (data: { tenantid: string; tenantdomain: string }) => {
+  const res = await apiClient.post(`/admin-details`, data);
+  console.log("updateAdminDetails", res)
+  return res.data?.data ?? null;
+}
