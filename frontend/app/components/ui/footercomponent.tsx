@@ -1,23 +1,35 @@
 'use client'
 
+import { useSiteDetails } from "@/app/context/siteContext";
 import { Mail } from "lucide-react";
+import { useEffect, useState } from "react";
 import { FaWhatsapp } from "react-icons/fa";
 
 export function FooterComponent() {
 
-  const phoneNumber = 1234;
+  const siteDetails = useSiteDetails();
+  const [phoneNumber, setPhoneNumber] = useState("");
 
+  useEffect(() => {
+    if (siteDetails?.contactphone) {
+      setPhoneNumber(siteDetails.contactphone);
+    }
+  }, [siteDetails]);
+  
   const openGmail = () => {
     const subject = "Inquiry about products"; // replace with your default subject
-    const body = "Hello, I would like to inquire about your products."; // replace with your default message
+    const body = "Hello, I would like to enquire about your products."; // replace with your default message
     const url = `mailto:${process.env.DEVELOPER_EMAIL_ID}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
     window.open(url, "_blank");
   }
 
   const openWhatsapp = () => {
-    if(!phoneNumber) return;
-    const message = "Hello, I would like to inquire about your products."; // replace with your default message
-    const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+    if(!phoneNumber) {
+      alert("Phone number not available");
+      return;
+    }
+    const message = "Hello, I would like to inquire about your products.";
+    const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
     window.open(url, "_blank");
   }
 

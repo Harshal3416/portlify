@@ -51,9 +51,9 @@ export default function RootLayout({
                 </ClerkProvider>
               </ToastProvider>
             </QueryProvider>
+            <FooterComponent></FooterComponent>
           </SiteProvider>
         </AuthProvider>
-            <FooterComponent></FooterComponent>
       </body>
     </html>
   );

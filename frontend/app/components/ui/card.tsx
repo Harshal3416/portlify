@@ -10,6 +10,7 @@ import ButtonGroup from 'react-bootstrap/ButtonGroup';
 import { renderImage } from "@/app/lib/renderImage";
 import { MdDeleteOutline } from "react-icons/md";
 import { TbEdit } from "react-icons/tb";
+import { useSiteDetails } from "@/app/context/siteContext";
 
 export interface Product {
     productid: string;
@@ -59,10 +60,18 @@ export default function Card({
     const [showProductDetails, setShowProductDetails] = useState(false);
     const { showToast } = useToast();
 
+      const siteDetails = useSiteDetails();
+      const [phoneNumber, setPhoneNumber] = useState("");
+    
+      useEffect(() => {
+        if (siteDetails?.contactphone) {
+          setPhoneNumber(siteDetails.contactphone);
+        }
+      }, [siteDetails]);
+
     const openWhatsappForProduct = () => {
-        const number = whatsappNumber || DEFAULT_WHATSAPP_NUMBER;
         const message = `Hello, I would like to enquire about "${product.name || "-"}" (ID: ${product.productid || "-"}). Description: ${product.description || "-"}`;
-        const url = `https://wa.me/${number}?text=${encodeURIComponent(message)}`;
+        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
     };
 

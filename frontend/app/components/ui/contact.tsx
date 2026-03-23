@@ -7,11 +7,10 @@ import { useAuth } from "@/app/context/AuthContext";
 import { useSearchParams } from "next/navigation";
 
 export default function Contact() {
-  const { user } = useAuth();
   const searchParams = useSearchParams();
   const tenantidFromUrl = searchParams.get('tenantid');
 
-  let siteDetails = useSiteDetails();
+  const siteDetails = useSiteDetails();
 
   const [open, setOpen] = useState(false);
   const [gmailId, setContactEmail] = useState("");
