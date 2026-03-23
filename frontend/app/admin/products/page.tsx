@@ -9,6 +9,7 @@ import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProdu
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
+import { getAdminDetails } from "@/services/settingsService";
 
 // type Tab = "login" | "register";
 
@@ -19,12 +20,13 @@ export default function Products() {
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
   const { showToast } = useToast();
+    const [tenantid, setTenantid] = useState('');
 
-  const shopid = user?.shopid || '';
+  // const tenantid = user?.shopid || '';
 
   // Use React Query for fetching products - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
-  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(shopid);
+  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantid);
 
   // shared state for add / edit form
   const [productName, setProductName] = useState("");
@@ -51,8 +53,15 @@ export default function Products() {
   };
 
   useEffect(() => {
+    fetchAdminDetails()
     setProductId(generateProductId());
   }, []);
+
+      async function fetchAdminDetails() {
+        const data = await getAdminDetails(); 
+        console.log("products page tenand id", data, data.tenantid, data.tenantdomain);
+        setTenantid(data.tenantid)
+    }
 
   // Route protection - redirect to login if not authenticated
   // useEffect(() => {
@@ -89,7 +98,7 @@ export default function Products() {
     form.append("productid", productid);
     form.append("name", productName);
     form.append("description", description);
-    form.append("shopid", shopid);
+    form.append("shopid", tenantid);
 
     // Only append image if a new file is selected
     if (highlightimage) {
@@ -186,7 +195,7 @@ export default function Products() {
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
             onClick={() => {
-              router.push(`/store?shop=${shopid}`);
+              router.push(`/store?shop=${tenantid}`);
             }}
           >
             Customer Portal
