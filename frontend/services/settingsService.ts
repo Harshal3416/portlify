@@ -22,8 +22,8 @@ export const getAdminDetails = async () => {
   return res.data?.data ?? null;
 }
 
-export const updateAdminDetails = async (formData: FormData) => {
-  const res = await apiClient.post(`/admin-details`, formData);
+export const updateAdminDetails = async (data: { tenantid: string; tenantdomain: string }) => {
+  const res = await apiClient.post(`/admin-details`, data);
   console.log("updateAdminDetails", res)
   return res.data?.data ?? null;
 }

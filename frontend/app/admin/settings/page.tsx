@@ -204,22 +204,10 @@ export default function Settings() {
     };
 
     const updateAdminDetailsFn = async () => {
-        // const token = await getToken();  // gets the Clerk session JWT
-
-        const form = new FormData();
-        form.append('tenantid', tenantid);
-        form.append('tenantdomain', tenantdomain);
-        const data = await updateAdminDetails(form)
-
-        // POST — save details
-        // await fetch("http://localhost:3000/api/admin-details", {
-        //     method: "POST",
-        //     headers: {
-        //         "Content-Type": "application/json",
-        //         "Authorization": `Bearer ${token}`,  // send JWT to Express
-        //     },
-        //     body: JSON.stringify({ tenantid, tenantdomain }),
-        // });
+        // Save via service as JSON object
+        const data = await updateAdminDetails({ tenantid, tenantdomain });
+        console.log("Admin details saved:", data);
+        setIsAdminDetailsFromDb(true);
     }
 
     useEffect(() => {
