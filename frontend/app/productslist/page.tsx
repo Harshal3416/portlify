@@ -12,6 +12,7 @@ import { IoMdAddCircleOutline } from "react-icons/io";
 import { IoRemoveCircleOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
+import { useSiteDetails } from "../context/siteContext";
 
 interface Product {
     productid: string;
@@ -33,10 +34,8 @@ interface CartData {
 
 export default function ProductList() {
 
-    // const { user } = useAuth();
-
-      const searchParams = useSearchParams();
-      const tenantidFromUrl = searchParams.get('tenantid');
+    const searchParams = useSearchParams();
+    const tenantidFromUrl = searchParams.get('tenantid');
 
     const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantidFromUrl);
 
@@ -47,6 +46,15 @@ export default function ProductList() {
 
     const [isCartOpen, setCartOpen] = useState(false);
     const [cartItems, setCartItems] = useState<CartData[]>([])
+
+    const siteDetails = useSiteDetails();
+    const [phoneNumber, setPhoneNumber] = useState("");
+
+    useEffect(() => {
+    if (siteDetails?.contactphone) {
+        setPhoneNumber(siteDetails.contactphone);
+    }
+    }, [siteDetails]);
 
     useEffect(() => {
         // get product details and filter from local storage
@@ -82,7 +90,18 @@ export default function ProductList() {
     }
 
     const contactOverWhatsapp = () => {
-        console.log("Whatsapp")
+        if (!phoneNumber) {
+            alert("Phone number not available");
+            return;
+        }
+        let itemDetails = ''
+        cartItems.map((item) => {
+            itemDetails += `\n Product Name: ${item.name} - Product ID: ${item.productid} - Count: ${item.count}`
+        })
+        console.log("itemDetails", itemDetails)
+        const message = "Hello, I would like to buy these products." + itemDetails + "\n";
+        const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)} Thank You!`;
+        window.open(url, "_blank");
     }
 
     const handleItemCount = (id: string, action: string) => {
