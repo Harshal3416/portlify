@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/admin/products',
+        destination: '/admin/settings',
         permanent: false, // use true if you never want a '/' route ever
       },
     ];
