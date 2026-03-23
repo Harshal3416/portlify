@@ -7,7 +7,7 @@ import { useSiteDetails } from "@/app/context/siteContext";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 import { SiteDetail } from "@/app/interfaces/interface"
 import { useAuth } from "@clerk/nextjs";
-import { getAdminDetails } from "@/services/settingsService";
+import { getAdminDetails, updateAdminDetails } from "@/services/settingsService";
 
 export default function Settings() {
 
@@ -203,10 +203,13 @@ export default function Settings() {
         return null;
     };
 
-    const updateAdminDetails = async () => {
+    const updateAdminDetailsFn = async () => {
         // const token = await getToken();  // gets the Clerk session JWT
 
-        
+        const form = new FormData();
+        form.append('tenantid', tenantid);
+        form.append('tenantdomain', tenantdomain);
+        const data = await updateAdminDetails(form)
 
         // POST — save details
         // await fetch("http://localhost:3000/api/admin-details", {
@@ -224,20 +227,7 @@ export default function Settings() {
     }, [])
 
     async function fetchAdminDetails() {
-        console.log("fetchAdminDetails called");
-        const token = await getToken();
-        console.log("User token", token)
-
-        // GET — fetch details
-        // const res = await fetch("http://localhost:3000/api/admin-details", {
-        //     headers: {
-        //         "Authorization": `Bearer ${token}`,  // send JWT to Express
-        //     },
-        // });
-
         const data = await getAdminDetails(); 
-
-        // const data = await res.json();
         console.log("fetchAdminDetails", data, data.tenantid, data.tenantdomain);
         setTenantid(data.tenantid)
         setTenantDomain(data.tenantdomain)
@@ -350,7 +340,7 @@ export default function Settings() {
                     
             {!isAdminDetailsFromDb &&
                 <div className="flex justify-center">
-                    <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateAdminDetails}
+                    <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateAdminDetailsFn}
                         disabled={!tenantdomain || !tenantid}>
                         Save Admin Details
                     </button>

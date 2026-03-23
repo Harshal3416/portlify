@@ -11,7 +11,7 @@ async function clerkAuth(req, res, next) {
     // console.log("JWT KEY", process.env.CLERK_JWT_KEY, process.env.CLERK_SECRET_KEY)
     const payload = await verifyToken(token, {
       secretKey: process.env.CLERK_SECRET_KEY,
-      jwtKey: process.env.CLERK_JWT_KEY
+      jwtKey: process.env.CLERK_JWT_KEY // TODO: remove if not required
     })
     req.clerkId = payload.sub  // attach userId to request
     next() // VERY IMPORTANT

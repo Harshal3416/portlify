@@ -6,8 +6,10 @@ const clerkAuth = require('../middleware/clerkAuth')
 
 // POST — save admin details for logged-in user
 router.post("/", clerkAuth, async (req, res) => {
+  console.log(req.body)
   const { tenantid, tenantdomain } = req.body;
   const clerkId = req.clerkId  // injected by middleware
+
 
   if (!tenantid || !tenantdomain) {
     return res.status(400).json({ error: 'tenantid and tenantdomain are required' })

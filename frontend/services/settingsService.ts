@@ -19,6 +19,11 @@ export const updateUserSettings = async (formData: FormData) => {
 
 export const getAdminDetails = async () => {
   const res = await apiClient.get(`/admin-details`);
-  console.log("service admin details", res)
+  return res.data?.data ?? null;
+}
+
+export const updateAdminDetails = async (formData: FormData) => {
+  const res = await apiClient.post(`/admin-details`, formData);
+  console.log("updateAdminDetails", res)
   return res.data?.data ?? null;
 }
