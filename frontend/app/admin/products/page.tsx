@@ -20,9 +20,7 @@ export default function Products() {
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
   const { showToast } = useToast();
-    const [tenantid, setTenantid] = useState('');
-
-  // const tenantid = user?.shopid || '';
+  const [tenantid, setTenantid] = useState('');
 
   // Use React Query for fetching products - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
@@ -98,7 +96,7 @@ export default function Products() {
     form.append("productid", productid);
     form.append("name", productName);
     form.append("description", description);
-    form.append("shopid", tenantid);
+    form.append("tenantid", tenantid);
 
     // Only append image if a new file is selected
     if (highlightimage) {
@@ -195,7 +193,7 @@ export default function Products() {
             type="button"
             className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
             onClick={() => {
-              router.push(`/store?shop=${tenantid}`);
+              router.push(`/store?tenantid=${tenantid}`);
             }}
           >
             Customer Portal

@@ -9,7 +9,7 @@ import { useSearchParams } from "next/navigation";
 export default function Contact() {
   const { user } = useAuth();
   const searchParams = useSearchParams();
-  const shopidFromUrl = searchParams.get('shop');
+  const tenantidFromUrl = searchParams.get('tenantid');
 
   let siteDetails = useSiteDetails();
   
@@ -23,8 +23,8 @@ export default function Contact() {
   const [justDialLink, setJustDialURL] = useState("");
   const [gmapLink, setGmapLink] = useState("");
 
-  // Get shopid: from URL params first, then from auth context, then fallback
-  const shopid = shopidFromUrl || user?.shopid || '';
+  // Get tenantid: from URL params first, then from auth context, then fallback
+  const tenantid = tenantidFromUrl;
 
   useEffect(() => {
     console.log("siteDetails in contact component", siteDetails)

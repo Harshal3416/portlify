@@ -1,13 +1,13 @@
 import apiClient from "@/lib/apiClient";
 import { SiteDetail } from "@/app/interfaces/interface";
 
-export const getUserSettings = async (shopid?: string): Promise<SiteDetail | null> => {
-  if (!shopid) {
-    console.warn("getUserSettings no shopid");
+export const getUserSettings = async (tenantid?: string): Promise<SiteDetail | null> => {
+  if (!tenantid) {
+    console.warn("getUserSettings no tenantid");
     return null;
   }
-  console.log("Settings fetch for:", shopid);
-  const res = await apiClient.get(`/site-details/${shopid}`);
+  console.log("Settings fetch for:", tenantid);
+  const res = await apiClient.get(`/site-details/${tenantid}`);
   console.log("Settings res:", res.data);
   return res.data?.data[0] ?? null;
 };

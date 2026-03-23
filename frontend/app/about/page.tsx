@@ -3,16 +3,15 @@
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useSiteDetails } from "../context/siteContext";
-import { useAuth } from "@/app/context/AuthContext";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 
 export default function About() {
-  const { user } = useAuth();
-  const router = useRouter();
+  // const { user } = useAuth();
+  // const router = useRouter();
   const siteDetails = useSiteDetails();
   const searchParams = useSearchParams();
-  const shopidFromUrl = searchParams.get('shop');
-  const shopid = shopidFromUrl || user?.shopid || ''; // Get shopid: from URL params first, then from auth context, then fallback
+  const tenantidFromUrl = searchParams.get('tenantid');
+  const tenantid = tenantidFromUrl; // Get tenantid: from URL params first, then from auth context, then fallback
 
   const [open, setOpen] = useState(false);
   const [sitetitle, setSiteTitle] = useState("");
@@ -21,7 +20,7 @@ export default function About() {
   const [sitelogourl, setSiteLogoUrl] = useState<string>("");
 
   useEffect(() => {
-    if (!shopid) return;
+    if (!tenantid) return;
 
     if(siteDetails) {
       setSiteTitle(siteDetails.sitetitle);

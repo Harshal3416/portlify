@@ -12,9 +12,6 @@ import { getAdminDetails, updateAdminDetails } from "@/services/settingsService"
 export default function Settings() {
 
     const router = useRouter();
-    // const { user, logout } = useAuth();
-    // const shopid = user?.shopid || '';
-    // const shopid = 'harshal';
 
     const siteContextDetails = useSiteDetails();
     const updateSettingsMutation = useUpdateSettings()
@@ -122,8 +119,8 @@ export default function Settings() {
         console.log("FILE", file);
         const form = new FormData();
 
-        // Add shopid to form data
-        form.append('shopid', tenantid);
+        // Add tenantid to form data
+        form.append('tenantid', tenantid);
 
         form.append('sitetitle', localDetails?.sitetitle || '');
         form.append('ownername', localDetails?.ownername || '');
@@ -241,7 +238,7 @@ export default function Settings() {
                 </button>
                 <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
                     onClick={() => {
-                        router.push(`/store?shop=${tenantid}`);
+                        router.push(`/store?tenantid=${tenantid}`);
                     }}
                 >Customer Portal
                 </button>

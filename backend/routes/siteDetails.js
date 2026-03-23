@@ -7,22 +7,22 @@ const pool = require("../../database/db/db");
 // Update site details
 router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (req, res) => {
   const {
-    shopid, sitetitle, ownername, sitedescription, contactemail,
+    tenantid, sitetitle, ownername, sitedescription, contactemail,
     contactphone, alternatecontactphone, address,
     instagramurl, googleurl, justdialurl,
     monday, tuesday, wednesday, thursday, friday, saturday, sunday,
   } = req.body
 
-  if (!shopid || !sitetitle) {
-    return res.status(400).json({ error: 'shopid and sitetitle are required' })
+  if (!tenantid || !sitetitle) {
+    return res.status(400).json({ error: 'tenantid and sitetitle are required' })
   }
 
   // Fetch existing logo to preserve if no new file
-  const existingResult = await pool.query("SELECT sitelogourl FROM sitedetails WHERE shopid = $1", [shopid]);
+  const existingResult = await pool.query("SELECT sitelogourl FROM sitedetails WHERE tenantid = $1", [tenantid]);
   const existingLogo = existingResult.rows[0]?.sitelogourl || null;
 
   const siteDetails = {
-    shopid,
+    tenantid,
     sitetitle,
     sitelogourl: req.files?.sitelogourl
       ? {
@@ -53,11 +53,11 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
   // UPSERT into DB - update if exists, insert if not
   const result = await pool.query(
     `INSERT INTO sitedetails 
-     (shopid, sitetitle, sitelogourl, ownername, sitedescription, contactemail, contactphone, alternatecontactphone, address, instagramurl, googleurl,
+     (tenantid, sitetitle, sitelogourl, ownername, sitedescription, contactemail, contactphone, alternatecontactphone, address, instagramurl, googleurl,
      justdialurl, monday, tuesday, wednesday, thursday, friday, saturday, sunday, updatedat)
      VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10,
        $11, $12, $13, $14, $15, $16, $17, $18, $19, $20)
-     ON CONFLICT (shopid) DO UPDATE SET
+     ON CONFLICT (tenantid) DO UPDATE SET
        sitetitle = EXCLUDED.sitetitle,
        sitelogourl = EXCLUDED.sitelogourl,
        ownername = EXCLUDED.ownername,
@@ -79,7 +79,7 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
        updatedat = EXCLUDED.updatedat
      RETURNING *`,
     [
-      shopid,
+      tenantid,
       sitetitle,
       JSON.stringify(siteDetails.sitelogourl), 
       ownername,
@@ -107,12 +107,12 @@ router.post('/', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (r
 })
 
 // Get site details
-router.get("/:shopid", async (req, res) => {
-  const { shopid } = req.params;
+router.get("/:tenantid", async (req, res) => {
+  const { tenantid } = req.params;
   try {
     const result = await pool.query(
-      "SELECT * from sitedetails WHERE shopid = $1",
-      [shopid],
+      "SELECT * from sitedetails WHERE tenantid = $1",
+      [tenantid],
     );
     return res.status(200).json({ success: true, data: result.rows });
   } catch (err) {

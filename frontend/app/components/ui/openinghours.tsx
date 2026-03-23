@@ -3,13 +3,8 @@
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useSiteDetails } from "../../context/siteContext";
-import { useAuth } from "@/app/context/AuthContext";
-import { useSearchParams } from "next/navigation";
 
 export default function OpeningHours() {
-  const { user } = useAuth();
-  const searchParams = useSearchParams();
-  const shopidFromUrl = searchParams.get('shop');
 
   const siteDetails = useSiteDetails();
 

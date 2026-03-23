@@ -36,9 +36,9 @@ export default function ProductList() {
     // const { user } = useAuth();
 
       const searchParams = useSearchParams();
-      const shopidFromUrl = searchParams.get('shop');
+      const tenantidFromUrl = searchParams.get('tenantid');
 
-    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(shopidFromUrl);
+    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantidFromUrl);
 
     // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
@@ -206,7 +206,7 @@ export default function ProductList() {
                     </Modal.Body>
                     <Modal.Footer>
                         <Button variant="secondary" onClick={() => setCartOpen(false)}>
-                            Cancel
+                            Save and Close
                         </Button>
                         <Button variant="danger" onClick={() => {
                             setCartOpen(false);

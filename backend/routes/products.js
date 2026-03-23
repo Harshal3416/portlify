@@ -16,7 +16,7 @@ router.post(
   async (req, res) => {
     console.log('Received product creation request with body:', req.body)
     try {
-      const { productid, name, description, shopid } = req.body
+      const { productid, name, description, tenantid } = req.body
       if (!productid || !name) return res.status(400).json({ success: false, error: 'productid and name are required' })
       console.log('products', products)
       // const exists = products.find(p => p.productid === productid)
@@ -27,7 +27,7 @@ router.post(
         productid,
         name,
         description: description || '',
-        shopid,
+        tenantid,
         highlightimage: req.files?.highlightimage
           ? { filename: req.files.highlightimage[0].originalname, size: req.files.highlightimage[0].size, url: `/uploads/${req.files.highlightimage[0].filename}` }
           : null,
@@ -43,12 +43,12 @@ router.post(
       // Insert into DB
       const result = await pool.query(
         `INSERT INTO products 
-         (id, shopid, productid, name, description, highlightimage, otherimages, videos, createdat)
+         (id, tenantid, productid, name, description, highlightimage, otherimages, videos, createdat)
          VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
          RETURNING *`,
         [
           product.id,
-          product.shopid,
+          product.tenantid,
           product.productid,
           product.name,
           product.description,
@@ -68,13 +68,13 @@ router.post(
 
 // List all products
 router.get('/', async (req, res) => {
-  const { shopid } = req.query; // read from query string
-  console.log("SHOP ID IN BACKEND", shopid)
+  const { tenantid } = req.query; // read from query string
+  console.log("SHOP ID IN BACKEND", tenantid)
     try {
-      if (shopid) {
+      if (tenantid) {
         result = await pool.query(
-          "SELECT * FROM products WHERE shopid = $1 ORDER BY createdat DESC",
-          [shopid],
+          "SELECT * FROM products WHERE tenantid = $1 ORDER BY createdat DESC",
+          [tenantid],
         );
       } else {
         result = await pool.query(
@@ -105,7 +105,7 @@ router.put('/:productid', upload.fields([
   ]), async (req, res) => {
   const { productid } = req.params
   console.log("EDITING PRODUCT", req.body)
-  const { name, description, shopid } = req.body
+  const { name, description, tenantid } = req.body
   
   // Only update highlightimage if a new file is provided
   let query = "UPDATE PRODUCTS SET name = $1, description = $2";
@@ -124,10 +124,10 @@ router.put('/:productid', upload.fields([
   }
   
   const product = await pool.query(query, params)
-    // if (shopid) {
+    // if (tenantid) {
     //     result = await pool.query(
-    //       "SELECT * FROM products WHERE shopid = $1 ORDER BY createdat DESC",
-    //       [shopid],
+    //       "SELECT * FROM products WHERE tenantid = $1 ORDER BY createdat DESC",
+    //       [tenantid],
     //     );
     //   } 
   if (!product) return res.status(404).json({ error: 'Product not found' })

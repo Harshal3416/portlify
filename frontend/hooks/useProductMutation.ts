@@ -2,11 +2,11 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createProduct, updateProduct, getProducts, deleteProduct } from "@/services/productService";
 
 // useQuery hook for fetching products (best practice for data fetching)
-export const useGetProductsQuery = (shopid: string | any) => {
+export const useGetProductsQuery = (tenantid: string | any) => {
   return useQuery({
-    queryKey: ["products", shopid],
-    queryFn: () => getProducts(shopid),
-    enabled: !!shopid, // Only run query when shopid is available
+    queryKey: ["products", tenantid],
+    queryFn: () => getProducts(tenantid),
+    enabled: !!tenantid, // Only run query when tenantid is available
   });
 };
 

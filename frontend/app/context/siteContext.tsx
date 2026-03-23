@@ -2,7 +2,6 @@
 
 import { createContext, useContext, useState, useEffect } from "react";
 import { getUserSettings } from "../../services/settingsService";
-import { useAuth } from "./AuthContext";
 import { SiteDetail } from "@/app/interfaces/interface";
 import { useSearchParams } from "next/navigation";
 
@@ -10,20 +9,19 @@ const SiteContext = createContext<SiteDetail | null>(null);
 
 export function SiteProvider({ children }: { children: React.ReactNode }) {
   const [siteDetails, setSiteDetails] = useState<SiteDetail | null>(null);
-  const { user } = useAuth();
 
   const searchParams = useSearchParams();
-  const shopidFromUrl = searchParams.get('shop');
-  const shopid = shopidFromUrl || user?.shopid || '';
+  const tenantidFromUrl = searchParams.get('tenantid');
+  const tenantid = tenantidFromUrl;
 
   useEffect(() => {
     const loadDetails = async () => {
       try {
-        if (!shopid) {
-          console.log("No shopid available");
+        if (!tenantid) {
+          console.log("No tenantid available");
           return;
         }
-        const details = await getUserSettings(shopid);
+        const details = await getUserSettings(tenantid);
         console.log("Context Data", details);
         setSiteDetails(details);
       } catch (error) {
