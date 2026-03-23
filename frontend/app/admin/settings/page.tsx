@@ -7,6 +7,7 @@ import { useSiteDetails } from "@/app/context/siteContext";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 import { SiteDetail } from "@/app/interfaces/interface"
 import { useAuth } from "@clerk/nextjs";
+import { getAdminDetails } from "@/services/settingsService";
 
 export default function Settings() {
 
@@ -27,6 +28,7 @@ export default function Settings() {
     const [selectedOption, setSelectedOption] = useState("");
     const [isAdminDetailsFromDb, setIsAdminDetailsFromDb] = useState(false)
 
+    // const getAdminDetails = useAdminDetails();
     const { getToken } = useAuth();
 
 
@@ -202,17 +204,19 @@ export default function Settings() {
     };
 
     const updateAdminDetails = async () => {
-        const token = await getToken();  // gets the Clerk session JWT
+        // const token = await getToken();  // gets the Clerk session JWT
+
+        
 
         // POST — save details
-        await fetch("http://localhost:3000/api/admin-details", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${token}`,  // send JWT to Express
-            },
-            body: JSON.stringify({ tenantid, tenantdomain }),
-        });
+        // await fetch("http://localhost:3000/api/admin-details", {
+        //     method: "POST",
+        //     headers: {
+        //         "Content-Type": "application/json",
+        //         "Authorization": `Bearer ${token}`,  // send JWT to Express
+        //     },
+        //     body: JSON.stringify({ tenantid, tenantdomain }),
+        // });
     }
 
     useEffect(() => {
@@ -225,16 +229,18 @@ export default function Settings() {
         console.log("User token", token)
 
         // GET — fetch details
-        const res = await fetch("http://localhost:3000/api/admin-details", {
-            headers: {
-                "Authorization": `Bearer ${token}`,  // send JWT to Express
-            },
-        });
+        // const res = await fetch("http://localhost:3000/api/admin-details", {
+        //     headers: {
+        //         "Authorization": `Bearer ${token}`,  // send JWT to Express
+        //     },
+        // });
 
-        const data = await res.json();
-        console.log("tenantid", data.data, data.data.tenantid);
-        setTenantid(data.data.tenantid)
-        setTenantDomain(data.data.tenantdomain)
+        const data = await getAdminDetails(); 
+
+        // const data = await res.json();
+        console.log("fetchAdminDetails", data, data.tenantid, data.tenantdomain);
+        setTenantid(data.tenantid)
+        setTenantDomain(data.tenantdomain)
         setIsAdminDetailsFromDb(true)
     }
 

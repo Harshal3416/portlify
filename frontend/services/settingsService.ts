@@ -16,3 +16,9 @@ export const updateUserSettings = async (formData: FormData) => {
   const res = await apiClient.post(`/site-details`, formData);
   return res.data;
 };
+
+export const getAdminDetails = async () => {
+  const res = await apiClient.get(`/admin-details`);
+  console.log("service admin details", res)
+  return res.data?.data ?? null;
+}

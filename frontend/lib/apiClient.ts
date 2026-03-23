@@ -1,18 +1,36 @@
 import axios from "axios";
 
+let getTokenFn: null | (() => Promise<string | null>) = null;
+
+// Setter to inject Clerk token function
+export const setAuthTokenGetter = (fn: () => Promise<string | null>) => {
+  getTokenFn = fn;
+};
+
 const apiClient = axios.create({
   baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
   withCredentials: true,
 });
 
-// Default headers - don't set Content-Type globally so it can be overridden for FormData
+// Default headers
 apiClient.defaults.headers.common["Content-Type"] = "application/json";
 
-// Intercept requests to handle FormData correctly
-apiClient.interceptors.request.use((config) => {
+// Request interceptor
+apiClient.interceptors.request.use(async (config) => {
+  // Handle FormData
   if (config.data instanceof FormData) {
     config.headers["Content-Type"] = "multipart/form-data";
   }
+
+  // ✅ Attach token ONLY for /admin routes
+  if (config.url?.startsWith("/admin") && getTokenFn) {
+    const token = await getTokenFn();
+
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+  }
+
   return config;
 });
 
