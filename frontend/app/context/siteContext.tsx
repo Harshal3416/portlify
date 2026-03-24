@@ -29,7 +29,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
       }
     };
     loadDetails();
-  }, []);
+  }, [tenantid]);
 
   return (
     <SiteContext.Provider value={siteDetails}>

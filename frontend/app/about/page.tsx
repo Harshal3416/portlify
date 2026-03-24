@@ -45,47 +45,64 @@ export default function About() {
     }
   }
 
-  return (
-    <>
-      <div className="bg-primary/5 py-4">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          {sitelogourl && 
-          <div className="flex justify-center mb-6">
+const hasAboutData = ownername || sitedescription;
+
+return (
+  <>
+    {/* Hero Section */}
+    <div className="bg-primary/5 py-6">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+        
+        {sitelogourl && (
+          <div className="flex justify-center mb-4">
             {renderLogo()}
           </div>
-          }
-          {sitetitle && 
-          <h1 className="text-4xl md:text-5xl font-bold text-center" data-testid="text-about-title">
+        )}
+
+        {sitetitle && (
+          <h1
+            className="text-3xl md:text-5xl font-bold"
+            data-testid="text-about-title"
+          >
             Welcome to {sitetitle}
           </h1>
-          }
-        </div>
+        )}
       </div>
+    </div>
 
-      {(ownername || sitedescription) &&
-        <div className="w-[80%] mx-auto border-1 border-gray-300 rounded-md my-2">
-          <div className="flex flex-row justify-between p-4" onClick={() => setOpen(!open)}>
-            <span>
-              About Us
-            </span>
-            <span>
-              {open ? <FaArrowUp /> : <FaArrowDown />}
-            </span>
-          </div>
-          {open && (
-            <div className="flex flex-col items-center justify-between border-t border-gray-300 p-2">
-              <div className="prose prose-lg max-w-none">
-                <div className="text-muted-foreground leading-relaxed p-5">
-                  <span className="text-4xl md:text-2xl font-bold text-center">{ownername}</span>
-                  {/* <span>Proprietor</span> */}
-                  <p>
-                    {sitedescription}
-                  </p>
-                </div>
-              </div>
-            </div>)}
+    {/* About Section */}
+    {hasAboutData && (
+      <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-4 overflow-hidden">
+        
+        {/* Header */}
+        <div
+          className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+          onClick={() => setOpen(!open)}
+        >
+          <span className="font-medium text-lg">About Us</span>
+          {open ? <FaArrowUp /> : <FaArrowDown />}
         </div>
-      }
-    </>
-  );
+
+        {/* Content */}
+        {open && (
+          <div className="border-t border-gray-200 p-3 space-y-3">
+            
+            {ownername && (
+              <h2 className="text-xl md:text-2xl font-semibold">
+                {ownername}
+              </h2>
+            )}
+
+            {sitedescription && (
+              <p className="text-sm md:text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
+                {sitedescription}
+              </p>
+            )}
+
+          </div>
+        )}
+      </div>
+    )}
+  </>
+);
 }

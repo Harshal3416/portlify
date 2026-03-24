@@ -30,50 +30,54 @@ export default function OpeningHours() {
     }
   }, [siteDetails]);
 
-  return (
-  (monday || tuesday || wednesday || thursday || friday || saturday || sunday) && (
-    <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-2">
-      <div
-        className="flex flex-row justify-between p-4 cursor-pointer"
-        onClick={() => setOpen(!open)}
-      >
-        <span>Opening Hours</span>
-        <span>{open ? <FaArrowUp /> : <FaArrowDown />}</span>
-      </div>
+const openingHours = [
+  { label: "Monday", value: monday },
+  { label: "Tuesday", value: tuesday },
+  { label: "Wednesday", value: wednesday },
+  { label: "Thursday", value: thursday },
+  { label: "Friday", value: friday },
+  { label: "Saturday", value: saturday },
+  { label: "Sunday", value: sunday },
+];
 
-      {open && (
-        <div className="flex flex-col justify-between border-t border-gray-300 p-2">
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Monday:</span>
-            <span>{monday}</span>
-          </p>
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Tuesday:</span>
-            <span>{tuesday}</span>
-          </p>
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Wednesday:</span>
-            <span>{wednesday}</span>
-          </p>
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Thursday:</span>
-            <span>{thursday}</span>
-          </p>
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Friday:</span>
-            <span>{friday}</span>
-          </p>
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Saturday:</span>
-            <span>{saturday}</span>
-          </p>
-          <p className="text-lg mt-2 flex flex-row justify-between w-[70%]">
-            <span>Sunday:</span>
-            <span>{sunday}</span>
-          </p>
-        </div>
-      )}
+const hasOpeningHours = openingHours.some(day => day.value);
+
+if (!hasOpeningHours) return null;
+
+return (
+  <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-4 overflow-hidden">
+    
+    {/* Header */}
+    <div
+      className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+      onClick={() => setOpen(!open)}
+    >
+      <span className="font-medium text-lg">Opening Hours</span>
+      {open ? <FaArrowUp /> : <FaArrowDown />}
     </div>
-  )
+
+    {/* Content */}
+    {open && (
+      <div className="border-t border-gray-200 p-4 grid gap-3 grid-cols-3 sm:grid-cols-3">
+        
+        {openingHours
+          .filter(day => day.value)
+          .map((day) => (
+            <div
+              key={day.label}
+              className="flex justify-between text-sm md:text-base"
+            >
+              <span className="font-medium text-gray-700">
+                {day.label}
+              </span>
+              <span className="text-gray-600">
+                {day.value}
+              </span>
+            </div>
+          ))}
+      
+      </div>
+    )}
+  </div>
 );
 }

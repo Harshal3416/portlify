@@ -67,59 +67,124 @@ export default function Contact() {
     window.open(url, "_blank");
   }
 
-  // (gmailId || phoneNumber || alternatePhoneNumber || address || instagramURL || googleURL || justDialLink) 
+  const hasContactData =
+  gmailId ||
+  phoneNumber ||
+  alternatePhoneNumber ||
+  address ||
+  instagramURL ||
+  googleURL ||
+  justDialLink;
 
-  return (
-    (gmailId || phoneNumber || alternatePhoneNumber || address || instagramURL || googleURL || justDialLink) && (
-      <div className="w-[80%] mx-auto border-1 border-gray-300 rounded-md my-2">
-        {(gmailId || phoneNumber || alternatePhoneNumber || address || instagramURL || googleURL || justDialLink) &&
-          <div className="flex flex-row justify-between p-4" onClick={() => setOpen(!open)}>
-            <span>
-              Contact Details
-            </span>
-            <span>
-              {open ? <FaArrowUp /> : <FaArrowDown />}
-            </span>
+if (!hasContactData) return null;
+
+return (
+  <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-2">
+    {/* Header */}
+    <div
+          className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+      onClick={() => setOpen(!open)}
+    >
+      <span className="font-medium text-lg">Contact Details</span>
+      {open ? <FaArrowUp /> : <FaArrowDown />}
+    </div>
+
+    {/* Content */}
+    {open && (
+      <div className="border-t border-gray-200 p-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
+        
+        {/* Email */}
+        {gmailId && (
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={openGmail}
+          >
+            <img src="/gmail.jpg" alt="Email" className="w-8 h-8" />
+            <span className="text-sm break-all">{gmailId}</span>
           </div>
-        }
-        {open && (gmailId || phoneNumber || alternatePhoneNumber || address) && (
-          <div className="flex flex-col justify-between border-t border-gray-300 p-2">
-            <div className="flex flex-col justify-between my-2">
-              {gmailId &&
-                <p className="text-lg m-2" onClick={openGmail}><span><img src="/gmail.jpg" alt="Email Icon" width={800}
-                  height={500} className="w-12 h-12 mr-2 inline-block"></img></span>{gmailId}</p>
-              }
-              {(phoneNumber || alternatePhoneNumber) &&
-                <p className="text-lg m-2">
-                  <span><img src="/phone.jpg" alt="Phone Icon" width={800}
-                    height={500} className="w-12 h-12 mr-2 inline-block"></img></span>
-                  {phoneNumber &&
-                    <span onClick={() => openPhoneDialer(Number(phoneNumber))}>{phoneNumber}</span>
+        )}
+
+        {/* Phone */}
+        {(phoneNumber || alternatePhoneNumber) && (
+          <div className="flex items-center gap-3">
+            <img src="/phone.jpg" alt="Phone" className="w-8 h-8" />
+            <div className="text-sm">
+              {phoneNumber && (
+                <span
+                  className="cursor-pointer"
+                  onClick={() => openPhoneDialer(Number(phoneNumber))}
+                >
+                  {phoneNumber}
+                </span>
+              )}
+              {alternatePhoneNumber && (
+                <span
+                  className="cursor-pointer ml-2"
+                  onClick={() =>
+                    openPhoneDialer(Number(alternatePhoneNumber))
                   }
-                  {alternatePhoneNumber &&
-                    <span onClick={() => openPhoneDialer(Number(alternatePhoneNumber))}>| {alternatePhoneNumber}</span>
-                  }
-                </p>
-              }
-              {address &&
-                <p className="text-lg m-2" onClick={() => openLink(gmapLink)}><span><img src="/gmap.jpg" alt="Gmap Icon" width={800}
-                  height={500} className="w-12 h-12 mr-2 inline-block"></img></span>{address}</p>
-              }
-              <button className="bg-green-500 text-white font-bold p-2 rounded m-2" onClick={openWhatsapp}><span><img src="/whatsapp.jpg" alt="WhatsApp Icon" width={800} height={500} className="w-12 h-12 mr-2 inline-block"></img></span>Chat over WhatsApp</button>
+                >
+                  | {alternatePhoneNumber}
+                </span>
+              )}
             </div>
-            <div className="flex flex-row justify-center my-2">
-              {instagramURL &&
-                <img src="/instagram.png" onClick={() => openLink(instagramURL)} alt="Instagram" width={800} height={500} className="w-12 h-12 mr-4 inline-block"></img>
-              }
-              {googleURL &&
-                <img src="/google.png" onClick={() => openLink(googleURL)} alt="Google" width={800} height={500} className="w-12 h-12 mr-4 inline-block"></img>
-              }
-              {justDialLink &&
-                <img src="/justDial.png" onClick={() => openLink(justDialLink)} alt="Just Dial" width={4000} height={500} className="w-25 h-12 mr-2 inline-block"></img>
-              }
-            </div>
-          </div>)}
+          </div>
+        )}
+
+        {/* Address */}
+        {address && (
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => openLink(gmapLink)}
+          >
+            <img src="/gmap.jpg" alt="Map" className="w-8 h-8" />
+            <span className="text-sm">{address}</span>
+          </div>
+        )}
+
+        {/* WhatsApp */}
+        {phoneNumber && (
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={openWhatsapp}
+          >
+            <img src="/whatsapp.jpg" alt="Whatsapp" className="w-8 h-8" />
+            <span className="text-sm">Chat on WhatsApp</span>
+          </div>
+        )}
+
+        {/* Social Links */}
+        {instagramURL && (
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => openLink(instagramURL)}
+          >
+            <img src="/instagram.png" alt="Instagram" className="w-8 h-8" />
+            <span className="text-sm">Instagram</span>
+          </div>
+        )}
+
+        {googleURL && (
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => openLink(googleURL)}
+          >
+            <img src="/google.png" alt="Google" className="w-8 h-8" />
+            <span className="text-sm">Google</span>
+          </div>
+        )}
+
+        {justDialLink && (
+          <div
+            className="flex items-center gap-3 cursor-pointer"
+            onClick={() => openLink(justDialLink)}
+          >
+            <img src="/justDial.png" alt="JustDial" className="w-18 h-8" />
+            <span className="text-sm">JustDial</span>
+          </div>
+        )}
       </div>
-    )
-  );
+    )}
+  </div>
+);
 }
