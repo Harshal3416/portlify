@@ -6,10 +6,12 @@ import { useSiteDetails } from "@/app/context/siteContext";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 import { SiteDetail } from "@/app/interfaces/interface"
 import { getAdminDetails, updateAdminDetails } from "@/services/settingsService";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function Settings() {
 
     const router = useRouter();
+    const { showToast } = useToast();
 
     const siteContextDetails = useSiteDetails();
     const updateSettingsMutation = useUpdateSettings()
@@ -195,12 +197,17 @@ export default function Settings() {
     };
 
     const updateAdminDetailsFn = async () => {
-        // Save via service as JSON object
-        const data = await updateAdminDetails({ tenantid, tenantdomain });
-        console.log("Admin details saved:", data);
-        setIsAdminDetailsFromDb(true);
-    }
+        try {
+            const data = await updateAdminDetails({ tenantid, tenantdomain });
 
+            console.log("Admin details saved:", data);
+            setIsAdminDetailsFromDb(true);
+
+        } catch (error: any) {
+            console.error("Error:", error);
+            showToast(error, "danger")
+        }
+    };
     useEffect(() => {
         fetchAdminDetails()
     }, [])
@@ -253,7 +260,6 @@ export default function Settings() {
                             type="text"
                             placeholder="Create Your Own Tenant ID"
                             maxLength={10}
-                            disabled={isAdminDetailsFromDb}
                             value={tenantid}
                             onChange={(e) =>
                                 hasSpecialCharacter(e.target.value) &&
@@ -277,7 +283,6 @@ export default function Settings() {
                                 name="tenantdomain"
                                 value="Shop Owner"
                                 checked={selectedOption === "Shop Owner"}
-                                disabled={isAdminDetailsFromDb}
                                 onChange={(e) => {
                                     setSelectedOption(e.target.value);
                                     setTenantDomain(e.target.value);
@@ -294,7 +299,6 @@ export default function Settings() {
                                 name="tenantdomain"
                                 value="Broker"
                                 checked={selectedOption === "Broker"}
-                                disabled={isAdminDetailsFromDb}
                                 onChange={(e) => {
                                     setSelectedOption(e.target.value);
                                     setTenantDomain(e.target.value);
@@ -310,7 +314,6 @@ export default function Settings() {
                                 type="text"
                                 placeholder="Enter your own"
                                 value={tenantdomain}
-                                disabled={isAdminDetailsFromDb}
                                 onFocus={() => {
                                     setSelectedOption("Custom");
                                     setTenantDomain(""); // clear when focusing
@@ -321,14 +324,14 @@ export default function Settings() {
                         </div>
                     </div>
 
-                    {!isAdminDetailsFromDb &&
+                    {/* {!isAdminDetailsFromDb && */}
                         <div className="flex justify-center">
                             <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateAdminDetailsFn}
                                 disabled={!tenantdomain || !tenantid}>
                                 Save Admin Details
                             </button>
                         </div>
-                    }
+                    {/* } */}
 
 
                     {isAdminDetailsFromDb &&

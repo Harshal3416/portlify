@@ -23,7 +23,11 @@ export const getAdminDetails = async () => {
 }
 
 export const updateAdminDetails = async (data: { tenantid: string; tenantdomain: string }) => {
-  const res = await apiClient.post(`/admin-details`, data);
-  console.log("updateAdminDetails", res)
-  return res.data?.data ?? null;
-}
+  try {
+    const res = await apiClient.post(`/admin-details`, data);
+    return res.data?.data ?? null;
+  } catch (err: any) {
+    // Pass clean error message upward
+    throw err.response?.data?.error || "Something went wrong";
+  }
+};
