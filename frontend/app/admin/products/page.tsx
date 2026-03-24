@@ -1,9 +1,7 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { IoSettingsOutline } from "react-icons/io5";
-import { useAuth } from "@/app/context/AuthContext";
 import Card, { Product } from "@/app/components/ui/card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
@@ -11,10 +9,7 @@ import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { getAdminDetails } from "@/services/settingsService";
 
-// type Tab = "login" | "register";
-
 export default function Products() {
-  const { user, logout } = useAuth();
   const router = useRouter();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
@@ -55,22 +50,14 @@ export default function Products() {
     setProductId(generateProductId());
   }, []);
 
-      async function fetchAdminDetails() {
-        const data = await getAdminDetails(); 
-        console.log("products page tenand id", data, data.tenantid, data.tenantdomain);
-        setTenantid(data.tenantid)
+  async function fetchAdminDetails() {
+    try {
+      const data = await getAdminDetails();
+      setTenantid(data.tenantid)
+    } catch (err: any) {
+      showToast(err.message, "danger");
     }
-
-  // Route protection - redirect to login if not authenticated
-  // useEffect(() => {
-  //   if (!user) {
-  //     router.push("/admin/login");
-  //     return;
-  //   }
-  // }, [user, router]);
-
-  // Note: Products are now fetched via useGetProductsQuery hook above
-  // No need for manual useEffect fetch anymore
+  }
 
   const resetProductForm = () => {
     setProductName("");
@@ -134,7 +121,6 @@ export default function Products() {
       },
       {
         onSuccess: (data) => {
-          console.log("DELETED", data);
           // remove from cart
           const remainingProducts = JSON.parse(localStorage.getItem("cart") || "[]").filter((el: any) => {
             return el.productid !== productid
@@ -144,7 +130,7 @@ export default function Products() {
           localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
         onError: (err) => {
-          console.log("Error in deleting")
+          showToast(err.message, "danger");
         }
       }
     )

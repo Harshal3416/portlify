@@ -2,7 +2,6 @@ import axios from "axios";
 
 let getTokenFn: null | (() => Promise<string | null>) = null;
 
-// Setter to inject Clerk token function
 export const setAuthTokenGetter = (fn: () => Promise<string | null>) => {
   getTokenFn = fn;
 };
@@ -12,20 +11,16 @@ const apiClient = axios.create({
   withCredentials: true,
 });
 
-// Default headers
 apiClient.defaults.headers.common["Content-Type"] = "application/json";
 
 // Request interceptor
 apiClient.interceptors.request.use(async (config) => {
-  // Handle FormData
   if (config.data instanceof FormData) {
     config.headers["Content-Type"] = "multipart/form-data";
   }
 
-  // ✅ Attach token ONLY for /admin routes
   if (config.url?.startsWith("/admin") && getTokenFn) {
     const token = await getTokenFn();
-
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -33,5 +28,25 @@ apiClient.interceptors.request.use(async (config) => {
 
   return config;
 });
+
+// ✅ Response interceptor (IMPORTANT)
+apiClient.interceptors.response.use(
+  (response) => {
+    return response; // success passthrough
+  },
+  (error) => {
+    // Normalize error
+    const message =
+      error?.response?.data?.message ||
+      error?.message ||
+      "Something went wrong";
+
+    return Promise.reject({
+      message,
+      status: error?.response?.status,
+      data: error?.response?.data,
+    });
+  }
+);
 
 export default apiClient;

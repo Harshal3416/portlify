@@ -1,10 +1,31 @@
 import { useMutation } from "@tanstack/react-query";
 import { getUserSettings, updateUserSettings } from "@/services/settingsService";
+import { useToast } from "@/app/context/ToastContext";
 
-export const useSettings = (tenantid?: string) => useMutation({
-  mutationFn: () => getUserSettings(tenantid)
-});
+export const useSettings = (tenantid?: string) => {
+  const { showToast } = useToast();
 
-export const useUpdateSettings = () => useMutation({
-  mutationFn: (formData: FormData) => updateUserSettings(formData)
-});
+  return useMutation({
+    mutationFn: () => getUserSettings(tenantid),
+
+    onError: (error: any) => {
+      showToast(error?.message || "Failed to fetch settings", "danger");
+    },
+  });
+};
+
+export const useUpdateSettings = () => {
+  const { showToast } = useToast();
+
+  return useMutation({
+    mutationFn: (formData: FormData) => updateUserSettings(formData),
+
+    onSuccess: () => {
+      showToast("Settings updated successfully", "success");
+    },
+
+    onError: (error: any) => {
+      showToast(error?.message || "Failed to update settings", "danger");
+    },
+  });
+};

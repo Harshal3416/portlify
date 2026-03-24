@@ -3,7 +3,6 @@
 import { useEffect, useState } from "react";
 import Card from "../components/ui/card";
 import { LuShoppingCart } from "react-icons/lu";
-import { useAuth } from "../context/AuthContext";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';

@@ -6,7 +6,6 @@ const cors = require("cors");
 // const corsMiddleware = require('./middleware/cors')
 const { uploadsDir } = require('./middleware/upload')
 
-const authRoutes = require('./routes/auth')
 const productRoutes = require('./routes/products')
 const siteDetailsRoutes = require('./routes/siteDetails')
 const adminDetailsRoutes = require('./routes/adminDetails')
@@ -28,7 +27,6 @@ app.use( cors({ origin: ["http://localhost:4000"], credentials: true,
 
 // Routes
 app.get('/', (req, res) => res.send('Enquiry App backend'))
-app.use('/api/auth', authRoutes)
 app.use('/api/products', productRoutes)
 app.use('/api/site-details', siteDetailsRoutes)
 app.use('/api/admin-details', adminDetailsRoutes)

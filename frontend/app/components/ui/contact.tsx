@@ -3,7 +3,6 @@
 import { useSiteDetails } from "@/app/context/siteContext";
 import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { useAuth } from "@/app/context/AuthContext";
 import { useSearchParams } from "next/navigation";
 
 export default function Contact() {

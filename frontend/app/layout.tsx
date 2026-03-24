@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { AuthProvider } from "./context/AuthContext";
 import { FooterComponent } from "./components/ui/footercomponent";
 import QueryProvider from "@/providers/QueryProvider";
 import { SiteProvider } from "./context/siteContext";
@@ -36,7 +35,6 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased pb-40`}
       >
         {/* auth provider covers the entire app */}
-        <AuthProvider>
           <SiteProvider>
             <QueryProvider>
               <ToastProvider>
@@ -53,7 +51,6 @@ export default function RootLayout({
             </QueryProvider>
             <FooterComponent></FooterComponent>
           </SiteProvider>
-        </AuthProvider>
       </body>
     </html>
   );

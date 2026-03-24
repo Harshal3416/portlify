@@ -198,13 +198,11 @@ export default function Settings() {
 
     const updateAdminDetailsFn = async () => {
         try {
-            const data = await updateAdminDetails({ tenantid, tenantdomain });
-
-            console.log("Admin details saved:", data);
+            await updateAdminDetails({ tenantid, tenantdomain });
+            showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
 
         } catch (error: any) {
-            console.error("Error:", error);
             showToast(error, "danger")
         }
     };
@@ -213,11 +211,14 @@ export default function Settings() {
     }, [])
 
     async function fetchAdminDetails() {
-        const data = await getAdminDetails(); 
-        console.log("fetchAdminDetails", data, data.tenantid, data.tenantdomain);
-        setTenantid(data.tenantid)
-        setTenantDomain(data.tenantdomain)
-        setIsAdminDetailsFromDb(true)
+        try {
+            const data = await getAdminDetails();
+            setTenantid(data.tenantid)
+            setTenantDomain(data.tenantdomain)
+            setIsAdminDetailsFromDb(true)
+        } catch (err: any) {
+            showToast(err.message, "danger");
+        }
     }
 
     const hasSpecialCharacter = (value: string) => {
