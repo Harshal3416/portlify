@@ -127,7 +127,7 @@ export default function ProductList() {
         <div>
             <div className="gallery-header">
                 <span className="section-title">Our Products</span>
-                          <button className="cart-btn">
+                          <button className="cart-btn" onClick={openCart}>
             <span>🛒</span> Cart <span className="cart-badge">{cartCount}</span>
           </button>
                 {/* <span className="section-count">{cartCount} item</span> */}
@@ -151,6 +151,63 @@ export default function ProductList() {
                 ))}
             </div>
             {/* <ProductList search={search} /> */}
+            {isCartOpen && cartItems && cartItems.length > 0 && (
+                <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
+                    <Modal.Header closeButton>
+                        <Modal.Title>Cart</Modal.Title>
+                    </Modal.Header>
+                    <Modal.Body>
+                        {cartItems.map((item: CartData, index) => {
+                            return (
+                                <div key={index} className="flex flex-row items-center border-1 border-gray-200 p-4">
+                                    <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
+                                    <div className="flex items-center space-x-2">
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'add')}
+                                            className="px-3 py-1 rounded-md hover:text-green-600"
+                                        >
+                                            <IoMdAddCircleOutline />
+                                        </button>
+
+                                        <span className="px-4 py-1 mr-0 border border-gray-300 rounded-md bg-white">
+                                            {item.count}
+                                        </span>
+
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'remove')}
+                                            disabled={item.count === 1}
+                                            className="px-3 py-1 rounded-md hover:text-red-600"
+                                        >
+                                            <IoRemoveCircleOutline />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => handleItemCount(item.productid, 'delete')}
+                                            className="py-1 rounded-md hover:text-red-600"
+                                        >
+                                            <MdDeleteOutline />
+                                        </button>
+                                    </div>
+
+                                </div>
+                            )
+                        })}
+                    </Modal.Body>
+                    <Modal.Footer>
+                        <button className="btn-enquire" onClick={() => setCartOpen(false)}>
+                            Save and Close
+                        </button>
+                        <button className="btn-add" onClick={() => {
+                            setCartOpen(false);
+                            contactOverWhatsapp();
+                        }}>
+                            Buy Now
+                        </button>
+                    </Modal.Footer>
+                </Modal>
+            )}
         </div>
         // <div className="flex flex-col my-10 border-t-2 border-gray-300 m-2 px-4 w-[80%] mx-auto">
         //     <header className="flex flex-row justify-between items-center my-4">
@@ -206,63 +263,7 @@ export default function ProductList() {
         //         <p>No products available.</p>
         //     )}
 
-        //     {isCartOpen && cartItems && cartItems.length > 0 && (
-        //         <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
-        //             <Modal.Header closeButton>
-        //                 <Modal.Title>Cart</Modal.Title>
-        //             </Modal.Header>
-        //             <Modal.Body>
-        //                 {cartItems.map((item: CartData, index) => {
-        //                     return (
-        //                         <div key={index} className="flex flex-row items-center border-1 border-gray-200 p-4">
-        //                             <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
-        //                             <div className="flex items-center space-x-2">
-        //                                 <button
-        //                                     type="button"
-        //                                     onClick={() => handleItemCount(item.productid, 'add')}
-        //                                     className="px-3 py-1 rounded-md hover:text-green-600"
-        //                                 >
-        //                                     <IoMdAddCircleOutline />
-        //                                 </button>
-
-        //                                 <span className="px-4 py-1 mr-0 border border-gray-300 rounded-md bg-white">
-        //                                     {item.count}
-        //                                 </span>
-
-        //                                 <button
-        //                                     type="button"
-        //                                     onClick={() => handleItemCount(item.productid, 'remove')}
-        //                                     disabled={item.count === 1}
-        //                                     className="px-3 py-1 rounded-md hover:text-red-600"
-        //                                 >
-        //                                     <IoRemoveCircleOutline />
-        //                                 </button>
-        //                                 <button
-        //                                     type="button"
-        //                                     onClick={() => handleItemCount(item.productid, 'delete')}
-        //                                     className="py-1 rounded-md hover:text-red-600"
-        //                                 >
-        //                                     <MdDeleteOutline />
-        //                                 </button>
-        //                             </div>
-
-        //                         </div>
-        //                     )
-        //                 })}
-        //             </Modal.Body>
-        //             <Modal.Footer>
-        //                 <Button variant="secondary" onClick={() => setCartOpen(false)}>
-        //                     Save and Close
-        //                 </Button>
-        //                 <Button variant="danger" onClick={() => {
-        //                     setCartOpen(false);
-        //                     contactOverWhatsapp();
-        //                 }}>
-        //                     Buy Now
-        //                 </Button>
-        //             </Modal.Footer>
-        //         </Modal>
-        //     )}
+            
         // </div>
     );
 }

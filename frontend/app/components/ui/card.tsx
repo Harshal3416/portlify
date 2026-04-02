@@ -89,7 +89,7 @@ export default function Card({
             productid: product.productid,
             name: product.name,
             image: product.highlightimage,
-            count: 0
+            count: 1
         });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)

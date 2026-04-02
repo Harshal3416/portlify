@@ -56,7 +56,7 @@ if (!hasOpeningHours) return null;
 return (
       <div className="card">
       <div className="custom-card-header">
-        <div className="card-title"><div className="card-title-icon">🕐</div>Opening Hours</div>
+        <div className="card-title mb-0"><div className="card-title-icon">🕐</div>Opening Hours</div>
         {/* <span className="open-badge"><span className="open-dot"></span> Open Now</span> */}
       </div>
       {/* style="padding:8px 24px 16px;" */}

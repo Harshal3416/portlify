@@ -532,7 +532,7 @@ main {
   padding: 10px 0;
   border-bottom: 1px solid var(--border);
 }
-.hour-row:nth-last-child(-n+2) { border-bottom: none; }
+/* .hour-row:nth-last-child(-n+1) { border-bottom: none; } */
 .day-name {
   font-size: 13px;
   font-weight: 500;

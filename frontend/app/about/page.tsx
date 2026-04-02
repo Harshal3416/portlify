@@ -50,7 +50,7 @@ const hasAboutData = ownername || sitedescription;
 return (
   <div className="card">
       <div className="custom-card-header">
-        <div className="card-title"><div className="card-title-icon">👤</div>About Us</div>
+        <div className="card-title mb-0"><div className="card-title-icon">👤</div>About Us</div>
       </div>
       <div className="card-body">
         <div className="owner-row">
