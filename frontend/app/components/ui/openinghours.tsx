@@ -17,6 +17,7 @@ export default function OpeningHours() {
   const [friday, setFridayTime] = useState('');
   const [saturday, setSaturdayTime] = useState('');
   const [sunday, setSundayTime] = useState('');
+  const [today, setToday] = useState('monday')
 
   useEffect(() => {
     if (siteDetails) {
@@ -28,6 +29,14 @@ export default function OpeningHours() {
       setSaturdayTime(siteDetails?.saturday || '');
       setSundayTime(siteDetails?.sunday || '');
     }
+
+    // const today = new Date();
+    // const day = String(today.getDate()).padStart(2, '0'); // Pads with 0 if single digit
+    const today = new Date();
+    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+    setToday(dayName)
+    console.log("TODAY", dayName)
+
   }, [siteDetails]);
 
 const openingHours = [
@@ -45,39 +54,21 @@ const hasOpeningHours = openingHours.some(day => day.value);
 if (!hasOpeningHours) return null;
 
 return (
-  <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-4 overflow-hidden">
-    
-    {/* Header */}
-    <div
-      className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-      onClick={() => setOpen(!open)}
-    >
-      <span className="font-medium text-lg">Opening Hours</span>
-      {open ? <FaArrowUp /> : <FaArrowDown />}
-    </div>
-
-    {/* Content */}
-    {open && (
-      <div className="border-t border-gray-200 p-4 grid gap-3 grid-cols-3 sm:grid-cols-3">
-        
-        {openingHours
-          .filter(day => day.value)
-          .map((day) => (
-            <div
-              key={day.label}
-              className="flex justify-between text-sm md:text-base"
-            >
-              <span className="font-medium text-gray-700">
-                {day.label}
-              </span>
-              <span className="text-gray-600">
-                {day.value}
-              </span>
-            </div>
-          ))}
-      
+      <div className="card">
+      <div className="custom-card-header">
+        <div className="card-title"><div className="card-title-icon">🕐</div>Opening Hours</div>
+        {/* <span className="open-badge"><span className="open-dot"></span> Open Now</span> */}
       </div>
-    )}
-  </div>
+      {/* style="padding:8px 24px 16px;" */}
+      <div className="card-body" >
+        <div className="hour-row"><span className={`day-name ${today === 'Monday' ? 'today' : ''}`}>Monday {`${today === 'Monday' ? '← Today' : ''}`}</span><span className="day-time">{monday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Tuesday' ? 'today' : ''}`}>Tuesday {`${today === 'Tuesday' ? '← Today' : ''}`}</span><span className="day-time">{tuesday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Wednesday' ? 'today' : ''}`}>Wednesday {`${today === 'Wednesday' ? '← Today' : ''}`}</span><span className="day-time">{wednesday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Thursday' ? 'today' : ''}`}>Thursday {`${today === 'Thursday' ? '← Today' : ''}`}</span><span className="day-time">{thursday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Friday' ? 'today' : ''}`}>Friday {`${today === 'Friday' ? '← Today' : ''}`}</span><span className="day-time">{friday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Saturday' ? 'today' : ''}`}>Saturday {`${today === 'Saturday' ? '← Today' : ''}`}</span><span className="day-time">{saturday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Sunday' ? 'today' : ''}`}>Sunday {`${today === 'Sunday' ? '← Today' : ''}`}</span><span className="day-time">{sunday}</span></div>
+      </div>
+    </div>
 );
 }

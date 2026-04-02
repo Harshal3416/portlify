@@ -48,61 +48,73 @@ export default function About() {
 const hasAboutData = ownername || sitedescription;
 
 return (
-  <>
-    {/* Hero Section */}
-    <div className="bg-primary/5 py-6">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-        
-        {sitelogourl && (
-          <div className="flex justify-center mb-4">
-            {renderLogo()}
-          </div>
-        )}
-
-        {sitetitle && (
-          <h1
-            className="text-3xl md:text-5xl font-bold"
-            data-testid="text-about-title"
-          >
-            Welcome to {sitetitle}
-          </h1>
-        )}
+  <div className="card">
+      <div className="custom-card-header">
+        <div className="card-title"><div className="card-title-icon">👤</div>About Us</div>
+      </div>
+      <div className="card-body">
+        <div className="owner-row">
+          <div className="owner-avatar">{ownername.charAt(0)}</div>
+          <div><div className="owner-name">{ownername}</div><div className="owner-role">Owner & Proprietor</div></div>
+        </div>
+        <p className="about-text">{sitedescription}</p>
       </div>
     </div>
-
-    {/* About Section */}
-    {hasAboutData && (
-      <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-4 overflow-hidden">
+  // <>
+  //   {/* Hero Section */}
+  //   <div className="bg-primary/5 py-6">
+  //     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         
-        {/* Header */}
-        <div
-          className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-          onClick={() => setOpen(!open)}
-        >
-          <span className="font-medium text-lg">About Us</span>
-          {open ? <FaArrowUp /> : <FaArrowDown />}
-        </div>
+  //       {sitelogourl && (
+  //         <div className="flex justify-center mb-4">
+  //           {renderLogo()}
+  //         </div>
+  //       )}
 
-        {/* Content */}
-        {open && (
-          <div className="border-t border-gray-200 p-3 space-y-3">
+  //       {sitetitle && (
+  //         <h1
+  //           className="text-3xl md:text-5xl font-bold"
+  //           data-testid="text-about-title"
+  //         >
+  //           Welcome to {sitetitle}
+  //         </h1>
+  //       )}
+  //     </div>
+  //   </div>
+
+  //   {/* About Section */}
+  //   {hasAboutData && (
+  //     <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-4 overflow-hidden">
+        
+  //       {/* Header */}
+  //       <div
+  //         className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
+  //         onClick={() => setOpen(!open)}
+  //       >
+  //         <span className="font-medium text-lg">About Us</span>
+  //         {open ? <FaArrowUp /> : <FaArrowDown />}
+  //       </div>
+
+  //       {/* Content */}
+  //       {open && (
+  //         <div className="border-t border-gray-200 p-3 space-y-3">
             
-            {ownername && (
-              <h2 className="text-xl md:text-2xl font-semibold">
-                {ownername}
-              </h2>
-            )}
+  //           {ownername && (
+  //             <h2 className="text-xl md:text-2xl font-semibold">
+  //               {ownername}
+  //             </h2>
+  //           )}
 
-            {sitedescription && (
-              <p className="text-sm md:text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
-                {sitedescription}
-              </p>
-            )}
+  //           {sitedescription && (
+  //             <p className="text-sm md:text-base text-gray-600 leading-relaxed max-w-3xl mx-auto">
+  //               {sitedescription}
+  //             </p>
+  //           )}
 
-          </div>
-        )}
-      </div>
-    )}
-  </>
+  //         </div>
+  //       )}
+  //     </div>
+  //   )}
+  // </>
 );
 }

@@ -113,7 +113,25 @@ export default function Card({
     }
 
     return (
-        <span className="border border-gray-300 rounded-md pb-0 hover:shadow-lg transition-shadow duration-300 flex flex-col h-full">
+        <div className="product-card">
+            <div className="product-img">
+                {renderImage(product.highlightimage, false)}<span className="product-badge">{availableInCart ? 'In Cart' : 'In Stock'}</span></div>
+            <div className="product-info">
+                <div className="product-name">{product.name || "-"}</div>
+                <div className="product-id">ID: {product.productid || "-"}</div>
+                <div className="product-desc">{product.description || "-"}</div>
+                <div className="product-actions">
+                    <button className="btn-enquire" onClick={openWhatsappForProduct}>💬 Enquire</button>
+                    {availableInCart ?
+                    <button className="btn-remove" onClick={removeFromCart}>🗑 Remove</button> :
+                    <button className="btn-add" onClick={addToCart}>🛒 Add</button>
+                    }
+                </div>
+            </div>
+        </div>
+    );
+}
+{/* <div className="product-card">
             <div className="p-2 flex-1 flex flex-col" onClick={() => setShowProductDetails(true)}>
                 <h4 className="text-xl font-bold mb-1">{product.name || "-"}</h4>
                 <span className="inline-block text-gray-600 bg-gray-200 text-xs p-2 rounded-full mb-2">
@@ -165,6 +183,4 @@ export default function Card({
                     </Modal.Footer>
                 </Modal>
             )}
-        </span>
-    );
-}
+        </div> */}
