@@ -196,7 +196,7 @@ export default function Products() {
                   setAddProductModal(true);
                   resetProductForm()
                   console.log("addProductsModal", addProductsModal)
-                }}>＋ Add New Product</button>
+                }}>+ Add New Product</button>
   </div>
 
   {/* <!-- Stats --> */}

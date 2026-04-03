@@ -121,11 +121,20 @@ export default function Card({
                 <div className="product-id">ID: {product.productid || "-"}</div>
                 <div className="product-desc">{product.description || "-"}</div>
                 <div className="product-actions">
-                    <button className="btn-enquire" onClick={openWhatsappForProduct}>💬 Enquire</button>
-                    {availableInCart ?
-                    <button className="btn-remove" onClick={removeFromCart}>🗑 Remove</button> :
-                    <button className="btn-add" onClick={addToCart}>🛒 Add</button>
-                    }
+                    {canEdit ? (
+                        <>
+                            <button className="btn-enquire" onClick={() => onEdit && onEdit(product)}>💬 Edit</button>
+                            <button className="btn-remove" onClick={() => onDelete && onDelete(product.productid)}>🗑 Delete</button>
+                        </>
+                    ) : (
+                        <>
+                            <button className="btn-enquire" onClick={openWhatsappForProduct}>💬 Enquire</button>
+                            {availableInCart ?
+                                <button className="btn-remove" onClick={removeFromCart}>🗑 Remove</button> :
+                                <button className="btn-add" onClick={addToCart}>🛒 Add</button>
+                            }
+                        </>
+                    )}
                 </div>
             </div>
         </div>
