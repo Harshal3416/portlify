@@ -20,8 +20,8 @@ export function Hero() {
         <div className="hero-stats">
           {stats.map((stat, i) => (
             <div key={i} className="stat">
-              <div className="stat-num">{stat.num}</div>
-              <div className="stat-label">{stat.label}</div>
+              <div className="stat-num-hero">{stat.num}</div>
+              <div className="stat-label-hero">{stat.label}</div>
             </div>
           ))}
         </div>

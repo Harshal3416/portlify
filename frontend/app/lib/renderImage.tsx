@@ -1,5 +1,5 @@
     export const renderImage = (image: any, forCart: boolean) => {
-        if (!image) return null;
+        if (!image) return '🖼️ ';
 
         const baseProps = {
             alt: "Product image",

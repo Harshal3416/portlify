@@ -26,20 +26,15 @@ export function Header() {
         <div className="logo">
           <div className="logo-icon">🔩</div>
           <div className="logo-text">
-            <h1>{siteDetails?.sitetitle || 'Raj Wholesale'}</h1>
+            <h1>{siteDetails?.sitetitle || 'Raj Wholesale'}<span className="admin-badge">Admin</span></h1>
             <span>Stainless Steel Shop</span>
           </div>
         </div>
-        {/* <div className="header-actions">
-          {(siteDetails?.contactphone || siteDetails?.alternatecontactphone) &&
-          <button className="whatsapp-btn" onClick={openWhatsapp}>
-            <span>💬</span> WhatsApp
-          </button>
-          }
-          <button className="cart-btn">
-            <span>🛒</span> Cart <span className="cart-badge">{cartCount}</span>
-          </button>
-        </div> */}
+    <div className="nav-actions">
+      <button className="nav-btn ghost">⚙️ Site Settings</button>
+      <button className="nav-btn ghost">🏪 Customer Portal</button>
+      <div className="avatar">H</div>
+    </div>
       </div>
     </header>
   );

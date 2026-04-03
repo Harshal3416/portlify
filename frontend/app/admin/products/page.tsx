@@ -8,6 +8,7 @@ import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { getAdminDetails } from "@/services/settingsService";
+import { renderImage } from "@/app/lib/renderImage";
 
 export default function Products() {
   const router = useRouter();
@@ -151,7 +152,7 @@ export default function Products() {
   return (
     <div className="m-4 w-[80%] mx-auto">
 
-      <header className="flex flex-row justify-between items-center my-4">
+      {/* <header className="flex flex-row justify-between items-center my-4">
         <div className="text-2xl m-2">Products</div>
         <div className="flex flex-row justify-end my-4">
           {tenantid &&
@@ -184,8 +185,27 @@ export default function Products() {
             onClick={() => siteSettings()}> Site Settings
           </button>
         </div>
-      </header>
-      
+      </header> */}
+      <div className="page-header">
+    <div>
+      <div className="page-title">Products</div>
+      <div className="page-subtitle">Manage your product catalog</div>
+    </div>
+    <button className="add-btn"
+    onClick={() => {
+                  setAddProductModal(true);
+                  resetProductForm()
+                  console.log("addProductsModal", addProductsModal)
+                }}>＋ Add New Product</button>
+  </div>
+
+  {/* <!-- Stats --> */}
+  <div className="stats-row">
+    <div className="stat-card">
+      <div className="stat-icon blue">📦</div>
+      <div><div className="stat-num">2</div><div className="stat-label">Total Products</div></div>
+    </div>
+  </div>
 
       {submitError && (
         <p className="text-red-600 mb-2 text-sm max-w-md">
@@ -218,9 +238,48 @@ export default function Products() {
 
       {addProductsModal &&
         <Modal show={addProductsModal} centered>
-          <Modal.Header><Modal.Title>{editingProductId ? "Edit product" : "Add a product"}</Modal.Title></Modal.Header>
+          <Modal.Header>
+            <Modal.Title>{editingProductId ? "Edit product" : "Add a product"}
+            </Modal.Title>
+            <button className="modal-close" onClick={() => {
+                  resetProductForm
+                  setAddProductModal(false);
+                }
+                }>✕</button>
+          </Modal.Header>
           <Modal.Body>
-              <div className="rounded-md p-4 flex flex-col h-full w-full">
+            <div className="field-group">
+              <label className="field-label">Product Name <span className="text-red-500">*</span></label>
+              <input className="field-input" type="text" id="productName" placeholder="e.g. Prestige Pressure Cooker" value={productName}
+                onChange={(e) => setProductName(e.target.value)} />
+            </div>
+            <div className="field-group">
+              <label className="field-label">Product ID</label>
+              <input className="field-input" type="text" value={productid} disabled />
+              <span className="field-hint">Auto-generated — cannot be changed</span>
+            </div>
+            <div className="field-group">
+              <label className="field-label">Description <span className="text-red-500">*</span></label>
+              <textarea className="field-input" id="productDesc" placeholder="Describe the product..." value={description}
+                onChange={(e) => setDescription(e.target.value)}></textarea>
+              <div className="char-count" id="charCount">18/150 characters</div>
+            </div>
+            <div className="field-group">
+              <label className="field-label">Product Image</label>
+              <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
+                {/* If image is selected, use renderImage method which will render the image or else show the default image 🖼️ */}
+                <div className="upload-area-icon">{renderImage(highlightimage, true)}</div>
+                <p>Click to upload or drag & drop</p>
+                <span>PNG, JPG, WEBP · Max 5MB</span>
+                <input type="file" id="imgUpload" className="hidden"
+                  ref={fileInputRef} name="highlightimage"
+                  accept="image/*"
+                  onChange={(e) =>
+                    setHighlightImage(e.target.files?.[0] || null)
+                  } />
+              </div>
+            </div>
+            {/* <div className="rounded-md p-4 flex flex-col h-full w-full">
                 <input
                   className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
                   name="Product Name"
@@ -266,10 +325,24 @@ export default function Products() {
                     setHighlightImage(e.target.files?.[0] || null)
                   }
                 />
-              </div>
+              </div> */}
           </Modal.Body>
           <Modal.Footer>
-            <div className="flex gap-2 mt-3">
+            {/* <div className="modal-footer"> */}
+              <button className="btn-cancel" onClick={() => {
+                resetProductForm
+                setAddProductModal(false);
+              }
+              }>Cancel</button>
+              <button className="btn-save" onClick={handleSubmitProduct} disabled={
+                submitting ||
+                !productid ||
+                !productName ||
+                (!editingProductId && !highlightimage)
+              }
+              >💾 Save Changes</button>
+            {/* </div> */}
+            {/* <div className="flex gap-2 mt-3">
               <button
                 className="px-4 py-2 border border-gray-400 rounded-md text-sm"
                 type="button"
@@ -297,7 +370,7 @@ export default function Products() {
 
 
 
-            </div>
+            </div> */}
           </Modal.Footer>
         </Modal>}
 
