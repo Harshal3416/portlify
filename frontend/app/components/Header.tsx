@@ -31,6 +31,7 @@ export function Header() {
           </div>
         </div>
     <div className="nav-actions">
+      <button className="nav-btn primary">📦 Products</button>
       <button className="nav-btn ghost">⚙️ Site Settings</button>
       <button className="nav-btn ghost">🏪 Customer Portal</button>
       <div className="avatar">H</div>
