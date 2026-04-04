@@ -7,7 +7,7 @@ const clerkAuth = require('../middleware/clerkAuth')
 // POST — save admin details for logged-in user
 router.post("/", clerkAuth, async (req, res) => {
   console.log(req.body);
-  const { tenantid, tenantdomain } = req.body;
+  const { tenantid, tenantdomain, shortdescription, yearsofexperience, productssold, happyclients} = req.body;
   const clerkId = req.clerkId; // injected by middleware
 
   if (!tenantid || !tenantdomain) {
@@ -18,14 +18,18 @@ router.post("/", clerkAuth, async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO admindetails (clerkid, tenantid, tenantdomain)
-   VALUES ($1, $2, $3)
+      `INSERT INTO admindetails (clerkid, tenantid, tenantdomain, shortdescription, yearsofexperience, productssold, happyclients)
+   VALUES ($1, $2, $3, $4, $5, $6, $7)
    ON CONFLICT (clerkid) DO UPDATE
    SET 
      tenantid = EXCLUDED.tenantid,
-     tenantdomain = EXCLUDED.tenantdomain
+     tenantdomain = EXCLUDED.tenantdomain,
+     shortdescription = EXCLUDED.shortdescription,
+     yearsofexperience = EXCLUDED.yearsofexperience,
+     productssold = EXCLUDED.productssold,
+     happyclients = EXCLUDED.happyclients
    RETURNING *`,
-      [clerkId, tenantid, tenantdomain],
+      [clerkId, tenantid, tenantdomain, shortdescription, yearsofexperience, productssold, happyclients],
     );
 
     return res.status(200).json({
