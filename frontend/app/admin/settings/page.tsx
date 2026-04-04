@@ -1,27 +1,15 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { useSiteDetails } from "@/app/context/siteContext";
-import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
-import { SiteDetail } from "@/app/interfaces/interface"
 import { getAdminContactDetails, getAdminDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
 import { renderImage } from "@/app/lib/renderImage";
 
 export default function Settings() {
 
-    const router = useRouter();
     const { showToast } = useToast();
 
-    const siteContextDetails = useSiteDetails();
-    const updateSettingsMutation = useUpdateSettings()
-    
-    const [localDetails, setLocalDetails] = useState<SiteDetail | null>(null)
-    const [error, setError] = useState('')
-    
     const [tenantid, setTenantid] = useState('');
-    const settingsMutation = useSettings(tenantid)
 
     const [tenantdomain, setTenantDomain] = useState("Shop owner");
 
@@ -39,7 +27,7 @@ export default function Settings() {
     const [sitedescription, setSiteDescription] = useState("");
 
     const fileInputRef = useRef<HTMLInputElement>(null);
-    
+
     // Admin contact details states
     const [contactemail, setContactEmail] = useState("");
     const [contactphone, setContactPhone] = useState("");
@@ -61,22 +49,7 @@ export default function Settings() {
     const [sunday, setSunday] = useState("");
 
     const [isAdminDetailsFromDb, setIsAdminDetailsFromDb] = useState(false)
-
-    // const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    //     console.log("setting value", field, e.target.value)
-    //     setLocalDetails(prev => {
-    //         if (!prev) {
-    //             const newDetails: SiteDetail = {
-    //                 sitetitle: '',
-    //                 [field]: e.target.value
-    //             } as SiteDetail;
-    //             return newDetails;
-    //         }
-    //         return { ...prev, [field]: e.target.value };
-    //     });
-    // };
-
-    // const [sitelogourl, setSitelogourl] = useState<File | null>(null);
+    
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
 
     useEffect(() => {
@@ -89,7 +62,6 @@ export default function Settings() {
 
     // Admin details Update functions
     const updateAdminDetailsFn = async () => {
-        console.log("updateAdminDetailsFn", { tenantid, tenantdomain, shoptype, shortdescription, yearsofexperience, productssold, happyclients })
         try {
             await updateAdminDetails({ tenantid, tenantdomain, shoptype, shortdescription, yearsofexperience, productssold, happyclients });
             showToast("Details saved!", "success")
@@ -131,10 +103,8 @@ export default function Settings() {
 
     // Fetch site Information
     const fetchSiteInformation = async () => {
-        // console.log("Fetching site information for tenant:", tenantid);
         try {
             const data = await getSiteInformation(tenantid);
-            console.log("Fetched site information:", data);
             setSiteTitle(data?.sitetitle || '')
             setOwnerName(data?.ownername || '')
             setSiteDescription(data?.sitedescription || '')
@@ -149,7 +119,6 @@ export default function Settings() {
 
     // Update admin contact details function
     const updateAdminContactDetailsFn = async () => {
-       console.log("updateAdminContactDetailsFn", { tenantid, contactemail, contactphone, alternatecontactphone, address })
         try {
             await updateAdminContactDetails({ tenantid, contactemail, contactphone, alternatecontactphone, address });
             showToast("Details saved!", "success")
@@ -164,7 +133,6 @@ export default function Settings() {
     const fetchAdminContactDetails = async () => {
         try {
             const data = await getAdminContactDetails(tenantid);
-            console.log("Fetched admin contact details:", data);
             setContactEmail(data?.contactemail || '');
             setContactPhone(data?.contactphone || '');
             setAlternateContactPhone(data?.alternatecontactphone || '');
@@ -176,9 +144,8 @@ export default function Settings() {
 
     // Update social links details function
     const updateAdminSocialLinksFn = async () => {
-       console.log("updateAdminSocialLinksFn", { tenantid, instagramurl, googlemapurl, justdialurl })
         try {
-            await updateAdminSocialLinks({ tenantid, instagramurl, googlemapurl, justdialurl});
+            await updateAdminSocialLinks({ tenantid, instagramurl, googlemapurl, justdialurl });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
 
@@ -191,7 +158,6 @@ export default function Settings() {
     const fetchAdminSocialLinks = async () => {
         try {
             const data = await getAdminSocialLinks(tenantid);
-            console.log("Fetched admin social links:", data);
             setInstagramUrl(data?.instagramurl || '');
             setGoogleMapUrl(data?.googlemapurl || '');
             setJustDialUrl(data?.justdialurl || '');
@@ -202,9 +168,8 @@ export default function Settings() {
 
     // Update opening hours details function
     const updateOpeningHoursFn = async () => {
-       console.log("updateOpeningHoursFn", { tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday })
         try {
-            const data = await updateOpeningHours({ tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday});
+            const data = await updateOpeningHours({ tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday });
             showToast("Details saved!", "success")
             setMonday(data?.monday || '')
             setTuesday(data?.tuesday || '');
@@ -223,7 +188,6 @@ export default function Settings() {
     const fetchOpeningHours = async () => {
         try {
             const data = await getOpeningHours(tenantid);
-            console.log("Fetched opening hours:", data);
             setMonday(data?.monday || '');
             setTuesday(data?.tuesday || '');
             setWednesday(data?.wednesday || '');
@@ -256,148 +220,10 @@ export default function Settings() {
         }
     }
 
-    // Load initial details from context or mutation
-    // useEffect(() => {
-    //     if (!tenantid) return;
-
-    //     console.log("siteContextDetails", siteContextDetails)
-    //     if (siteContextDetails) {
-    //         setLocalDetails(siteContextDetails);
-    //         // Update current logo from context
-    //         if (siteContextDetails.sitelogourl) {
-    //             const logoUrl = typeof siteContextDetails.sitelogourl === 'object' ? siteContextDetails.sitelogourl.url : siteContextDetails.sitelogourl;
-    //             setCurrentLogoUrl(logoUrl || '');
-    //         } else {
-    //             setCurrentLogoUrl('');
-    //         }
-    //     }
-    //     // Fallback to mutation
-    //     settingsMutation.mutate(undefined, {
-    //         onSuccess: (data: any) => {
-    //             console.log("RECEIVED DATA FROM MUTATION-SETTING", data);
-    //             if (data) {
-    //                 setLocalDetails(data);
-    //                 if (data.sitelogourl) {
-    //                     const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
-    //                     setCurrentLogoUrl(logoUrl || '');
-    //                 }
-    //             }
-    //         },
-    //         onError: (err) => {
-    //             console.log("MUTATION ERROR-SETTING", err)
-    //         }
-    //     });
-    // }, [tenantid, siteContextDetails]);
-
-    // const updateSettings = () => {
-
-    //     if(((localDetails?.contactphone && localDetails?.contactphone !== '' && !validatePhone(localDetails?.contactphone+'')) || 
-    //     (localDetails?.alternatecontactphone && localDetails?.alternatecontactphone !== '' && !validatePhone(localDetails?.alternatecontactphone+'')))) {
-    //         return setError("Enter a valid Phone number")
-    //     };
-
-    //     if(localDetails?.contactemail && localDetails?.contactemail !== '' && !validateEmail(localDetails?.contactemail || '')) {
-    //         return setError("Enter a valid Email")
-    //     };
-
-    //     if ((localDetails?.instagramurl && localDetails?.instagramurl !== '' && !isValidUrl(localDetails?.instagramurl || '')) ||
-    //         (localDetails?.googleurl && localDetails?.googleurl !== '' && !isValidUrl(localDetails?.googleurl || '')) ||
-    //         (localDetails?.justdialurl && localDetails?.justdialurl !== '' && !isValidUrl(localDetails?.justdialurl || ''))) {
-    //         return setError("Enter valid URL")
-    //     }
-
-    //     const file = sitelogourl;
-    //     console.log("FILE", file);
-    //     const form = new FormData();
-
-    //     // Add tenantid to form data
-    //     form.append('tenantid', tenantid);
-
-    //     form.append('sitetitle', localDetails?.sitetitle || '');
-    //     form.append('ownername', localDetails?.ownername || '');
-    //     form.append('sitedescription', localDetails?.sitedescription || '');
-    //     form.append('contactemail', localDetails?.contactemail || '');
-    //     form.append('contactphone', localDetails?.contactphone || '');
-    //     form.append('alternatecontactphone', localDetails?.alternatecontactphone || '');
-    //     form.append('address', localDetails?.address || '');
-    //     form.append('instagramurl', localDetails?.instagramurl || '');
-    //     form.append('googleurl', localDetails?.googleurl || '');
-    //     form.append('justdialurl', localDetails?.justdialurl || '');
-
-    //     // Append opening hours
-    //     form.append('monday', localDetails?.monday ?? '');
-    //     form.append('tuesday', localDetails?.tuesday ?? '');
-    //     form.append('wednesday', localDetails?.wednesday ?? '');
-    //     form.append('thursday', localDetails?.thursday ?? '');
-    //     form.append('friday', localDetails?.friday ?? '');
-    //     form.append('saturday', localDetails?.saturday ?? '');
-    //     form.append('sunday', localDetails?.sunday ?? '');
-
-    //     if (file && file instanceof File) {
-    //         form.append('sitelogourl', file);
-    //     }
-
-    //     updateSettingsMutation.mutate(form, {
-    //         onSuccess: (data) => {
-    //             console.log('Settings updated:', data);
-    //             const updatedDetails = data.data;
-    //             if (updatedDetails) {
-    //                 setLocalDetails(updatedDetails);
-    //                 // Always update logo URL from response - even if no new file uploaded
-    //                 if (updatedDetails.sitelogourl) {
-    //                     const logoUrl = typeof updatedDetails.sitelogourl === 'object' ? updatedDetails.sitelogourl.url : updatedDetails.sitelogourl;
-    //                     setCurrentLogoUrl(logoUrl || '');
-    //                 }
-    //             }
-    //             setError('')
-    //             alert("Settings saved!");
-    //             setSitelogourl(null);
-    //         },
-    //         onError: (error) => {
-    //             console.error('Error updating settings:', error);
-    //             alert("Failed to save settings");
-    //         }
-    //     });
-    // }
-
-    // Render logo preview
-    
-    // const renderLogoPreview = () => {
-    //     if (sitelogourl && sitelogourl instanceof File) {
-    //         return (
-    //             <div className="mt-2">
-    //                 <p className="text-sm text-gray-600">New logo preview:</p>
-    //                 <img
-    //                     src={URL.createObjectURL(sitelogourl)}
-    //                     alt="New logo preview"
-    //                     className="w-32 h-32 object-contain rounded-md mt-1"
-    //                 />
-    //             </div>
-    //         );
-    //     }
-
-    //     if (currentLogoUrl) {
-    //         return (
-    //             <div className="mt-2">
-    //                 <p className="text-sm text-gray-600">Current logo:</p>
-    //                 <img
-    //                     src={"http://localhost:3000" + currentLogoUrl}
-    //                     alt="Current logo"
-    //                     className="w-32 h-32 object-contain rounded-md mt-1"
-    //                 />
-    //             </div>
-    //         );
-    //     }
-
-    //     return null;
-    // };
-
-
 
     const hasSpecialCharacter = (value: string) => {
         const regex = /[^a-zA-Z0-9]/;
         const isValid = regex.test(value);
-        console.log("Validity", isValid)
         return !isValid;
     }
 
@@ -428,12 +254,12 @@ export default function Settings() {
                     <div className="settings-card-body">
                         <div className="field-group">
                             <label className="field-label">Tenant ID <span className="required">*</span></label>
-                            <input className="field-input" type="text" placeholder="No special characters" value={tenantid} 
-                            disabled={isAdminDetailsFromDb}
-                            onChange={(e) =>
-                                hasSpecialCharacter(e.target.value) &&
-                                setTenantid(e.target.value)
-                            }/>
+                            <input className="field-input" type="text" placeholder="No special characters" value={tenantid}
+                                disabled={isAdminDetailsFromDb}
+                                onChange={(e) =>
+                                    hasSpecialCharacter(e.target.value) &&
+                                    setTenantid(e.target.value)
+                                } />
                             <span className="field-hint">⚠️ Special characters are not allowed. This is your unique shop identifier.</span>
                         </div>
                         <div className="field-group">
@@ -453,29 +279,29 @@ export default function Settings() {
                         </div>
                         <div className="field-group">
                             <label className="field-label">Short Description</label>
-                            <input className="field-input" type="text" placeholder="Give a short description" value={shortdescription} onChange={(e) => setShortDescription(e.target.value)}/>
+                            <input className="field-input" type="text" placeholder="Give a short description" value={shortdescription} onChange={(e) => setShortDescription(e.target.value)} />
                             <span className="field-hint">Ex: Over two decades of supplying high-quality steel products to businesses and homes across Bangalore. Bulk pricing available.</span>
                         </div>
                         <div className="field-group">
                             <label className="field-label">Years of Experience</label>
-                            <input className="field-input" type="text" placeholder="Give your years of experience" value={yearsofexperience} onChange={(e) => setYearsOfExperience(e.target.value)}/>
+                            <input className="field-input" type="text" placeholder="Give your years of experience" value={yearsofexperience} onChange={(e) => setYearsOfExperience(e.target.value)} />
                             <span className="field-hint">Ex: 25+</span>
                         </div>
                         <div className="field-group">
                             <label className="field-label">Products Sold</label>
-                            <input className="field-input" type="text" placeholder="How many unique products did you sell?" value={productssold} onChange={(e) => setProductsSold(e.target.value)}/>
+                            <input className="field-input" type="text" placeholder="How many unique products did you sell?" value={productssold} onChange={(e) => setProductsSold(e.target.value)} />
                             <span className="field-hint">Ex: 20000+</span>
                         </div>
                         <div className="field-group">
                             <label className="field-label">Happy Clients</label>
-                            <input className="field-input" type="text" placeholder="How many satisfied customers do you have?" value={happyclients} onChange={(e) => setHappyClients(e.target.value)}/>
+                            <input className="field-input" type="text" placeholder="How many satisfied customers do you have?" value={happyclients} onChange={(e) => setHappyClients(e.target.value)} />
                             <span className="field-hint">Ex: 2000+</span>
                         </div>
                     </div>
                     <div className="save-section">
                         <button className="btn-primary" onClick={updateAdminDetailsFn}
-                            // disabled={!tenantdomain || !tenantid}
-                            >💾 Save Admin Details</button>
+                        // disabled={!tenantdomain || !tenantid}
+                        >💾 Save Admin Details</button>
                     </div>
                 </div>
 
@@ -492,11 +318,11 @@ export default function Settings() {
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Site Title <span className="required">*</span></label>
-                                <input className="field-input" type="text" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)}/>
+                                <input className="field-input" type="text" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)} />
                             </div>
                             <div className="field-group">
                                 <label className="field-label">Owner Name</label>
-                                <input className="field-input" type="text" value={ownername} onChange={(e) => setOwnerName(e.target.value)}/>
+                                <input className="field-input" type="text" value={ownername} onChange={(e) => setOwnerName(e.target.value)} />
                             </div>
                         </div>
                         <div className="field-group">
@@ -505,7 +331,7 @@ export default function Settings() {
                                 <div className="upload-zone-icon">{renderImage(sitelogourl, true)}</div>
                                 <p>Click to upload new logo</p>
                                 <span>PNG, JPG, SVG · Recommended 200×200px</span>
-                                <input ref={fileInputRef} className="hidden" type="file" id="logoInput" accept="image/*" onChange={(e) => setSitelogourl(e.target.files?.[0] || null)}/>
+                                <input ref={fileInputRef} className="hidden" type="file" id="logoInput" accept="image/*" onChange={(e) => setSitelogourl(e.target.files?.[0] || null)} />
                             </div>
                         </div>
                         <div className="field-group">
@@ -533,24 +359,24 @@ export default function Settings() {
                             <div className="field-group">
                                 <label className="field-label">Contact Email</label>
                                 <input className="field-input" type="email" placeholder="your@email.com" onChange={(e) => setContactEmail(e.target.value)}
-                                value={contactemail}/>
+                                    value={contactemail} />
                             </div>
                             <div className="field-group">
                                 <label className="field-label">Phone Number</label>
                                 <input className="field-input" type="tel" placeholder="10-digit number" onChange={(e) => setContactPhone(e.target.value)}
-                                value={contactphone}/>
+                                    value={contactphone} />
                             </div>
                         </div>
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Alternate Phone</label>
                                 <input className="field-input" type="tel" placeholder="Optional" onChange={(e) => setAlternateContactPhone(e.target.value)}
-                                value={alternatecontactphone}/>
+                                    value={alternatecontactphone} />
                             </div>
                             <div className="field-group">
                                 <label className="field-label">Address</label>
                                 <input className="field-input" type="text" placeholder="Enter your address" onChange={(e) => setAddress(e.target.value)}
-                                value={address}/>
+                                    value={address} />
                             </div>
                         </div>
                     </div>
@@ -571,15 +397,15 @@ export default function Settings() {
                     <div className="settings-card-body">
                         <div className="field-group">
                             <label className="field-label">📷 Instagram URL</label>
-                            <input className="field-input" type="url" placeholder="https://instagram.com/..." value={instagramurl} onChange={(e) => setInstagramUrl(e.target.value)}/>
+                            <input className="field-input" type="url" placeholder="https://instagram.com/..." value={instagramurl} onChange={(e) => setInstagramUrl(e.target.value)} />
                         </div>
                         <div className="field-group">
                             <label className="field-label">🔍 Google Map URL</label>
-                            <input className="field-input" type="url" placeholder="https://maps.google.com/..." value={googlemapurl} onChange={(e) => setGoogleMapUrl(e.target.value)}/>
+                            <input className="field-input" type="url" placeholder="https://maps.google.com/..." value={googlemapurl} onChange={(e) => setGoogleMapUrl(e.target.value)} />
                         </div>
                         <div className="field-group">
                             <label className="field-label">📒 Just Dial URL</label>
-                            <input className="field-input" type="url" placeholder="https://justdial.com/..." value={justdialurl} onChange={(e) => setJustDialUrl(e.target.value)}/>
+                            <input className="field-input" type="url" placeholder="https://justdial.com/..." value={justdialurl} onChange={(e) => setJustDialUrl(e.target.value)} />
                         </div>
                     </div>
                     <div className="save-section">
@@ -644,351 +470,5 @@ export default function Settings() {
 
             </div>
         </div>
-        // <>
-        //     <div className="m-4 w-[80%] mx-auto">
-        //         <header className="flex flex-col lg:flex-row justify-between items-start lg:items-start mb-8 gap-4">
-        //             <div className="text-2xl">Site Settings</div>
-        //             {isAdminDetailsFromDb &&
-        //                 <div className="flex flex-row">
-
-        //                     <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100" onClick={() => {
-        //                         router.push("/admin/products");
-        //                     }}>Products
-        //                     </button>
-
-        //                     <button className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-        //                         onClick={() => {
-        //                             router.push(`/store?tenantid=${tenantid}`);
-        //                         }}
-        //                     >Customer Portal
-        //                     </button>
-        //                 </div>
-        //             }
-        //         </header>
-
-        //         <div className="w-[60%] mx-auto">
-        //             {/* Tenant details */}
-        //             <div className="flex flex-col items-start w-full mb-4">
-        //                 <label className="text-left pr-4 font-medium">Tenant ID:<span className="text-red-700">*</span><span className="text-sm text-muted"> (Special characters are not allowed)</span></label>
-        //                 <input
-        //                     className="p-2 border border-gray-300 rounded-md w-full"
-        //                     name="tenantid"
-        //                     type="text"
-        //                     placeholder="Create Your Own Tenant ID"
-        //                     maxLength={10}
-        //                     value={tenantid}
-        //                     onChange={(e) =>
-        //                         hasSpecialCharacter(e.target.value) &&
-        //                         setTenantid(e.target.value)
-        //                     }
-        //                 />
-        //             </div>
-
-        //             <div className="flex flex-col items-start w-full mb-4">
-        //                 <label className="font-medium mb-2">
-        //                     I am a <span className="text-red-700">*</span>
-        //                     <span className="text-sm text-muted">
-        //                         {" "}About Yourself. (example: Shop Owner, Broker)
-        //                     </span>
-        //                 </label>
-
-        //                 {/* Option 1 */}
-        //                 <div className="flex items-center gap-2 mb-2">
-        //                     <input
-        //                         type="radio"
-        //                         name="tenantdomain"
-        //                         value="Shop Owner"
-        //                         checked={selectedOption === "Shop Owner"}
-        //                         onChange={(e) => {
-        //                             setSelectedOption(e.target.value);
-        //                             setTenantDomain(e.target.value);
-        //                         }}
-        //                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-        //                     />
-        //                     <span>Shop Owner</span>
-        //                 </div>
-
-        //                 {/* Option 2 */}
-        //                 <div className="flex items-center gap-2 mb-2">
-        //                     <input
-        //                         type="radio"
-        //                         name="tenantdomain"
-        //                         value="Broker"
-        //                         checked={selectedOption === "Broker"}
-        //                         onChange={(e) => {
-        //                             setSelectedOption(e.target.value);
-        //                             setTenantDomain(e.target.value);
-        //                         }}
-        //                         className="h-4 w-4 text-blue-600 border-gray-300 focus:ring-blue-500"
-        //                     />
-        //                     <span>Broker</span>
-        //                 </div>
-
-        //                 {/* Option 3: Custom input */}
-        //                 <div className="flex items-center gap-2">
-        //                     <input
-        //                         type="text"
-        //                         placeholder="Enter your own"
-        //                         value={tenantdomain}
-        //                         onFocus={() => {
-        //                             setSelectedOption("Custom");
-        //                             setTenantDomain(""); // clear when focusing
-        //                         }}
-        //                         onChange={(e) => setTenantDomain(e.target.value)}
-        //                         className="p-2 border border-gray-300 rounded-md w-full text-sm"
-        //                     />
-        //                 </div>
-        //             </div>
-
-        //             {/* {!isAdminDetailsFromDb && */}
-        //                 <div className="flex justify-center">
-        //                     <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateAdminDetailsFn}
-        //                         disabled={!tenantdomain || !tenantid}>
-        //                         Save Admin Details
-        //                     </button>
-        //                 </div>
-        //             {/* } */}
-
-
-        //             {isAdminDetailsFromDb &&
-        //                 <div>
-        //                     <hr></hr>
-        //                     {/* Site Title */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Site Title:<span className="text-red-700">*</span></label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="sitetitle"
-        //                             type="text"
-        //                             placeholder="Enter Site Title"
-        //                             maxLength={50}
-        //                             value={localDetails?.sitetitle ?? ''}
-        //                             onChange={updateField('sitetitle' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Site Logo */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Site Logo:</label>
-        //                         <div className="w-full">
-        //                             <input
-        //                                 className="p-2 border border-gray-300 rounded-md w-full"
-        //                                 name="sitelogourl"
-        //                                 type="file"
-        //                                 accept="image/*"
-        //                                 onChange={(e) => setSitelogourl(e.target.files?.[0] || null)}
-        //                             />
-        //                             {renderLogoPreview()}
-        //                         </div>
-        //                     </div>
-
-        //                     {/* Owner Name */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Owner Name:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="ownername"
-        //                             type="text"
-        //                             placeholder="Enter Owner Name"
-        //                             value={localDetails?.ownername ?? ''}
-        //                             onChange={updateField('ownername' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Site Description */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium pt-2">Site Description:</label>
-        //                         <textarea
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="sitedescription"
-        //                             placeholder="Enter Site Description"
-        //                             value={localDetails?.sitedescription ?? ''}
-        //                             onChange={updateField('sitedescription' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Contact Email */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Contact Email:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="contactemail"
-        //                             type="email"
-        //                             placeholder="Enter Contact Email"
-        //                             value={localDetails?.contactemail ?? ''}
-        //                             onChange={updateField('contactemail' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Phone Number */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Phone Number:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="contactphone"
-        //                             type="tel"
-        //                             placeholder="Enter Phone Number"
-        //                             value={localDetails?.contactphone ?? ''}
-        //                             onChange={updateField('contactphone' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Alternate Phone */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Alternate Phone:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="alternatecontactphone"
-        //                             type="tel"
-        //                             placeholder="Enter Alternate Phone Number"
-        //                             value={localDetails?.alternatecontactphone ?? ''}
-        //                             onChange={updateField('alternatecontactphone' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Address */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium pt-2">Address:</label>
-        //                         <textarea
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="address"
-        //                             placeholder="Enter Address"
-        //                             maxLength={200}
-        //                             value={localDetails?.address ?? ''}
-        //                             onChange={updateField('address' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Social Links */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Instagram URL:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="instagramurl"
-        //                             type="url"
-        //                             placeholder="Enter Instagram URL"
-        //                             value={localDetails?.instagramurl ?? ''}
-        //                             onChange={updateField('instagramurl' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Google URL:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="googleurl"
-        //                             type="url"
-        //                             placeholder="Enter Google URL"
-        //                             value={localDetails?.googleurl ?? ''}
-        //                             onChange={updateField('googleurl' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left pr-4 font-medium">Just Dial URL:</label>
-        //                         <input
-        //                             className="p-2 border border-gray-300 rounded-md w-full"
-        //                             name="justdialurl"
-        //                             type="url"
-        //                             placeholder="Enter Just Dial URL"
-        //                             value={localDetails?.justdialurl ?? ''}
-        //                             onChange={updateField('justdialurl' as keyof SiteDetail)}
-        //                         />
-        //                     </div>
-
-        //                     {/* Opening Hours */}
-        //                     <div className="flex flex-col items-start w-full mb-4">
-        //                         <label className="text-left font-medium py-2">Opening Hours:</label>
-        //                         <div className="w-full space-y-2">
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Monday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., 9:00 AM - 6:00 PM"
-        //                                     value={localDetails?.monday ?? ''}
-        //                                     onChange={updateField('monday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Tuesday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., 9:00 AM - 6:00 PM"
-        //                                     value={localDetails?.tuesday ?? ''}
-        //                                     onChange={updateField('tuesday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Wednesday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., 9:00 AM - 6:00 PM"
-        //                                     value={localDetails?.wednesday ?? ''}
-        //                                     onChange={updateField('wednesday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Thursday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., 9:00 AM - 6:00 PM"
-        //                                     value={localDetails?.thursday ?? ''}
-        //                                     onChange={updateField('thursday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Friday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., 9:00 AM - 6:00 PM"
-        //                                     value={localDetails?.friday ?? ''}
-        //                                     onChange={updateField('friday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Saturday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., 9:00 AM - 6:00 PM"
-        //                                     value={localDetails?.saturday ?? ''}
-        //                                     onChange={updateField('saturday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                             <div className="flex items-start">
-        //                                 <span className="w-24 text-sm font-medium">Sunday:</span>
-        //                                 <input
-        //                                     className="p-2 border border-gray-300 rounded-md flex-1"
-        //                                     type="text"
-        //                                     placeholder="e.g., Closed"
-        //                                     value={localDetails?.sunday ?? ''}
-        //                                     onChange={updateField('sunday' as keyof SiteDetail)}
-        //                                 />
-        //                             </div>
-        //                         </div>
-        //                     </div>
-
-        //                     {error && (
-        //                         <p className="text-red-600 mb-2 text-sm max-w-md text-left">
-        //                             {error}
-        //                         </p>
-        //                     )}
-
-        //                     <div className="flex justify-center">
-        //                         <button className="px-4 py-2 bg-black text-white rounded-md mt-3 disabled:opacity-30" onClick={updateSettings}
-        //                             disabled={!localDetails?.sitetitle || tenantid === ''}>
-        //                             Save Settings
-        //                         </button>
-        //                     </div>
-        //                 </div>
-        //             }
-        //         </div>
-        //     </div>
-        // </>
     );
 }
