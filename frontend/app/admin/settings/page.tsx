@@ -327,8 +327,8 @@ export default function Settings() {
                         </div>
                         <div className="field-group">
                             <label className="field-label">Site Logo</label>
-                            <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
-                                <div className="upload-zone-icon">{renderImage(sitelogourl, true)}</div>
+                            <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
+                                <div className="upload-area-icon">{renderImage(sitelogourl || currentLogoUrl, true)}</div>
                                 <p>Click to upload new logo</p>
                                 <span>PNG, JPG, SVG · Recommended 200×200px</span>
                                 <input ref={fileInputRef} className="hidden" type="file" id="logoInput" accept="image/*" onChange={(e) => setSitelogourl(e.target.files?.[0] || null)} />

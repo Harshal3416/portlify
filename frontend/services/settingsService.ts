@@ -29,8 +29,18 @@ export const getSiteInformation = async (tenantid?: string): Promise<SiteDetail 
   return res.data.data ?? null;
 };
 
-export const updateSiteInformation = async (data: {tenantid: string; sitetitle: string; sitelogourl: any; ownername: string; sitedescription: string; }) => {
-  const res = await apiClient.post(`/site-details/siteinformation`, data);
+export const updateSiteInformation = async (data: {tenantid: string; sitetitle: string; sitelogourl: File | null; ownername: string; sitedescription: string; }) => {
+  const formData = new FormData();
+  formData.append('tenantid', data.tenantid);
+  formData.append('sitetitle', data.sitetitle);
+  formData.append('ownername', data.ownername);
+  formData.append('sitedescription', data.sitedescription);
+
+  if (data.sitelogourl instanceof File) {
+    formData.append('sitelogourl', data.sitelogourl);
+  }
+
+  const res = await apiClient.post(`/site-details/siteinformation`, formData);
   return res.data;
 };
 
