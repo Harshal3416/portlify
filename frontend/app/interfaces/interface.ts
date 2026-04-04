@@ -8,7 +8,7 @@ export interface SiteDetail {
     alternatecontactphone?: string;
     address?: string;
     instagramurl?: string;
-    googleurl?: string;
+    googlemapurl?: string;
     justdialurl?: string;
     gmapLink?: string;
     monday?: string;

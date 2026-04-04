@@ -39,6 +39,7 @@ export default function RootLayout({
               <ClerkProvider>
                 <AuthInitializer />
                 <Header />
+                <UserButton />
                   {children}
                 <FooterComponent />
               </ClerkProvider>

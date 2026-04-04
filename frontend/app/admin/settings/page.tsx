@@ -1,12 +1,13 @@
 'use client';
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useSiteDetails } from "@/app/context/siteContext";
 import { useSettings, useUpdateSettings } from "@/hooks/useSettings";
 import { SiteDetail } from "@/app/interfaces/interface"
-import { getAdminDetails, updateAdminDetails } from "@/services/settingsService";
+import { getAdminContactDetails, getAdminDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
+import { renderImage } from "@/app/lib/renderImage";
 
 export default function Settings() {
 
@@ -21,26 +22,220 @@ export default function Settings() {
     
     const [tenantid, setTenantid] = useState('');
     const settingsMutation = useSettings(tenantid)
-    const [tenantdomain, setTenantDomain] = useState("");
-    const [selectedOption, setSelectedOption] = useState("");
+
+    const [tenantdomain, setTenantDomain] = useState("Shop owner");
+
+    // Admin details states
+    const [shoptype, setShopType] = useState("");
+    const [shortdescription, setShortDescription] = useState("");
+    const [yearsofexperience, setYearsOfExperience] = useState("");
+    const [productssold, setProductsSold] = useState("");
+    const [happyclients, setHappyClients] = useState("");
+
+    // Site Information states
+    const [sitetitle, setSiteTitle] = useState("");
+    const [sitelogourl, setSitelogourl] = useState<File | null>(null);
+    const [ownername, setOwnerName] = useState("");
+    const [sitedescription, setSiteDescription] = useState("");
+
+    const fileInputRef = useRef<HTMLInputElement>(null);
+    
+    // Admin contact details states
+    const [contactemail, setContactEmail] = useState("");
+    const [contactphone, setContactPhone] = useState("");
+    const [alternatecontactphone, setAlternateContactPhone] = useState("");
+    const [address, setAddress] = useState("");
+
+    // Admin social links states
+    const [instagramurl, setInstagramUrl] = useState("");
+    const [googlemapurl, setGoogleMapUrl] = useState("");
+    const [justdialurl, setJustDialUrl] = useState("");
+
+    // Opening hours states
+    const [monday, setMonday] = useState("");
+    const [tuesday, setTuesday] = useState("");
+    const [wednesday, setWednesday] = useState("");
+    const [thursday, setThursday] = useState("");
+    const [friday, setFriday] = useState("");
+    const [saturday, setSaturday] = useState("");
+    const [sunday, setSunday] = useState("");
+
     const [isAdminDetailsFromDb, setIsAdminDetailsFromDb] = useState(false)
 
-    const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        console.log("setting value", field, e.target.value)
-        setLocalDetails(prev => {
-            if (!prev) {
-                const newDetails: SiteDetail = {
-                    sitetitle: '',
-                    [field]: e.target.value
-                } as SiteDetail;
-                return newDetails;
-            }
-            return { ...prev, [field]: e.target.value };
-        });
+    // const updateField = (field: keyof SiteDetail) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    //     console.log("setting value", field, e.target.value)
+    //     setLocalDetails(prev => {
+    //         if (!prev) {
+    //             const newDetails: SiteDetail = {
+    //                 sitetitle: '',
+    //                 [field]: e.target.value
+    //             } as SiteDetail;
+    //             return newDetails;
+    //         }
+    //         return { ...prev, [field]: e.target.value };
+    //     });
+    // };
+
+    // const [sitelogourl, setSitelogourl] = useState<File | null>(null);
+    const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
+
+    useEffect(() => {
+        fetchAdminDetails()
+        fetchSiteInformation()
+        fetchAdminContactDetails()
+        fetchAdminSocialLinks()
+        fetchOpeningHours()
+    }, [tenantid])
+
+    // Admin details Update functions
+    const updateAdminDetailsFn = async () => {
+        console.log("updateAdminDetailsFn", { tenantid, tenantdomain, shoptype, shortdescription, yearsofexperience, productssold, happyclients })
+        try {
+            await updateAdminDetails({ tenantid, tenantdomain, shoptype, shortdescription, yearsofexperience, productssold, happyclients });
+            showToast("Details saved!", "success")
+            setIsAdminDetailsFromDb(true);
+
+        } catch (error: any) {
+            showToast(error, "danger")
+        }
     };
 
-    const [sitelogourl, setSitelogourl] = useState<File | null>(null);
-    const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
+    // Fetch Admin details
+    const fetchAdminDetails = async () => {
+        try {
+            const data = await getAdminDetails();
+            setTenantid(data.tenantid)
+            setTenantDomain(data.tenantdomain)
+            setShopType(data.shoptype)
+            setShortDescription(data.shortdescription)
+            setYearsOfExperience(data.yearsofexperience)
+            setProductsSold(data.productssold)
+            setHappyClients(data.happyclients)
+            setIsAdminDetailsFromDb(true)
+        } catch (err: any) {
+            showToast(err.message, "danger");
+        }
+    }
+
+    // Site information update function
+    const updateSiteInformationFn = async () => {
+        try {
+            await updateSiteInformation({ tenantid, sitetitle, sitelogourl, ownername, sitedescription });
+            showToast("Details saved!", "success")
+            setIsAdminDetailsFromDb(true);
+
+        } catch (error: any) {
+            showToast(error, "danger")
+        }
+    };
+
+    // Fetch site Information
+    const fetchSiteInformation = async () => {
+        // console.log("Fetching site information for tenant:", tenantid);
+        try {
+            const data = await getSiteInformation(tenantid);
+            console.log("Fetched site information:", data);
+            setSiteTitle(data?.sitetitle || '')
+            setOwnerName(data?.ownername || '')
+            setSiteDescription(data?.sitedescription || '')
+            if (data?.sitelogourl) {
+                const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
+                setCurrentLogoUrl(logoUrl || '');
+            }
+        } catch (err: any) {
+            showToast(err, "danger")
+        }
+    };
+
+    // Update admin contact details function
+    const updateAdminContactDetailsFn = async () => {
+       console.log("updateAdminContactDetailsFn", { tenantid, contactemail, contactphone, alternatecontactphone, address })
+        try {
+            await updateAdminContactDetails({ tenantid, contactemail, contactphone, alternatecontactphone, address });
+            showToast("Details saved!", "success")
+            setIsAdminDetailsFromDb(true);
+
+        } catch (error: any) {
+            showToast(error, "danger")
+        }
+    };
+
+    // Fetch admin contact details
+    const fetchAdminContactDetails = async () => {
+        try {
+            const data = await getAdminContactDetails(tenantid);
+            console.log("Fetched admin contact details:", data);
+            setContactEmail(data?.contactemail || '');
+            setContactPhone(data?.contactphone || '');
+            setAlternateContactPhone(data?.alternatecontactphone || '');
+            setAddress(data?.address || '');
+        } catch (err: any) {
+            showToast(err.message, "danger");
+        }
+    }
+
+    // Update social links details function
+    const updateAdminSocialLinksFn = async () => {
+       console.log("updateAdminSocialLinksFn", { tenantid, instagramurl, googlemapurl, justdialurl })
+        try {
+            await updateAdminSocialLinks({ tenantid, instagramurl, googlemapurl, justdialurl});
+            showToast("Details saved!", "success")
+            setIsAdminDetailsFromDb(true);
+
+        } catch (error: any) {
+            showToast(error, "danger")
+        }
+    };
+
+    // Fetch social links details
+    const fetchAdminSocialLinks = async () => {
+        try {
+            const data = await getAdminSocialLinks(tenantid);
+            console.log("Fetched admin social links:", data);
+            setInstagramUrl(data?.instagramurl || '');
+            setGoogleMapUrl(data?.googlemapurl || '');
+            setJustDialUrl(data?.justdialurl || '');
+        } catch (err: any) {
+            showToast(err.message, "danger");
+        }
+    }
+
+    // Update opening hours details function
+    const updateOpeningHoursFn = async () => {
+       console.log("updateOpeningHoursFn", { tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday })
+        try {
+            const data = await updateOpeningHours({ tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday});
+            showToast("Details saved!", "success")
+            setMonday(data?.monday || '')
+            setTuesday(data?.tuesday || '');
+            setWednesday(data?.wednesday || '');
+            setThursday(data?.thursday || '');
+            setFriday(data?.friday || '');
+            setSaturday(data?.saturday || '');
+            setSunday(data?.sunday || '');
+
+        } catch (error: any) {
+            showToast(error, "danger")
+        }
+    };
+
+    // Fetch opening hours details
+    const fetchOpeningHours = async () => {
+        try {
+            const data = await getOpeningHours(tenantid);
+            console.log("Fetched opening hours:", data);
+            setMonday(data?.monday || '');
+            setTuesday(data?.tuesday || '');
+            setWednesday(data?.wednesday || '');
+            setThursday(data?.thursday || '');
+            setFriday(data?.friday || '');
+            setSaturday(data?.saturday || '');
+            setSunday(data?.sunday || '');
+        } catch (err: any) {
+            showToast(err.message, "danger");
+        }
+    }
+
 
     const validateEmail = (value: string) => {
         const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -62,164 +257,142 @@ export default function Settings() {
     }
 
     // Load initial details from context or mutation
-    useEffect(() => {
-        if (!tenantid) return;
+    // useEffect(() => {
+    //     if (!tenantid) return;
 
-        console.log("siteContextDetails", siteContextDetails)
-        if (siteContextDetails) {
-            setLocalDetails(siteContextDetails);
-            // Update current logo from context
-            if (siteContextDetails.sitelogourl) {
-                const logoUrl = typeof siteContextDetails.sitelogourl === 'object' ? siteContextDetails.sitelogourl.url : siteContextDetails.sitelogourl;
-                setCurrentLogoUrl(logoUrl || '');
-            } else {
-                setCurrentLogoUrl('');
-            }
-        }
-        // Fallback to mutation
-        settingsMutation.mutate(undefined, {
-            onSuccess: (data: any) => {
-                console.log("RECEIVED DATA FROM MUTATION-SETTING", data);
-                if (data) {
-                    setLocalDetails(data);
-                    if (data.sitelogourl) {
-                        const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
-                        setCurrentLogoUrl(logoUrl || '');
-                    }
-                }
-            },
-            onError: (err) => {
-                console.log("MUTATION ERROR-SETTING", err)
-            }
-        });
-    }, [tenantid, siteContextDetails]);
+    //     console.log("siteContextDetails", siteContextDetails)
+    //     if (siteContextDetails) {
+    //         setLocalDetails(siteContextDetails);
+    //         // Update current logo from context
+    //         if (siteContextDetails.sitelogourl) {
+    //             const logoUrl = typeof siteContextDetails.sitelogourl === 'object' ? siteContextDetails.sitelogourl.url : siteContextDetails.sitelogourl;
+    //             setCurrentLogoUrl(logoUrl || '');
+    //         } else {
+    //             setCurrentLogoUrl('');
+    //         }
+    //     }
+    //     // Fallback to mutation
+    //     settingsMutation.mutate(undefined, {
+    //         onSuccess: (data: any) => {
+    //             console.log("RECEIVED DATA FROM MUTATION-SETTING", data);
+    //             if (data) {
+    //                 setLocalDetails(data);
+    //                 if (data.sitelogourl) {
+    //                     const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
+    //                     setCurrentLogoUrl(logoUrl || '');
+    //                 }
+    //             }
+    //         },
+    //         onError: (err) => {
+    //             console.log("MUTATION ERROR-SETTING", err)
+    //         }
+    //     });
+    // }, [tenantid, siteContextDetails]);
 
-    const updateSettings = () => {
+    // const updateSettings = () => {
 
-        if(((localDetails?.contactphone && localDetails?.contactphone !== '' && !validatePhone(localDetails?.contactphone+'')) || 
-        (localDetails?.alternatecontactphone && localDetails?.alternatecontactphone !== '' && !validatePhone(localDetails?.alternatecontactphone+'')))) {
-            return setError("Enter a valid Phone number")
-        };
+    //     if(((localDetails?.contactphone && localDetails?.contactphone !== '' && !validatePhone(localDetails?.contactphone+'')) || 
+    //     (localDetails?.alternatecontactphone && localDetails?.alternatecontactphone !== '' && !validatePhone(localDetails?.alternatecontactphone+'')))) {
+    //         return setError("Enter a valid Phone number")
+    //     };
 
-        if(localDetails?.contactemail && localDetails?.contactemail !== '' && !validateEmail(localDetails?.contactemail || '')) {
-            return setError("Enter a valid Email")
-        };
+    //     if(localDetails?.contactemail && localDetails?.contactemail !== '' && !validateEmail(localDetails?.contactemail || '')) {
+    //         return setError("Enter a valid Email")
+    //     };
 
-        if ((localDetails?.instagramurl && localDetails?.instagramurl !== '' && !isValidUrl(localDetails?.instagramurl || '')) ||
-            (localDetails?.googleurl && localDetails?.googleurl !== '' && !isValidUrl(localDetails?.googleurl || '')) ||
-            (localDetails?.justdialurl && localDetails?.justdialurl !== '' && !isValidUrl(localDetails?.justdialurl || ''))) {
-            return setError("Enter valid URL")
-        }
+    //     if ((localDetails?.instagramurl && localDetails?.instagramurl !== '' && !isValidUrl(localDetails?.instagramurl || '')) ||
+    //         (localDetails?.googleurl && localDetails?.googleurl !== '' && !isValidUrl(localDetails?.googleurl || '')) ||
+    //         (localDetails?.justdialurl && localDetails?.justdialurl !== '' && !isValidUrl(localDetails?.justdialurl || ''))) {
+    //         return setError("Enter valid URL")
+    //     }
 
-        const file = sitelogourl;
-        console.log("FILE", file);
-        const form = new FormData();
+    //     const file = sitelogourl;
+    //     console.log("FILE", file);
+    //     const form = new FormData();
 
-        // Add tenantid to form data
-        form.append('tenantid', tenantid);
+    //     // Add tenantid to form data
+    //     form.append('tenantid', tenantid);
 
-        form.append('sitetitle', localDetails?.sitetitle || '');
-        form.append('ownername', localDetails?.ownername || '');
-        form.append('sitedescription', localDetails?.sitedescription || '');
-        form.append('contactemail', localDetails?.contactemail || '');
-        form.append('contactphone', localDetails?.contactphone || '');
-        form.append('alternatecontactphone', localDetails?.alternatecontactphone || '');
-        form.append('address', localDetails?.address || '');
-        form.append('instagramurl', localDetails?.instagramurl || '');
-        form.append('googleurl', localDetails?.googleurl || '');
-        form.append('justdialurl', localDetails?.justdialurl || '');
+    //     form.append('sitetitle', localDetails?.sitetitle || '');
+    //     form.append('ownername', localDetails?.ownername || '');
+    //     form.append('sitedescription', localDetails?.sitedescription || '');
+    //     form.append('contactemail', localDetails?.contactemail || '');
+    //     form.append('contactphone', localDetails?.contactphone || '');
+    //     form.append('alternatecontactphone', localDetails?.alternatecontactphone || '');
+    //     form.append('address', localDetails?.address || '');
+    //     form.append('instagramurl', localDetails?.instagramurl || '');
+    //     form.append('googleurl', localDetails?.googleurl || '');
+    //     form.append('justdialurl', localDetails?.justdialurl || '');
 
-        // Append opening hours
-        form.append('monday', localDetails?.monday ?? '');
-        form.append('tuesday', localDetails?.tuesday ?? '');
-        form.append('wednesday', localDetails?.wednesday ?? '');
-        form.append('thursday', localDetails?.thursday ?? '');
-        form.append('friday', localDetails?.friday ?? '');
-        form.append('saturday', localDetails?.saturday ?? '');
-        form.append('sunday', localDetails?.sunday ?? '');
+    //     // Append opening hours
+    //     form.append('monday', localDetails?.monday ?? '');
+    //     form.append('tuesday', localDetails?.tuesday ?? '');
+    //     form.append('wednesday', localDetails?.wednesday ?? '');
+    //     form.append('thursday', localDetails?.thursday ?? '');
+    //     form.append('friday', localDetails?.friday ?? '');
+    //     form.append('saturday', localDetails?.saturday ?? '');
+    //     form.append('sunday', localDetails?.sunday ?? '');
 
-        if (file && file instanceof File) {
-            form.append('sitelogourl', file);
-        }
+    //     if (file && file instanceof File) {
+    //         form.append('sitelogourl', file);
+    //     }
 
-        updateSettingsMutation.mutate(form, {
-            onSuccess: (data) => {
-                console.log('Settings updated:', data);
-                const updatedDetails = data.data;
-                if (updatedDetails) {
-                    setLocalDetails(updatedDetails);
-                    // Always update logo URL from response - even if no new file uploaded
-                    if (updatedDetails.sitelogourl) {
-                        const logoUrl = typeof updatedDetails.sitelogourl === 'object' ? updatedDetails.sitelogourl.url : updatedDetails.sitelogourl;
-                        setCurrentLogoUrl(logoUrl || '');
-                    }
-                }
-                setError('')
-                alert("Settings saved!");
-                setSitelogourl(null);
-            },
-            onError: (error) => {
-                console.error('Error updating settings:', error);
-                alert("Failed to save settings");
-            }
-        });
-    }
+    //     updateSettingsMutation.mutate(form, {
+    //         onSuccess: (data) => {
+    //             console.log('Settings updated:', data);
+    //             const updatedDetails = data.data;
+    //             if (updatedDetails) {
+    //                 setLocalDetails(updatedDetails);
+    //                 // Always update logo URL from response - even if no new file uploaded
+    //                 if (updatedDetails.sitelogourl) {
+    //                     const logoUrl = typeof updatedDetails.sitelogourl === 'object' ? updatedDetails.sitelogourl.url : updatedDetails.sitelogourl;
+    //                     setCurrentLogoUrl(logoUrl || '');
+    //                 }
+    //             }
+    //             setError('')
+    //             alert("Settings saved!");
+    //             setSitelogourl(null);
+    //         },
+    //         onError: (error) => {
+    //             console.error('Error updating settings:', error);
+    //             alert("Failed to save settings");
+    //         }
+    //     });
+    // }
 
     // Render logo preview
-    const renderLogoPreview = () => {
-        if (sitelogourl && sitelogourl instanceof File) {
-            return (
-                <div className="mt-2">
-                    <p className="text-sm text-gray-600">New logo preview:</p>
-                    <img
-                        src={URL.createObjectURL(sitelogourl)}
-                        alt="New logo preview"
-                        className="w-32 h-32 object-contain rounded-md mt-1"
-                    />
-                </div>
-            );
-        }
+    
+    // const renderLogoPreview = () => {
+    //     if (sitelogourl && sitelogourl instanceof File) {
+    //         return (
+    //             <div className="mt-2">
+    //                 <p className="text-sm text-gray-600">New logo preview:</p>
+    //                 <img
+    //                     src={URL.createObjectURL(sitelogourl)}
+    //                     alt="New logo preview"
+    //                     className="w-32 h-32 object-contain rounded-md mt-1"
+    //                 />
+    //             </div>
+    //         );
+    //     }
 
-        if (currentLogoUrl) {
-            return (
-                <div className="mt-2">
-                    <p className="text-sm text-gray-600">Current logo:</p>
-                    <img
-                        src={"http://localhost:3000" + currentLogoUrl}
-                        alt="Current logo"
-                        className="w-32 h-32 object-contain rounded-md mt-1"
-                    />
-                </div>
-            );
-        }
+    //     if (currentLogoUrl) {
+    //         return (
+    //             <div className="mt-2">
+    //                 <p className="text-sm text-gray-600">Current logo:</p>
+    //                 <img
+    //                     src={"http://localhost:3000" + currentLogoUrl}
+    //                     alt="Current logo"
+    //                     className="w-32 h-32 object-contain rounded-md mt-1"
+    //                 />
+    //             </div>
+    //         );
+    //     }
 
-        return null;
-    };
+    //     return null;
+    // };
 
-    const updateAdminDetailsFn = async () => {
-        try {
-            await updateAdminDetails({ tenantid, tenantdomain });
-            showToast("Details saved!", "success")
-            setIsAdminDetailsFromDb(true);
 
-        } catch (error: any) {
-            showToast(error, "danger")
-        }
-    };
-    useEffect(() => {
-        fetchAdminDetails()
-    }, [])
-
-    async function fetchAdminDetails() {
-        try {
-            const data = await getAdminDetails();
-            setTenantid(data.tenantid)
-            setTenantDomain(data.tenantdomain)
-            setIsAdminDetailsFromDb(true)
-        } catch (err: any) {
-            showToast(err.message, "danger");
-        }
-    }
 
     const hasSpecialCharacter = (value: string) => {
         const regex = /[^a-zA-Z0-9]/;
@@ -255,7 +428,12 @@ export default function Settings() {
                     <div className="settings-card-body">
                         <div className="field-group">
                             <label className="field-label">Tenant ID <span className="required">*</span></label>
-                            <input className="field-input" type="text" placeholder="No special characters" />
+                            <input className="field-input" type="text" placeholder="No special characters" value={tenantid} 
+                            disabled={isAdminDetailsFromDb}
+                            onChange={(e) =>
+                                hasSpecialCharacter(e.target.value) &&
+                                setTenantid(e.target.value)
+                            }/>
                             <span className="field-hint">⚠️ Special characters are not allowed. This is your unique shop identifier.</span>
                         </div>
                         <div className="field-group">
@@ -273,9 +451,31 @@ export default function Settings() {
                                 </div>
                             </div>
                         </div>
+                        <div className="field-group">
+                            <label className="field-label">Short Description</label>
+                            <input className="field-input" type="text" placeholder="Give a short description" value={shortdescription} onChange={(e) => setShortDescription(e.target.value)}/>
+                            <span className="field-hint">Ex: Over two decades of supplying high-quality steel products to businesses and homes across Bangalore. Bulk pricing available.</span>
+                        </div>
+                        <div className="field-group">
+                            <label className="field-label">Years of Experience</label>
+                            <input className="field-input" type="text" placeholder="Give your years of experience" value={yearsofexperience} onChange={(e) => setYearsOfExperience(e.target.value)}/>
+                            <span className="field-hint">Ex: 25+</span>
+                        </div>
+                        <div className="field-group">
+                            <label className="field-label">Products Sold</label>
+                            <input className="field-input" type="text" placeholder="How many unique products did you sell?" value={productssold} onChange={(e) => setProductsSold(e.target.value)}/>
+                            <span className="field-hint">Ex: 20000+</span>
+                        </div>
+                        <div className="field-group">
+                            <label className="field-label">Happy Clients</label>
+                            <input className="field-input" type="text" placeholder="How many satisfied customers do you have?" value={happyclients} onChange={(e) => setHappyClients(e.target.value)}/>
+                            <span className="field-hint">Ex: 2000+</span>
+                        </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary">💾 Save Admin Details</button>
+                        <button className="btn-primary" onClick={updateAdminDetailsFn}
+                            // disabled={!tenantdomain || !tenantid}
+                            >💾 Save Admin Details</button>
                     </div>
                 </div>
 
@@ -292,30 +492,30 @@ export default function Settings() {
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Site Title <span className="required">*</span></label>
-                                <input className="field-input" type="text" />
+                                <input className="field-input" type="text" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)}/>
                             </div>
                             <div className="field-group">
                                 <label className="field-label">Owner Name</label>
-                                <input className="field-input" type="text" />
+                                <input className="field-input" type="text" value={ownername} onChange={(e) => setOwnerName(e.target.value)}/>
                             </div>
                         </div>
                         <div className="field-group">
                             <label className="field-label">Site Logo</label>
-                            <div className="upload-zone" >
-                                <div className="upload-zone-icon">🖼️</div>
+                            <div className="upload-zone" onClick={() => fileInputRef.current?.click()}>
+                                <div className="upload-zone-icon">{renderImage(sitelogourl, true)}</div>
                                 <p>Click to upload new logo</p>
                                 <span>PNG, JPG, SVG · Recommended 200×200px</span>
-                                <input type="file" id="logoInput" accept="image/*" />
+                                <input ref={fileInputRef} className="hidden" type="file" id="logoInput" accept="image/*" onChange={(e) => setSitelogourl(e.target.files?.[0] || null)}/>
                             </div>
                         </div>
                         <div className="field-group">
                             <label className="field-label">Site Description</label>
-                            <textarea className="field-input" rows={4}></textarea>
+                            <textarea className="field-input" rows={4} value={sitedescription} onChange={(e) => setSiteDescription(e.target.value)}></textarea>
                         </div>
                     </div>
                     <div className="save-section">
                         <button className="btn-secondary">Reset</button>
-                        <button className="btn-primary">💾 Save Site Info</button>
+                        <button className="btn-primary" onClick={updateSiteInformationFn} >💾 Save Site Info</button>
                     </div>
                 </div>
 
@@ -332,26 +532,30 @@ export default function Settings() {
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Contact Email</label>
-                                <input className="field-input" type="email" placeholder="your@email.com" />
+                                <input className="field-input" type="email" placeholder="your@email.com" onChange={(e) => setContactEmail(e.target.value)}
+                                value={contactemail}/>
                             </div>
                             <div className="field-group">
                                 <label className="field-label">Phone Number</label>
-                                <input className="field-input" type="tel" placeholder="10-digit number" />
+                                <input className="field-input" type="tel" placeholder="10-digit number" onChange={(e) => setContactPhone(e.target.value)}
+                                value={contactphone}/>
                             </div>
                         </div>
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Alternate Phone</label>
-                                <input className="field-input" type="tel" placeholder="Optional" />
+                                <input className="field-input" type="tel" placeholder="Optional" onChange={(e) => setAlternateContactPhone(e.target.value)}
+                                value={alternatecontactphone}/>
                             </div>
                             <div className="field-group">
                                 <label className="field-label">Address</label>
-                                <input className="field-input" type="text" />
+                                <input className="field-input" type="text" placeholder="Enter your address" onChange={(e) => setAddress(e.target.value)}
+                                value={address}/>
                             </div>
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary" >💾 Save Contact</button>
+                        <button className="btn-primary" onClick={updateAdminContactDetailsFn}>💾 Save Contact</button>
                     </div>
                 </div>
 
@@ -367,19 +571,19 @@ export default function Settings() {
                     <div className="settings-card-body">
                         <div className="field-group">
                             <label className="field-label">📷 Instagram URL</label>
-                            <input className="field-input" type="url" placeholder="https://instagram.com/..." />
+                            <input className="field-input" type="url" placeholder="https://instagram.com/..." value={instagramurl} onChange={(e) => setInstagramUrl(e.target.value)}/>
                         </div>
                         <div className="field-group">
-                            <label className="field-label">🔍 Google Business URL</label>
-                            <input className="field-input" type="url" placeholder="https://maps.google.com/..." />
+                            <label className="field-label">🔍 Google Map URL</label>
+                            <input className="field-input" type="url" placeholder="https://maps.google.com/..." value={googlemapurl} onChange={(e) => setGoogleMapUrl(e.target.value)}/>
                         </div>
                         <div className="field-group">
                             <label className="field-label">📒 Just Dial URL</label>
-                            <input className="field-input" type="url" placeholder="https://justdial.com/..." />
+                            <input className="field-input" type="url" placeholder="https://justdial.com/..." value={justdialurl} onChange={(e) => setJustDialUrl(e.target.value)}/>
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary">💾 Save Links</button>
+                        <button className="btn-primary" onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
                     </div>
                 </div>
 
@@ -403,38 +607,38 @@ export default function Settings() {
                             <tbody>
                                 <tr>
                                     <td className="day-label">Monday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={monday} onChange={(e) => setMonday(e.target.value)} /></td>
                                 </tr>
                                 <tr>
                                     <td className="day-label">Tuesday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={tuesday} onChange={(e) => setTuesday(e.target.value)} /></td>
                                 </tr>
                                 <tr>
                                     <td className="day-label">Wednesday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={wednesday} onChange={(e) => setWednesday(e.target.value)} /></td>
                                 </tr>
                                 <tr>
                                     <td className="day-label">Thursday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={thursday} onChange={(e) => setThursday(e.target.value)} /></td>
                                 </tr>
                                 <tr>
                                     <td className="day-label">Friday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={friday} onChange={(e) => setFriday(e.target.value)} /></td>
                                 </tr>
                                 <tr>
                                     <td className="day-label">Saturday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={saturday} onChange={(e) => setSaturday(e.target.value)} /></td>
                                 </tr>
                                 <tr>
                                     <td className="day-label">Sunday</td>
-                                    <td><input className="field-input" type="text" /></td>
+                                    <td><input className="field-input" type="text" value={sunday} onChange={(e) => setSunday(e.target.value)} /></td>
                                 </tr>
                             </tbody>
                         </table>
                     </div>
                     <div className="save-section">
                         <button className="btn-secondary">Reset to Default</button>
-                        <button className="btn-primary">💾 Save All Settings</button>
+                        <button className="btn-primary" onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
                     </div>
                 </div>
 
