@@ -49,9 +49,10 @@ export default function Settings() {
     const [friday, setFriday] = useState("");
     const [saturday, setSaturday] = useState("");
     const [sunday, setSunday] = useState("");
+    const [activeSection, setActiveSection] = useState('adminSec');
 
     const [isAdminDetailsFromDb, setIsAdminDetailsFromDb] = useState(false)
-    
+
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
 
     // Error states
@@ -135,8 +136,7 @@ export default function Settings() {
 
     // Update admin contact details function
     const updateAdminContactDetailsFn = async () => {
-        console.log("EMAIL VALIDITY", validateEmail(contactemail))
-        if ((!validateEmail(contactemail) ) || (!validatePhone(contactphone)) || (!validatePhone(alternatecontactphone))) {
+        if ((!validateEmail(contactemail)) || (!validatePhone(contactphone)) || (!validatePhone(alternatecontactphone))) {
             if (!validateEmail(contactemail) && contactemail !== "") {
                 setErrorEmail("Enter a valid email address");
             } else {
@@ -158,9 +158,9 @@ export default function Settings() {
             await updateAdminContactDetails({ tenantid, contactemail, contactphone, alternatecontactphone, address });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
-                        showToast("Saved Successfully", "success");
+            showToast("Saved Successfully", "success");
 
-                                  setErrorEmail("");
+            setErrorEmail("");
             setErrorPhone("");
             setErrorAlternatePhone("");
 
@@ -177,9 +177,6 @@ export default function Settings() {
             setContactPhone(data?.contactphone || '');
             setAlternateContactPhone(data?.alternatecontactphone || '');
             setAddress(data?.address || '');
-
-  
-
         } catch (err: any) {
             showToast(err.message, "danger");
         }
@@ -280,29 +277,61 @@ export default function Settings() {
         }
     }
 
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setActiveSection(entry.target.id);
+                    }
+                });
+            },
+            { threshold: 0.3, rootMargin: '-100px 0px 0px 0px' }
+        );
+
+        const sections = document.querySelectorAll('.settings-card');
+        sections.forEach(section => observer.observe(section));
+
+        return () => observer.disconnect();
+    }, []);
+
+    const handleNavClick = (sectionId: string) => {
+        setActiveSection(sectionId);
+        const element = document.getElementById(sectionId);
+        if (element) {
+            const navHeight = 120; // Adjust based on your nav height
+            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
+            const offsetPosition = elementPosition - navHeight;
+            window.scrollTo({
+                top: offsetPosition,
+                behavior: 'smooth'
+            });
+        }
+    };
+
     const hasSpecialCharacter = (value: string) => {
         const regex = /[^a-zA-Z0-9]/;
         const isValid = regex.test(value);
         return !isValid;
-    }
+    };
 
     return (
         <div className="settings-layout">
             {/* <!-- Left Nav --> */}
             <div className="settings-nav">
                 <div className="settings-nav-header">Settings</div>
-                <div className="nav-item active" ><span className="nav-item-icon">🔑</span> Admin Details</div>
-                <div className="nav-item"><span className="nav-item-icon">🏪</span> Site Info</div>
-                <div className="nav-item"><span className="nav-item-icon">📞</span> Contact</div>
-                <div className="nav-item"><span className="nav-item-icon">🔗</span> Social Links</div>
-                <div className="nav-item"><span className="nav-item-icon">🕐</span> Opening Hours</div>
+                <div className={`nav-item ${activeSection === 'adminSec' ? 'active' : ''}`} data-target="adminSec" onClick={() => handleNavClick('adminSec')}><span className="nav-item-icon">🔑</span> Admin Details</div>
+                <div className={`nav-item ${activeSection === 'siteInfo' ? 'active' : ''}`} data-target="siteInfo" onClick={() => handleNavClick('siteInfo')}><span className="nav-item-icon">🏪</span> Site Info</div>
+                <div className={`nav-item ${activeSection === 'contactSec' ? 'active' : ''}`} data-target="contactSec" onClick={() => handleNavClick('contactSec')}><span className="nav-item-icon">📞</span> Contact</div>
+                <div className={`nav-item ${activeSection === 'socialSec' ? 'active' : ''}`} data-target="socialSec" onClick={() => handleNavClick('socialSec')}><span className="nav-item-icon">🔗</span> Social Links</div>
+                <div className={`nav-item ${activeSection === 'hoursSec' ? 'active' : ''}`} data-target="hoursSec" onClick={() => handleNavClick('hoursSec')}><span className="nav-item-icon">🕐</span> Opening Hours</div>
             </div>
 
             {/* <!-- Right Content --> */}
             <div>
 
                 {/* <!-- Admin Details --> */}
-                <div className="settings-card">
+                <div className="settings-card" id="adminSec">
                     <div className="settings-card-header">
                         <div className="settings-card-icon">🔑</div>
                         <div>
@@ -347,7 +376,7 @@ export default function Settings() {
                         <div className="field-group">
                             <label className="field-label">About Owner</label>
                             <textarea className="field-input" placeholder="With over two decades of experience, we are a reliable partner for businesses across various sectors. Our commitment to quality, customer satisfaction, and sustainable practices has been the cornerstone of our success." value={aboutowner} onChange={(e) => setAboutOwner(e.target.value)} />
-                        </div>                        
+                        </div>
                         <div className="field-group">
                             <label className="field-label">Years of Experience</label>
                             <input className="field-input" type="text" placeholder="Give your years of experience. Ex: 25+" value={yearsofexperience} onChange={(e) => setYearsOfExperience(e.target.value)} />
@@ -363,7 +392,7 @@ export default function Settings() {
                     </div>
                     <div className="save-section">
                         <button className="btn-primary" onClick={updateAdminDetailsFn}
-                        // disabled={!tenantdomain || !tenantid}
+                        disabled={!tenantid}
                         >💾 Save Admin Details</button>
                     </div>
                 </div>
@@ -379,18 +408,18 @@ export default function Settings() {
                     </div>
                     <div className="settings-card-body">
                         {/* <div className="field-row"> */}
-                            <div className="field-group">
-                                <label className="field-label">Site Title <span className="required">*</span></label>
-                                <input className="field-input" type="text" placeholder="Raj Steel Shop" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)} />
-                            </div>
-                            <div className="field-group">
-                                <label className="field-label">Site Sub Title</label>
-                                <input className="field-input" type="text" placeholder="Stainless Steel Shop" value={sitesubtitle} onChange={(e) => setSubSiteTitle(e.target.value)} />
-                            </div>
-                            <div className="field-group">
-                                <label className="field-label">Trusted Tagline</label>
-                                <input className="field-input" type="text" placeholder="Trusted Wholesale Supplier · Bangalore" value={trustedtagline} onChange={(e) => setTrustedTagline(e.target.value)} />
-                            </div>
+                        <div className="field-group">
+                            <label className="field-label">Site Title <span className="required">*</span></label>
+                            <input className="field-input" type="text" placeholder="Raj Steel Shop" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)} />
+                        </div>
+                        <div className="field-group">
+                            <label className="field-label">Site Sub Title</label>
+                            <input className="field-input" type="text" placeholder="Stainless Steel Shop" value={sitesubtitle} onChange={(e) => setSubSiteTitle(e.target.value)} />
+                        </div>
+                        <div className="field-group">
+                            <label className="field-label">Trusted Tagline</label>
+                            <input className="field-input" type="text" placeholder="Trusted Wholesale Supplier · Bangalore" value={trustedtagline} onChange={(e) => setTrustedTagline(e.target.value)} />
+                        </div>
                         {/* </div> */}
                         <div className="field-group">
                             <label className="field-label">Site Logo</label>
@@ -460,93 +489,93 @@ export default function Settings() {
 
                 {/* <!-- Social Links --> */}
                 <div className="settings-card" id="socialSec">
-                    <div className="settings-card-header">
-                        <div className="settings-card-icon">🔗</div>
-                        <div>
-                            <div className="settings-card-title">Social & Directory Links</div>
-                            <div className="settings-card-desc">Links shown in your contact section</div>
+                        <div className="settings-card-header">
+                            <div className="settings-card-icon">🔗</div>
+                            <div>
+                                <div className="settings-card-title">Social & Directory Links</div>
+                                <div className="settings-card-desc">Links shown in your contact section</div>
+                            </div>
+                        </div>
+                        <div className="mx-4 my-2">
+                            {errorInstagram && <p className="text-sm text-[indianred] my-0">{errorInstagram}</p>}
+                            {errorGoogleMap && <p className="text-sm text-[indianred] my-0">{errorGoogleMap}</p>}
+                            {errorJustDial && <p className="text-sm text-[indianred] my-0">{errorJustDial}</p>}
+                        </div>
+                        <div className="settings-card-body">
+                            <div className="field-group">
+                                <label className="field-label">📷 Instagram URL</label>
+                                <input className="field-input" type="url" placeholder="https://instagram.com/..." value={instagramurl} onChange={(e) => setInstagramUrl(e.target.value)} />
+                            </div>
+                            <div className="field-group">
+                                <label className="field-label">🔍 Google Map URL</label>
+                                <input className="field-input" type="url" placeholder="https://maps.google.com/..." value={googlemapurl} onChange={(e) => setGoogleMapUrl(e.target.value)} />
+                            </div>
+                            <div className="field-group">
+                                <label className="field-label">📒 Just Dial URL</label>
+                                <input className="field-input" type="url" placeholder="https://justdial.com/..." value={justdialurl} onChange={(e) => setJustDialUrl(e.target.value)} />
+                            </div>
+                        </div>
+                        <div className="save-section">
+                            <button className="btn-primary" onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
                         </div>
                     </div>
-                    <div className="mx-4 my-2">
-                        {errorInstagram && <p className="text-sm text-[indianred] my-0">{errorInstagram}</p>}
-                        {errorGoogleMap && <p className="text-sm text-[indianred] my-0">{errorGoogleMap}</p>}
-                        {errorJustDial && <p className="text-sm text-[indianred] my-0">{errorJustDial}</p>}
-                    </div>
-                    <div className="settings-card-body">
-                        <div className="field-group">
-                            <label className="field-label">📷 Instagram URL</label>
-                            <input className="field-input" type="url" placeholder="https://instagram.com/..." value={instagramurl} onChange={(e) => setInstagramUrl(e.target.value)} />
-                        </div>
-                        <div className="field-group">
-                            <label className="field-label">🔍 Google Map URL</label>
-                            <input className="field-input" type="url" placeholder="https://maps.google.com/..." value={googlemapurl} onChange={(e) => setGoogleMapUrl(e.target.value)} />
-                        </div>
-                        <div className="field-group">
-                            <label className="field-label">📒 Just Dial URL</label>
-                            <input className="field-input" type="url" placeholder="https://justdial.com/..." value={justdialurl} onChange={(e) => setJustDialUrl(e.target.value)} />
-                        </div>
-                    </div>
-                    <div className="save-section">
-                        <button className="btn-primary" onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
-                    </div>
-                </div>
 
-                {/* <!-- Opening Hours --> */}
-                <div className="settings-card" id="hoursSec">
-                    <div className="settings-card-header">
-                        <div className="settings-card-icon">🕐</div>
-                        <div>
-                            <div className="settings-card-title">Opening Hours</div>
-                            <div className="settings-card-desc">Set your shop's operating hours per day</div>
+                    {/* <!-- Opening Hours --> */}
+                    <div className="settings-card" id="hoursSec">
+                        <div className="settings-card-header">
+                            <div className="settings-card-icon">🕐</div>
+                            <div>
+                                <div className="settings-card-title">Opening Hours</div>
+                                <div className="settings-card-desc">Set your shop's operating hours per day</div>
+                            </div>
+                        </div>
+                        <div className="settings-card-body">
+                            <table className="hours-table">
+                                <thead>
+                                    <tr>
+                                        <th>Day</th>
+                                        <th>Opening Hours</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td className="day-label">Monday</td>
+                                        <td><input className="field-input" type="text" value={monday} onChange={(e) => setMonday(e.target.value)} /></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="day-label">Tuesday</td>
+                                        <td><input className="field-input" type="text" value={tuesday} onChange={(e) => setTuesday(e.target.value)} /></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="day-label">Wednesday</td>
+                                        <td><input className="field-input" type="text" value={wednesday} onChange={(e) => setWednesday(e.target.value)} /></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="day-label">Thursday</td>
+                                        <td><input className="field-input" type="text" value={thursday} onChange={(e) => setThursday(e.target.value)} /></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="day-label">Friday</td>
+                                        <td><input className="field-input" type="text" value={friday} onChange={(e) => setFriday(e.target.value)} /></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="day-label">Saturday</td>
+                                        <td><input className="field-input" type="text" value={saturday} onChange={(e) => setSaturday(e.target.value)} /></td>
+                                    </tr>
+                                    <tr>
+                                        <td className="day-label">Sunday</td>
+                                        <td><input className="field-input" type="text" value={sunday} onChange={(e) => setSunday(e.target.value)} /></td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div className="save-section">
+                            {/* <button className="btn-secondary">Reset to Default</button> */}
+                            <button className="btn-primary" onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
                         </div>
                     </div>
-                    <div className="settings-card-body">
-                        <table className="hours-table">
-                            <thead>
-                                <tr>
-                                    <th>Day</th>
-                                    <th>Opening Hours</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr>
-                                    <td className="day-label">Monday</td>
-                                    <td><input className="field-input" type="text" value={monday} onChange={(e) => setMonday(e.target.value)} /></td>
-                                </tr>
-                                <tr>
-                                    <td className="day-label">Tuesday</td>
-                                    <td><input className="field-input" type="text" value={tuesday} onChange={(e) => setTuesday(e.target.value)} /></td>
-                                </tr>
-                                <tr>
-                                    <td className="day-label">Wednesday</td>
-                                    <td><input className="field-input" type="text" value={wednesday} onChange={(e) => setWednesday(e.target.value)} /></td>
-                                </tr>
-                                <tr>
-                                    <td className="day-label">Thursday</td>
-                                    <td><input className="field-input" type="text" value={thursday} onChange={(e) => setThursday(e.target.value)} /></td>
-                                </tr>
-                                <tr>
-                                    <td className="day-label">Friday</td>
-                                    <td><input className="field-input" type="text" value={friday} onChange={(e) => setFriday(e.target.value)} /></td>
-                                </tr>
-                                <tr>
-                                    <td className="day-label">Saturday</td>
-                                    <td><input className="field-input" type="text" value={saturday} onChange={(e) => setSaturday(e.target.value)} /></td>
-                                </tr>
-                                <tr>
-                                    <td className="day-label">Sunday</td>
-                                    <td><input className="field-input" type="text" value={sunday} onChange={(e) => setSunday(e.target.value)} /></td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div className="save-section">
-                        {/* <button className="btn-secondary">Reset to Default</button> */}
-                        <button className="btn-primary" onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
-                    </div>
-                </div>
 
+                </div>
             </div>
-        </div>
     );
 }
