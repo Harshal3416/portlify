@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import { getAdminContactDetails, getAdminDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
+import { getAdminContactDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
 import { renderImage } from "@/app/lib/renderImage";
+import { useSiteDetails } from "@/app/context/siteContext";
 
 export default function Settings() {
 
     const { showToast } = useToast();
-
+    const siteDetails = useSiteDetails();
+    
     const [tenantid, setTenantid] = useState('');
-
-    const [tenantdomain, setTenantDomain] = useState("Shop owner");
 
     // Admin details states
     const [ownername, setOwnerName] = useState("");
@@ -64,8 +64,14 @@ export default function Settings() {
     const [errorJustDial, setErrorJustDial] = useState("");
 
     useEffect(() => {
-        fetchAdminDetails()
-    }, []);
+    setTenantid(siteDetails?.tenantid || '');
+    setOwnerName(siteDetails?.ownername || '');
+    setOwnerTitle(siteDetails?.ownertitle || '');
+    setAboutOwner(siteDetails?.aboutowner || '');
+    setYearsOfExperience(siteDetails?.yearsofexperience || '');
+    setProductsSold(siteDetails?.productssold || '');
+    setHappyClients(siteDetails?.happyclients || '');
+  }, [siteDetails])
 
     useEffect(() => {
         fetchSiteInformation()
@@ -85,24 +91,6 @@ export default function Settings() {
             showToast(error, "danger")
         }
     };
-
-    // Fetch Admin details
-    const fetchAdminDetails = async () => {
-        try {
-            const data = await getAdminDetails();
-            setTenantid(data.tenantid)
-            setTenantDomain(data.tenantdomain)
-            setOwnerName(data.ownername)
-            setOwnerTitle(data.ownertitle)
-            setAboutOwner(data.aboutowner)
-            setYearsOfExperience(data.yearsofexperience)
-            setProductsSold(data.productssold)
-            setHappyClients(data.happyclients)
-            setIsAdminDetailsFromDb(true)
-        } catch (err: any) {
-            showToast(err.message, "danger");
-        }
-    }
 
     // Site information update function
     const updateSiteInformationFn = async () => {

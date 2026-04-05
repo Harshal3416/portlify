@@ -1,41 +1,24 @@
 'use client';
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { getAdminDetails } from "@/services/settingsService";
-import { useToast } from "../context/ToastContext";
+import { useSiteDetails } from "../context/siteContext";
 
 export default function About() {
- 
-  const { showToast } = useToast();
 
-  const searchParams = useSearchParams();
-  const tenantidFromUrl = searchParams.get('tenantid');
-  const tenantid = tenantidFromUrl; // Get tenantid: from URL params first, then from auth context, then fallback
+  const siteDetails = useSiteDetails();
 
   const [ownername, setOwnerName] = useState("");
   const [ownertitle, setOwnerTitle] = useState("");
   const [aboutowner, setAboutOwner] = useState("");
 
   useEffect(() => {
-    fetchAdminDetails();
-  }, [tenantid]);
+    setOwnerName(siteDetails?.ownername || '')
+    setOwnerTitle(siteDetails?.ownertitle || '')
+    setAboutOwner(siteDetails?.aboutowner || '')
+  }, [siteDetails])
 
-  const fetchAdminDetails = async () => {
-    if (!tenantid) return;
-    console.log("About page tenantid:", tenantid);
-    try {
-      const data = await getAdminDetails(tenantid);
-      setOwnerName(data?.ownername || '')
-      setOwnerTitle(data?.ownertitle || '')
-      setAboutOwner(data?.aboutowner || '')
-    } catch (err: any) {
-      showToast(err.message, "danger");
-    }
-  }
-
-return (
-  <div className="card">
+  return (
+    <div className="card">
       <div className="custom-card-header">
         <div className="card-title mb-0"><div className="card-title-icon">👤</div>About Us</div>
       </div>
@@ -47,5 +30,5 @@ return (
         <p className="about-text">{aboutowner}</p>
       </div>
     </div>
-);
+  );
 }

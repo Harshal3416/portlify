@@ -1,21 +1,22 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
-import { getAdminDetails } from "@/services/settingsService";
 import { renderImage } from "@/app/lib/renderImage";
 import { Product } from "@/app/interfaces/interface";
+import { useSiteDetails } from "@/app/context/siteContext";
 
 export default function Products() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
   const { showToast } = useToast();
-  const [tenantid, setTenantid] = useState('');
+  const siteDetails = useSiteDetails();
+  
+  const [tenantid, setTenantId] = useState('');
 
   // Use React Query for fetching products - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
@@ -45,18 +46,12 @@ export default function Products() {
   };
 
   useEffect(() => {
-    fetchAdminDetails()
+    setTenantId(siteDetails?.tenantid || '');
+  }, [siteDetails])
+
+  useEffect(() => {
     setProductId(generateProductId());
   }, []);
-
-  async function fetchAdminDetails() {
-    try {
-      const data = await getAdminDetails();
-      setTenantid(data.tenantid)
-    } catch (err: any) {
-      showToast(err.message, "danger");
-    }
-  }
 
   const resetProductForm = () => {
     setProductName("");

@@ -1,4 +1,6 @@
 export interface SiteDetail {
+    ownertitle: string;
+    aboutowner: string;
     tenantid: string;
     tenantdomain: string;
     sitesubtitle: string;

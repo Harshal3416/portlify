@@ -1,6 +1,6 @@
 'use client'
 
-import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
+import { getSiteInformation } from '@/services/settingsService';
 import { useEffect, useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useSearchParams } from 'next/navigation';
