@@ -14,16 +14,18 @@ export default function Settings() {
     const [tenantdomain, setTenantDomain] = useState("Shop owner");
 
     // Admin details states
-    const [shoptype, setShopType] = useState("");
-    const [shortdescription, setShortDescription] = useState("");
+    const [ownername, setOwnerName] = useState("");
+    const [ownertitle, setOwnerTitle] = useState("");
+    const [aboutowner, setAboutOwner] = useState("");
     const [yearsofexperience, setYearsOfExperience] = useState("");
     const [productssold, setProductsSold] = useState("");
     const [happyclients, setHappyClients] = useState("");
 
     // Site Information states
-    const [sitetitle, setSiteTitle] = useState("");
     const [sitelogourl, setSitelogourl] = useState<File | null>(null);
-    const [ownername, setOwnerName] = useState("");
+    const [sitetitle, setSiteTitle] = useState("");
+    const [sitesubtitle, setSubSiteTitle] = useState("");
+    const [trustedtagline, setTrustedTagline] = useState("");
     const [sitedescription, setSiteDescription] = useState("");
 
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -54,16 +56,19 @@ export default function Settings() {
 
     useEffect(() => {
         fetchAdminDetails()
+    }, []);
+
+    useEffect(() => {
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
         fetchOpeningHours()
-    }, [tenantid])
+    }, [tenantid]);
 
     // Admin details Update functions
     const updateAdminDetailsFn = async () => {
         try {
-            await updateAdminDetails({ tenantid, tenantdomain, shoptype, shortdescription, yearsofexperience, productssold, happyclients });
+            await updateAdminDetails({ tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
 
@@ -78,8 +83,9 @@ export default function Settings() {
             const data = await getAdminDetails();
             setTenantid(data.tenantid)
             setTenantDomain(data.tenantdomain)
-            setShopType(data.shoptype)
-            setShortDescription(data.shortdescription)
+            setOwnerName(data.ownername)
+            setOwnerTitle(data.ownertitle)
+            setAboutOwner(data.aboutowner)
             setYearsOfExperience(data.yearsofexperience)
             setProductsSold(data.productssold)
             setHappyClients(data.happyclients)
@@ -92,12 +98,12 @@ export default function Settings() {
     // Site information update function
     const updateSiteInformationFn = async () => {
         try {
-            await updateSiteInformation({ tenantid, sitetitle, sitelogourl, ownername, sitedescription });
+            await updateSiteInformation({ tenantid, sitetitle, sitesubtitle, sitelogourl, trustedtagline, sitedescription });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
 
         } catch (error: any) {
-            showToast(error, "danger")
+            showToast(error?.message, "danger")
         }
     };
 
@@ -105,8 +111,10 @@ export default function Settings() {
     const fetchSiteInformation = async () => {
         try {
             const data = await getSiteInformation(tenantid);
+            console.log("Fetched site information:", data);
             setSiteTitle(data?.sitetitle || '')
-            setOwnerName(data?.ownername || '')
+            setSubSiteTitle(data?.sitesubtitle || '')
+            setTrustedTagline(data?.trustedtagline || '')
             setSiteDescription(data?.sitedescription || '')
             if (data?.sitelogourl) {
                 const logoUrl = typeof data.sitelogourl === 'object' ? data.sitelogourl.url : data.sitelogourl;
@@ -278,24 +286,28 @@ export default function Settings() {
                             </div>
                         </div>
                         <div className="field-group">
-                            <label className="field-label">Short Description</label>
-                            <input className="field-input" type="text" placeholder="Give a short description" value={shortdescription} onChange={(e) => setShortDescription(e.target.value)} />
-                            <span className="field-hint">Ex: Over two decades of supplying high-quality steel products to businesses and homes across Bangalore. Bulk pricing available.</span>
+                            <label className="field-label">Owner Name</label>
+                            <input className="field-input" type="text" placeholder="Raj Kapoor" value={ownername} onChange={(e) => setOwnerName(e.target.value)} />
                         </div>
                         <div className="field-group">
+                            <label className="field-label">Owner Title</label>
+                            <input className="field-input" type="text" placeholder="Proprietor" value={ownertitle} onChange={(e) => setOwnerTitle(e.target.value)} />
+                        </div>
+                        <div className="field-group">
+                            <label className="field-label">About Owner</label>
+                            <textarea className="field-input" placeholder="With over two decades of experience, we are a reliable partner for businesses across various sectors. Our commitment to quality, customer satisfaction, and sustainable practices has been the cornerstone of our success." value={aboutowner} onChange={(e) => setAboutOwner(e.target.value)} />
+                        </div>                        
+                        <div className="field-group">
                             <label className="field-label">Years of Experience</label>
-                            <input className="field-input" type="text" placeholder="Give your years of experience" value={yearsofexperience} onChange={(e) => setYearsOfExperience(e.target.value)} />
-                            <span className="field-hint">Ex: 25+</span>
+                            <input className="field-input" type="text" placeholder="Give your years of experience. Ex: 25+" value={yearsofexperience} onChange={(e) => setYearsOfExperience(e.target.value)} />
                         </div>
                         <div className="field-group">
                             <label className="field-label">Products Sold</label>
-                            <input className="field-input" type="text" placeholder="How many unique products did you sell?" value={productssold} onChange={(e) => setProductsSold(e.target.value)} />
-                            <span className="field-hint">Ex: 20000+</span>
+                            <input className="field-input" type="text" placeholder="How many unique products did you sell?. Ex: 20000+" value={productssold} onChange={(e) => setProductsSold(e.target.value)} />
                         </div>
                         <div className="field-group">
                             <label className="field-label">Happy Clients</label>
-                            <input className="field-input" type="text" placeholder="How many satisfied customers do you have?" value={happyclients} onChange={(e) => setHappyClients(e.target.value)} />
-                            <span className="field-hint">Ex: 2000+</span>
+                            <input className="field-input" type="text" placeholder="How many satisfied customers do you have?. Ex: 2000+" value={happyclients} onChange={(e) => setHappyClients(e.target.value)} />
                         </div>
                     </div>
                     <div className="save-section">
@@ -315,16 +327,20 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="settings-card-body">
-                        <div className="field-row">
+                        {/* <div className="field-row"> */}
                             <div className="field-group">
                                 <label className="field-label">Site Title <span className="required">*</span></label>
-                                <input className="field-input" type="text" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)} />
+                                <input className="field-input" type="text" placeholder="Raj Steel Shop" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)} />
                             </div>
                             <div className="field-group">
-                                <label className="field-label">Owner Name</label>
-                                <input className="field-input" type="text" value={ownername} onChange={(e) => setOwnerName(e.target.value)} />
+                                <label className="field-label">Site Sub Title</label>
+                                <input className="field-input" type="text" placeholder="Stainless Steel Shop" value={sitesubtitle} onChange={(e) => setSubSiteTitle(e.target.value)} />
                             </div>
-                        </div>
+                            <div className="field-group">
+                                <label className="field-label">Trusted Tagline</label>
+                                <input className="field-input" type="text" placeholder="Trusted Wholesale Supplier · Bangalore" value={trustedtagline} onChange={(e) => setTrustedTagline(e.target.value)} />
+                            </div>
+                        {/* </div> */}
                         <div className="field-group">
                             <label className="field-label">Site Logo</label>
                             <div className="upload-area" onClick={() => fileInputRef.current?.click()}>

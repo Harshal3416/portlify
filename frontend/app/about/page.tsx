@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useSiteDetails } from "../context/siteContext";
 import { useSearchParams } from "next/navigation";
-import { getAdminContactDetails } from "@/services/settingsService";
+import { getAdminContactDetails, getAdminDetails } from "@/services/settingsService";
 import { useToast } from "../context/ToastContext";
 
 export default function About() {
@@ -23,11 +23,12 @@ export default function About() {
   const [ownername, setOwnerName] = useState("");
   const [sitedescription, setSiteDescription] = useState("");
   const [sitelogourl, setSiteLogoUrl] = useState<string>("");
-
+const [ownertitle, setOwnerTitle] = useState("");
+const [aboutowner, setAboutOwner] = useState("");
   useEffect(() => {
     if (!tenantid) return;
 
-    fetchAdminContactDetails();
+    fetchAdminDeatails();
     // if(siteDetails) {
     //   setSiteTitle(siteDetails.sitetitle);
     //   setSiteDescription(siteDetails.sitedescription || '')
@@ -38,11 +39,13 @@ export default function About() {
     // }
   }, [tenantid]);
 
-  const fetchAdminContactDetails = async () => {
+  const fetchAdminDeatails = async () => {
     if (!tenantid) return;
     try {
-      const data = await getAdminContactDetails(tenantid);
+      const data = await getAdminDetails();
       setOwnerName(data?.ownername || '')
+      setOwnerTitle(data?.ownertitle || '')
+      setAboutOwner(data?.aboutowner || '')
     } catch (err: any) {
       showToast(err.message, "danger");
     }
@@ -71,9 +74,9 @@ return (
       <div className="card-body">
         <div className="owner-row">
           <div className="owner-avatar">{ownername.charAt(0)}</div>
-          <div><div className="owner-name">{ownername}</div><div className="owner-role">Owner & Proprietor</div></div>
+          <div><div className="owner-name">{ownername}</div><div className="owner-role">{ownertitle}</div></div>
         </div>
-        <p className="about-text">{sitedescription}</p>
+        <p className="about-text">{aboutowner}</p>
       </div>
     </div>
   // <>

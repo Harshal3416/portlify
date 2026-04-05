@@ -1,6 +1,8 @@
 export interface SiteDetail {
     tenantid: string;
     tenantdomain: string;
+    sitesubtitle: string;
+    trustedtagline: string;
     shoptype: string;
     shortdescription: string;
     yearsofexperience: string;

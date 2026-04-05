@@ -115,7 +115,7 @@ export default function Card({
     return (
         <div className="product-card">
             <div className="product-img">
-                {renderImage(product.highlightimage, false)}<span className="product-badge">{availableInCart ? 'In Cart' : 'In Stock'}</span></div>
+                {renderImage(product.highlightimage, false)}<span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
             <div className="product-info">
                 <div className="product-name">{product.name || "-"}</div>
                 <div className="product-id">ID: {product.productid || "-"}</div>

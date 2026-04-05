@@ -6,11 +6,10 @@ const clerkAuth = require('../middleware/clerkAuth')
 
 // POST — save admin details for logged-in user
 router.post("/", clerkAuth, async (req, res) => {
-  console.log(req.body);
-  const { tenantid, tenantdomain, shortdescription, yearsofexperience, productssold, happyclients} = req.body;
+  const { tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients} = req.body;
   const clerkId = req.clerkId; // injected by middleware
 
-  if (!tenantid || !tenantdomain) {
+  if (!tenantid) {
     return res
       .status(400)
       .json({ error: "tenantid and tenantdomain are required" });
@@ -18,18 +17,19 @@ router.post("/", clerkAuth, async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO admindetails (clerkid, tenantid, tenantdomain, shortdescription, yearsofexperience, productssold, happyclients)
-   VALUES ($1, $2, $3, $4, $5, $6, $7)
+      `INSERT INTO admindetails (clerkid, tenantid, ownername, ownertitle, aboutowner,  yearsofexperience, productssold, happyclients)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
    ON CONFLICT (clerkid) DO UPDATE
    SET 
      tenantid = EXCLUDED.tenantid,
-     tenantdomain = EXCLUDED.tenantdomain,
-     shortdescription = EXCLUDED.shortdescription,
+     ownername = EXCLUDED.ownername,
+     ownertitle = EXCLUDED.ownertitle,
+     aboutowner = EXCLUDED.aboutowner,
      yearsofexperience = EXCLUDED.yearsofexperience,
      productssold = EXCLUDED.productssold,
      happyclients = EXCLUDED.happyclients
    RETURNING *`,
-      [clerkId, tenantid, tenantdomain, shortdescription, yearsofexperience, productssold, happyclients],
+      [clerkId, tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients],
     );
 
     return res.status(200).json({

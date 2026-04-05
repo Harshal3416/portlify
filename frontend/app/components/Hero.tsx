@@ -1,29 +1,77 @@
 'use client'
 
-import { useSiteDetails } from '../context/siteContext';
+import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
+import { useEffect, useState } from 'react';
+import { useToast } from '../context/ToastContext';
 
 export function Hero() {
-  const siteDetails = useSiteDetails();
+  const { showToast } = useToast();
+  
+  const [tenantid, setTenantId] = useState('');
+  const [trustedtagline, setTrustedTagline] = useState('');
+  const [sitedescription, setSiteDescription] = useState('');
+  const [sitesubtitle, setSubSiteTitle] = useState('');
+  const [yearsofexperience, setYOE] = useState('');
+  const [productssold, setProductsSold] = useState('');
+  const [happyclients, setHappyClients] = useState('');
 
-  const stats = [
-    { num: '20+', label: 'Years Experience' },
-    { num: '500+', label: 'Products' },
-    { num: '1000+', label: 'Happy Clients' },
-  ];
+  useEffect(() => {
+    fetchData();
+    fetchAdminDetails();
+  }, [tenantid]);
+
+ 
+  const fetchAdminDetails = async () => {
+    try {
+      const data = await getAdminDetails();
+      setTenantId(data?.tenantid || '');
+      setYOE(data?.yearsofexperience || '');
+      setProductsSold(data?.productssold || '');
+      setHappyClients(data?.happyclients || '');
+    } catch (err: any) {
+      showToast(err.message, "danger");
+    }
+  }
+
+  const fetchData = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getSiteInformation(tenantid);
+      setTrustedTagline(data?.trustedtagline || '');
+      setSubSiteTitle(data?.sitesubtitle || '');
+      setSiteDescription(data?.sitedescription || '');
+    } catch (err: any) {
+      showToast(err.message, "danger");
+    }
+  }
 
   return (
     <section className="hero">
       <div className="hero-inner">
-        <div className="hero-badge">⭐ Trusted Wholesale Supplier · Bangalore</div>
-        <h2>Premium <em>Stainless Steel</em><br/>Products & Cookware</h2>
-        <p>Over two decades of supplying high-quality steel products to businesses and homes across Bangalore. Bulk pricing available.</p>
+        <div className="hero-badge">⭐ {trustedtagline}</div>
+        {/* <h2>Premium <em>Stainless Steel</em><br/>Products & Cookware</h2> */}
+        <h2>{sitesubtitle}</h2>
+        <p>{sitedescription}</p>
         <div className="hero-stats">
-          {stats.map((stat, i) => (
-            <div key={i} className="stat">
-              <div className="stat-num-hero">{stat.num}</div>
-              <div className="stat-label-hero">{stat.label}</div>
+          {yearsofexperience &&
+            <div className="stat">
+              <div className="stat-num-hero">{yearsofexperience}</div>
+              <div className="stat-label-hero">Years</div>
             </div>
-          ))}
+          }
+          {productssold &&
+            <div className="stat">
+              <div className="stat-num-hero">{productssold}</div>
+              <div className="stat-label-hero">Products</div>
+            </div>
+          }
+          {happyclients &&
+
+            <div className="stat">
+              <div className="stat-num-hero">{happyclients}</div>
+              <div className="stat-label-hero">Happy Clients</div>
+            </div>
+          }
         </div>
       </div>
     </section>

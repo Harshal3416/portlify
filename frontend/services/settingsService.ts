@@ -7,7 +7,7 @@ export const getAdminDetails = async () => {
   return res.data?.data ?? null;
 }
 
-export const updateAdminDetails = async (data: { tenantid: string; tenantdomain: string; shoptype: string; shortdescription: string; yearsofexperience: string; productssold: string; happyclients: string; }) => {
+export const updateAdminDetails = async (data: { tenantid: string; ownername: string; ownertitle: string; aboutowner: string; yearsofexperience: string; productssold: string; happyclients: string; }) => {
   try {
     const res = await apiClient.post(`/admin-details`, data);
     return res.data?.data ?? null;
@@ -25,15 +25,17 @@ export const getSiteInformation = async (tenantid?: string): Promise<SiteDetail 
   }
   console.log("Settings fetch for:", tenantid);
   const res = await apiClient.get(`/site-details/siteinformation/${tenantid}`);
-  console.log("Settings res:", res.data);
+  console.log("getSiteInformation res:", res.data);
   return res.data.data ?? null;
 };
 
-export const updateSiteInformation = async (data: {tenantid: string; sitetitle: string; sitelogourl: File | null; ownername: string; sitedescription: string; }) => {
+export const updateSiteInformation = async (data: {tenantid: string; sitelogourl: File | null; sitetitle: string; sitesubtitle: string; trustedtagline:string; sitedescription: string; }) => {
+  console.log("Updating site information with data:", data);
   const formData = new FormData();
   formData.append('tenantid', data.tenantid);
   formData.append('sitetitle', data.sitetitle);
-  formData.append('ownername', data.ownername);
+  formData.append('sitesubtitle', data.sitesubtitle);
+  formData.append('trustedtagline', data.trustedtagline);
   formData.append('sitedescription', data.sitedescription);
 
   if (data.sitelogourl instanceof File) {
@@ -47,12 +49,12 @@ export const updateSiteInformation = async (data: {tenantid: string; sitetitle: 
 // admin contact details
 export const getAdminContactDetails = async (tenantid?: string): Promise<SiteDetail | null> => {
   if (!tenantid) {
-    console.warn("getUserSettings no tenantid");
+    console.warn("admin contact details no tenantid");
     return null;
   }
   console.log("Settings fetch for:", tenantid);
   const res = await apiClient.get(`/site-details/admincontact/${tenantid}`);
-  console.log("Settings res:", res.data);
+  console.log("admincontact res:", res.data);
   return res.data?.data ?? null;
 };
 

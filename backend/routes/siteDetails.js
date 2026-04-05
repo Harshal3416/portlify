@@ -5,12 +5,13 @@ const pool = require('../../database/db/db')
 
 // --- siteinformation routes ---
 router.post('/siteinformation', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (req, res) => {
-  const { tenantid, sitetitle, ownername, sitedescription } = req.body
+  const { tenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription } = req.body
 
   if (!tenantid || !sitetitle) {
     return res.status(400).json({ error: 'tenantid and sitetitle are required' })
   }
 
+  console.log('Received siteinformation data:', tenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription ) // Debug log
   try {
     const existingRow = await pool.query('SELECT sitelogourl FROM siteinformation WHERE tenantid = $1', [tenantid])
     const existingLogo = existingRow.rows[0]?.sitelogourl || null
@@ -24,16 +25,17 @@ router.post('/siteinformation', upload.fields([{ name: 'sitelogourl', maxCount: 
       : existingLogo
 
     const result = await pool.query(
-      `INSERT INTO siteinformation (tenantid, sitetitle, sitelogourl, ownername, sitedescription, updatedat)
-       VALUES ($1, $2, $3, $4, $5, NOW())
+      `INSERT INTO siteinformation (tenantid, sitelogourl, sitetitle, sitesubtitle, trustedtagline, sitedescription, updatedat)
+       VALUES ($1, $2, $3, $4, $5, $6, NOW())
        ON CONFLICT (tenantid) DO UPDATE SET
-         sitetitle = EXCLUDED.sitetitle,
-         sitelogourl = EXCLUDED.sitelogourl,
-         ownername = EXCLUDED.ownername,
+          sitelogourl = EXCLUDED.sitelogourl,
+          sitetitle = EXCLUDED.sitetitle,
+         sitesubtitle = EXCLUDED.sitesubtitle,
+         trustedtagline = EXCLUDED.trustedtagline,
          sitedescription = EXCLUDED.sitedescription,
          updatedat = NOW()
        RETURNING *`,
-      [tenantid, sitetitle, sitelogourl ? JSON.stringify(sitelogourl) : null, ownername || null, sitedescription || null],
+      [tenantid, sitelogourl ? JSON.stringify(sitelogourl) : null, sitetitle, sitesubtitle || null, trustedtagline || null, sitedescription || null],
     )
 
     return res.status(201).json({ success: true, data: result.rows[0] })

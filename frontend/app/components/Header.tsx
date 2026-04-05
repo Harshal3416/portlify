@@ -5,13 +5,16 @@ import { useEffect, useState } from 'react';
 import { UserButton } from '@clerk/nextjs';
 import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
 import { useToast } from '../context/ToastContext';
+import { renderImage } from '../lib/renderImage';
 
 export function Header() {
   const { showToast } = useToast();
 
   const router = useRouter();
   const [sitetitle, setSiteTitle] = useState('');
+  const [sitesubtitle, setSubSiteTitle] = useState('');
   const [tenantid, setTenantId] = useState('');
+  const [sitelogourl, setSiteLogoUrl] = useState<string | { filename: string; size: number; url?: string } | null>(null);
 
   // Simulate cart count from localStorage (match existing logic)
   useEffect(() => {
@@ -34,6 +37,8 @@ export function Header() {
     try {
       const data = await getSiteInformation(tenantid);
       setSiteTitle(data?.sitetitle || '');
+      setSubSiteTitle(data?.sitesubtitle || '');
+      setSiteLogoUrl(data?.sitelogourl || null);
     } catch (err: any) {
       showToast(err.message, "danger");
     }
@@ -50,10 +55,10 @@ export function Header() {
     <header className="header">
       <div className="header-inner">
         <div className="logo">
-          <div className="logo-icon">🔩</div>
+          <div className="logo-icon">{renderImage(sitelogourl, false)}</div>
           <div className="logo-text">
-            <h1>{sitetitle || 'Raj Wholesale'}<span className="admin-badge">Admin</span></h1>
-            <span>Stainless Steel Shop</span>
+            <h1>{sitetitle || 'Raj Wholesale'}</h1>
+            {/* {sitesubtitle &&  <span>{sitesubtitle}</span>} */}
           </div>
         </div>
         <div className="nav-actions">
