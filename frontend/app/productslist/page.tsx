@@ -12,24 +12,7 @@ import { IoRemoveCircleOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
 import { useSiteDetails } from "../context/siteContext";
-
-interface Product {
-    productid: string;
-    name?: string;
-    description?: string;
-    // highlightimage may be:
-    // - a File/Blob client‑side (used when previewing before upload)
-    // - a string URL returned by the server
-    // - a metadata object returned by your API (e.g. { filename, size, url })
-    highlightimage?: Blob | string | { filename: string; size: number; url?: string } | null;
-}
-
-interface CartData {
-    productid: string,
-    name: string,
-    image: Blob | string | { filename: string; size: number; url?: string } | null,
-    count: number
-}
+import { CartData, Product } from "../interfaces/interface";
 
 export default function ProductList() {
 
@@ -160,7 +143,7 @@ export default function ProductList() {
                     <Modal.Body>
                         {cartItems.map((item: CartData, index) => {
                             return (
-                                <div key={index} className="flex flex-row items-center border-1 border-gray-200 p-4">
+                                <div key={index} className="flex flex-row items-center p-4">
                                     <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
                                     <div className="flex items-center space-x-2">
                                         <button

@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import Card, { Product } from "@/app/components/ui/card";
+import Card from "@/app/components/ui/card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
 import Button from 'react-bootstrap/Button';
 import { getAdminDetails } from "@/services/settingsService";
 import { renderImage } from "@/app/lib/renderImage";
+import { Product } from "@/app/interfaces/interface";
 
 export default function Products() {
   const router = useRouter();
@@ -137,10 +138,6 @@ export default function Products() {
     )
   }
 
-  const siteSettings = () => {
-    router.push("/admin/settings");
-  };
-
   const startEditingProduct = (product: Product) => {
     setEditingProductId(product.productid);
     setProductName(product.name || "");
@@ -151,61 +148,26 @@ export default function Products() {
 
   return (
     <div className="m-4 w-[80%] mx-auto">
-
-      {/* <header className="flex flex-row justify-between items-center my-4">
-        <div className="text-2xl m-2">Products</div>
-        <div className="flex flex-row justify-end my-4">
-          {tenantid &&
-            <>
-              <button
-                type="button"
-                className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-                onClick={() => {
-                  setAddProductModal(true);
-                  resetProductForm()
-                  console.log("addProductsModal", addProductsModal)
-                }}
-              >
-                Add new Product
-              </button>
-              <button
-                type="button"
-                className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-                onClick={() => {
-                  router.push(`/store?tenantid=${tenantid}`);
-                }}
-              >
-                Customer Portal
-              </button>
-            </>
-          }
-
-          <button
-            className="px-4 py-2 text-sm border border-gray-400 rounded-md hover:bg-gray-100"
-            onClick={() => siteSettings()}> Site Settings
-          </button>
-        </div>
-      </header> */}
       <div className="page-header">
-    <div>
-      <div className="page-title">Products</div>
-      <div className="page-subtitle">Manage your product catalog</div>
-    </div>
-    <button className="add-btn"
-    onClick={() => {
-                  setAddProductModal(true);
-                  resetProductForm()
-                  console.log("addProductsModal", addProductsModal)
-                }}>+ Add New Product</button>
-  </div>
+        <div>
+          <div className="page-title">Products</div>
+          <div className="page-subtitle">Manage your product catalog</div>
+        </div>
+        <button className="add-btn"
+          onClick={() => {
+            setAddProductModal(true);
+            resetProductForm()
+            console.log("addProductsModal", addProductsModal)
+          }}>+ Add New Product</button>
+      </div>
 
-  {/* <!-- Stats --> */}
-  <div className="stats-row">
-    <div className="stat-card">
-      <div className="stat-icon blue">📦</div>
-      <div><div className="stat-num">{products.length}</div><div className="stat-label">Total Products</div></div>
-    </div>
-  </div>
+      {/* <!-- Stats --> */}
+      <div className="stats-row">
+        <div className="stat-card">
+          <div className="stat-icon blue">📦</div>
+          <div><div className="stat-num">{products.length}</div><div className="stat-label">Total Products</div></div>
+        </div>
+      </div>
 
       {submitError && (
         <p className="text-red-600 mb-2 text-sm max-w-md">
@@ -230,7 +192,7 @@ export default function Products() {
               product={product}
               mode="admin"
               onDelete={() => { setDeleteId(product.productid); setShowDeleteModal(true) }}
-              onEdit={() => { startEditingProduct(product); setAddProductModal(true) } }
+              onEdit={() => { startEditingProduct(product); setAddProductModal(true) }}
             />
           ))
         )}
@@ -242,10 +204,10 @@ export default function Products() {
             <Modal.Title>{editingProductId ? "Edit product" : "Add a product"}
             </Modal.Title>
             <button className="modal-close" onClick={() => {
-                  resetProductForm
-                  setAddProductModal(false);
-                }
-                }>✕</button>
+              resetProductForm
+              setAddProductModal(false);
+            }
+            }>✕</button>
           </Modal.Header>
           <Modal.Body>
             <div className="field-group">
@@ -279,105 +241,33 @@ export default function Products() {
                   } />
               </div>
             </div>
-            {/* <div className="rounded-md p-4 flex flex-col h-full w-full">
-                <input
-                  className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
-                  name="Product Name"
-                  type="text"
-                  placeholder="Enter Product Name"
-                  value={productName}
-                  onChange={(e) => setProductName(e.target.value)}
-                  required
-                />
-
-                <input
-                  className="p-2 mt-3 border border-gray-300 rounded-md text-sm opacity-50"
-                  type="text"
-                  value={productid}
-                  placeholder="Enter Product ID"
-                  disabled
-                />
-
-                <textarea
-                  className="p-2 mt-3 border border-gray-300 rounded-md text-sm"
-                  name="Description"
-                  placeholder="Enter Product Description"
-                  rows={4}
-                  maxLength={150}
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                />
-                <p className="text-xs text-gray-500 mt-1">
-                  {description.length}/150 characters
-                </p>
-
-                <label className="mt-3 text-xs font-medium text-gray-700">
-                  Upload Highlight Image <span className="text-red-700">*</span>
-                </label>
-                <input
-                  ref={fileInputRef}
-                  className="p-2 mt-1 border border-gray-300 rounded-md text-sm"
-                  name="highlightimage"
-                  placeholder="Upload Highlight Image"
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setHighlightImage(e.target.files?.[0] || null)
-                  }
-                />
-              </div> */}
           </Modal.Body>
           <Modal.Footer>
             {/* <div className="modal-footer"> */}
-              <button className="btn-cancel" onClick={() => {
-                resetProductForm
-                setAddProductModal(false);
-              }
-              }>Cancel</button>
-              <button className="btn-save" onClick={handleSubmitProduct} disabled={
-                submitting ||
-                !productid ||
-                !productName ||
-                (!editingProductId && !highlightimage)
-              }
-              >💾 Save Changes</button>
-            {/* </div> */}
-            {/* <div className="flex gap-2 mt-3">
-              <button
-                className="px-4 py-2 border border-gray-400 rounded-md text-sm"
-                type="button"
-                onClick={() => {
-                  resetProductForm
-                  setAddProductModal(false);
-                }
-                }
-              >
-                Cancel
-              </button>
-              <button
-                className="px-4 py-2 bg-black text-white rounded-md text-sm disabled:opacity-60"
-                onClick={handleSubmitProduct}
-                type="button"
-                disabled={
-                  submitting ||
-                  !productid ||
-                  !productName ||
-                  (!editingProductId && !highlightimage)
-                }
-              >
-                {editingProductId ? "Save changes" : "+ Add this product"}
-              </button>
-
-
-
-            </div> */}
+            <button className="btn-cancel" onClick={() => {
+              resetProductForm
+              setAddProductModal(false);
+            }
+            }>Cancel</button>
+            <button className="btn-save" onClick={handleSubmitProduct} disabled={
+              submitting ||
+              !productid ||
+              !productName ||
+              (!editingProductId && !highlightimage)
+            }
+            >💾 Save Changes</button>
           </Modal.Footer>
         </Modal>}
 
       {showDeleteModal && (
         <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
-          <Modal.Header closeButton>
+          <Modal.Header>
             <Modal.Title>Delete product</Modal.Title>
+            <button className="modal-close" onClick={(e) => {
+              e.stopPropagation();
+              setShowDeleteModal(false);
+            }
+            }>✕</button>
           </Modal.Header>
           <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
           <Modal.Footer>

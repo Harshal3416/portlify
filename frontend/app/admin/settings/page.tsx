@@ -329,7 +329,6 @@ export default function Settings() {
 
             {/* <!-- Right Content --> */}
             <div>
-
                 {/* <!-- Admin Details --> */}
                 <div className="settings-card" id="adminSec">
                     <div className="settings-card-header">
@@ -351,7 +350,7 @@ export default function Settings() {
                             <span className="field-hint">⚠️ Special characters are not allowed. This is your unique shop identifier.</span>
                         </div>
                         <div className="field-group">
-                            <label className="field-label">I am a <span className="required">*</span></label>
+                            <label className="field-label">I am a</label>
                             <div className="role-options">
                                 <div className="role-option selected">
                                     <div className="role-icon">🏪</div>
@@ -407,7 +406,6 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="settings-card-body">
-                        {/* <div className="field-row"> */}
                         <div className="field-group">
                             <label className="field-label">Site Title <span className="required">*</span></label>
                             <input className="field-input" type="text" placeholder="Raj Steel Shop" value={sitetitle} onChange={(e) => setSiteTitle(e.target.value)} />
@@ -420,7 +418,6 @@ export default function Settings() {
                             <label className="field-label">Trusted Tagline</label>
                             <input className="field-input" type="text" placeholder="Trusted Wholesale Supplier · Bangalore" value={trustedtagline} onChange={(e) => setTrustedTagline(e.target.value)} />
                         </div>
-                        {/* </div> */}
                         <div className="field-group">
                             <label className="field-label">Site Logo</label>
                             <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
@@ -451,9 +448,9 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="mx-4 my-2">
-                        {errorPhone && <p className="text-sm text-[indianred] my-0">{errorPhone}</p>}
-                        {errorAlternatePhone && <p className="text-sm text-[indianred] my-0">{errorAlternatePhone}</p>}
-                        {errorEmail && <p className="text-sm text-[indianred] my-0">{errorEmail}</p>}
+                        {errorPhone && <p className="text-sm text-[indianred] my-0">❌{errorPhone}</p>}
+                        {errorAlternatePhone && <p className="text-sm text-[indianred] my-0">❌{errorAlternatePhone}</p>}
+                        {errorEmail && <p className="text-sm text-[indianred] my-0">❌{errorEmail}</p>}
                     </div>
                     <div className="settings-card-body">
 
@@ -497,9 +494,9 @@ export default function Settings() {
                             </div>
                         </div>
                         <div className="mx-4 my-2">
-                            {errorInstagram && <p className="text-sm text-[indianred] my-0">{errorInstagram}</p>}
-                            {errorGoogleMap && <p className="text-sm text-[indianred] my-0">{errorGoogleMap}</p>}
-                            {errorJustDial && <p className="text-sm text-[indianred] my-0">{errorJustDial}</p>}
+                            {errorInstagram && <p className="text-sm text-[indianred] my-0">❌ {errorInstagram}</p>}
+                            {errorGoogleMap && <p className="text-sm text-[indianred] my-0">❌ {errorGoogleMap}</p>}
+                            {errorJustDial && <p className="text-sm text-[indianred] my-0">❌ {errorJustDial}</p>}
                         </div>
                         <div className="settings-card-body">
                             <div className="field-group">
@@ -507,7 +504,7 @@ export default function Settings() {
                                 <input className="field-input" type="url" placeholder="https://instagram.com/..." value={instagramurl} onChange={(e) => setInstagramUrl(e.target.value)} />
                             </div>
                             <div className="field-group">
-                                <label className="field-label">🔍 Google Map URL</label>
+                                <label className="field-label">📍 Google Map URL</label>
                                 <input className="field-input" type="url" placeholder="https://maps.google.com/..." value={googlemapurl} onChange={(e) => setGoogleMapUrl(e.target.value)} />
                             </div>
                             <div className="field-group">
@@ -525,8 +522,8 @@ export default function Settings() {
                         <div className="settings-card-header">
                             <div className="settings-card-icon">🕐</div>
                             <div>
-                                <div className="settings-card-title">Opening Hours</div>
-                                <div className="settings-card-desc">Set your shop's operating hours per day</div>
+                                <div className="settings-card-title">Available Hours</div>
+                                <div className="settings-card-desc">Set your available hours per day</div>
                             </div>
                         </div>
                         <div className="settings-card-body">
