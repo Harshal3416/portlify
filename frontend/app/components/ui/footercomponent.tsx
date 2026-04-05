@@ -25,7 +25,7 @@ export function FooterComponent() {
         <div>
           Contact developer: <button onClick={openGmail}>professor3416@gmail.com</button> · <button onClick={openWhatsapp}>WhatsApp</button>
         </div>
-        <div>© {new Date().getFullYear()} {siteDetails?.sitetitle || 'Raj Wholesale Stainless Steel Shop'}. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} {siteDetails?.sitetitle} All rights reserved.</div>
       </div>
     </footer>
   );

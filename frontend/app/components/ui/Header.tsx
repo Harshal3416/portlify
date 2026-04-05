@@ -6,9 +6,12 @@ import { UserButton, useUser } from '@clerk/nextjs';
 import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
 import { useToast } from '../../context/ToastContext';
 import { renderImage } from '../../lib/renderImage';
+import { useSiteDetails } from '@/app/context/siteContext';
 
 export function Header() {
   const { showToast } = useToast();
+  const siteDetails = useSiteDetails();
+  
   const { user, isLoaded } = useUser();
 
   const router = useRouter();
@@ -20,6 +23,10 @@ export function Header() {
   const [sitelogourl, setSiteLogoUrl] = useState<string | { filename: string; size: number; url?: string } | null>(null);
 
   useEffect(() => {
+    setTenantId(siteDetails?.tenantid || '');
+  }, [siteDetails])
+
+  useEffect(() => {
     setTenantId(tenantidFromUrl || '');
   }, [tenantidFromUrl]);
 
@@ -28,28 +35,6 @@ export function Header() {
       fetchData();
     }
   }, [tenantid]);
-
-  useEffect(() => {
-    if (!isLoaded) return;
-
-    if (tenantid) {
-      fetchAdminDetails(tenantid);
-      return;
-    }
-
-    if (user) {
-      fetchAdminDetails();
-    }
-  }, [isLoaded, user, tenantid]);
-
-  const fetchAdminDetails = async (tenantId?: string) => {
-    try {
-      const data = await getAdminDetails(tenantId);
-      setTenantId(data?.tenantid || tenantId || '');
-    } catch (err: any) {
-      showToast(err.message, "danger");
-    }
-  }
 
   const fetchData = async () => {
     if (!tenantid) return;
@@ -61,13 +46,6 @@ export function Header() {
       showToast(err.message, "danger");
     }
   }
-
-  // const openWhatsapp = () => {
-  //   const phoneNumber = siteDetails?.contactphone || siteDetails?.alternatecontactphone || '';
-  //   const message = "Hello, I would like to inquire about your products.";
-  //   const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-  //   window.open(url, "_blank");
-  // };
 
   return (
     <header className="header">

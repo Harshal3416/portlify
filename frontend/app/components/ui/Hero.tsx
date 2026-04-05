@@ -4,9 +4,11 @@ import { getAdminDetails, getSiteInformation } from '@/services/settingsService'
 import { useEffect, useState } from 'react';
 import { useToast } from '../../context/ToastContext';
 import { useSearchParams } from 'next/navigation';
+import { useSiteDetails } from '@/app/context/siteContext';
 
 export function Hero() {
   const { showToast } = useToast();
+  const siteDetails = useSiteDetails();
   
   const [trustedtagline, setTrustedTagline] = useState('');
   const [sitedescription, setSiteDescription] = useState('');
@@ -15,29 +17,20 @@ export function Hero() {
   const [productssold, setProductsSold] = useState('');
   const [happyclients, setHappyClients] = useState('');
 
-    const searchParams = useSearchParams();
-    const tenantidFromUrl = searchParams.get('tenantid');
-    const [tenantid, setTenantId] = useState(tenantidFromUrl || '');
+  const searchParams = useSearchParams();
+  const tenantidFromUrl = searchParams.get('tenantid');
+  const [tenantid, setTenantId] = useState(tenantidFromUrl || '');
 
+  useEffect(() => {
+    setTenantId(siteDetails?.tenantid || '');
+    setYOE(siteDetails?.yearsofexperience || '');
+    setProductsSold(siteDetails?.productssold || '');
+    setHappyClients(siteDetails?.happyclients || '');
+  }, [siteDetails])
 
   useEffect(() => {
     fetchData();
-    fetchAdminDetails();
   }, [tenantid]);
-
- 
-  const fetchAdminDetails = async () => {
-    if (!tenantid) return;
-    try {
-      const data = await getAdminDetails(tenantid);
-      setTenantId(data?.tenantid || '');
-      setYOE(data?.yearsofexperience || '');
-      setProductsSold(data?.productssold || '');
-      setHappyClients(data?.happyclients || '');
-    } catch (err: any) {
-      showToast(err.message, "danger");
-    }
-  }
 
   const fetchData = async () => {
     if (!tenantid) return;

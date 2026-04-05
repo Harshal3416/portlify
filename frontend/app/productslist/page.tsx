@@ -33,9 +33,9 @@ export default function ProductList() {
     const [phoneNumber, setPhoneNumber] = useState("");
 
     useEffect(() => {
-    if (siteDetails?.contactphone) {
-        setPhoneNumber(siteDetails.contactphone);
-    }
+        if (siteDetails?.contactphone) {
+            setPhoneNumber(siteDetails.contactphone);
+        }
     }, [siteDetails]);
 
     useEffect(() => {
@@ -88,7 +88,7 @@ export default function ProductList() {
 
     const handleItemCount = (id: string, action: string) => {
         if (!isCartOpen) return;
-        
+
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
         const index = items.findIndex((item: CartData) => item.productid === id);
         if (index !== -1) {
@@ -109,11 +109,10 @@ export default function ProductList() {
     return (
         <div>
             <div className="gallery-header">
-                <span className="section-title">Our Products</span>
-                          <button className="cart-btn" onClick={openCart}>
-            <span>🛒</span> Cart <span className="cart-badge">{cartCount}</span>
-          </button>
-                {/* <span className="section-count">{cartCount} item</span> */}
+                <span className="section-title">Our Gallery</span>
+                <button className="cart-btn" onClick={openCart}>
+                    <span>🛒</span> Cart <span className="cart-badge">{cartCount}</span>
+                </button>
             </div>
             <div className="search-wrap">
                 <span className="search-icon">🔍</span>
@@ -138,7 +137,7 @@ export default function ProductList() {
                 <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
                     <Modal.Header>
                         <Modal.Title>Cart</Modal.Title>
-                                    <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
+                        <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
                     </Modal.Header>
                     <Modal.Body>
                         {cartItems.map((item: CartData, index) => {
@@ -193,61 +192,5 @@ export default function ProductList() {
                 </Modal>
             )}
         </div>
-        // <div className="flex flex-col my-10 border-t-2 border-gray-300 m-2 px-4 w-[80%] mx-auto">
-        //     <header className="flex flex-row justify-between items-center my-4">
-        //         <div className="text-2xl m-2">Gallery</div>
-
-        //         <button className="flex flex-row items-center p-2 bg-black text-white rounded-md" onClick={openCart}>
-        //             <span><LuShoppingCart /> </span><span className="m-2">{cartCount}</span>
-        //         </button>
-        //     </header>
-        //     {products.length > 0 ? (
-        //         <>
-        //             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-        //                 {paginatedProducts.map((product: any) => (
-        //                     <Card
-        //                         key={product.productid}
-        //                         product={product}
-        //                         mode="public"
-        //                         cartUpdated={(count: number) => handleCart(count)}
-        //                     />
-        //                 ))}
-        //             </div>
-        //             {/* Pagination Controls */}
-        //             {/* <div className="flex justify-center items-center mt-8 space-x-2">
-        //                 <button
-        //                     onClick={() => handlePageChange(currentPage - 1)}
-        //                     disabled={currentPage === 1}
-        //                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-        //                 >
-        //                     Previous
-        //                 </button>
-        //                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-        //                     <button
-        //                         key={page}
-        //                         onClick={() => handlePageChange(page)}
-        //                         className={`px-4 py-2 rounded-md ${page === currentPage
-        //                                 ? 'bg-blue-500 text-white'
-        //                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        //                             }`}
-        //                     >
-        //                         {page}
-        //                     </button>
-        //                 ))}
-        //                 <button
-        //                     onClick={() => handlePageChange(currentPage + 1)}
-        //                     disabled={currentPage === totalPages}
-        //                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-        //                 >
-        //                     Next
-        //                 </button>
-        //             </div> */}
-        //         </>
-        //     ) : (
-        //         <p>No products available.</p>
-        //     )}
-
-            
-        // </div>
     );
 }

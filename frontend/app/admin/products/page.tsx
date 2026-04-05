@@ -6,13 +6,11 @@ import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import { getAdminDetails } from "@/services/settingsService";
 import { renderImage } from "@/app/lib/renderImage";
 import { Product } from "@/app/interfaces/interface";
 
 export default function Products() {
-  const router = useRouter();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
@@ -21,7 +19,7 @@ export default function Products() {
 
   // Use React Query for fetching products - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
-  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantid);
+  const { data: products = [], isLoading: loadingProducts } = useGetProductsQuery(tenantid);
 
   // shared state for add / edit form
   const [productName, setProductName] = useState("");
@@ -31,7 +29,6 @@ export default function Products() {
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -250,7 +247,6 @@ export default function Products() {
             }
             }>Cancel</button>
             <button className="btn-save" onClick={handleSubmitProduct} disabled={
-              submitting ||
               !productid ||
               !productName ||
               (!editingProductId && !highlightimage)
