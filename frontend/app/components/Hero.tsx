@@ -3,17 +3,22 @@
 import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
 import { useEffect, useState } from 'react';
 import { useToast } from '../context/ToastContext';
+import { useSearchParams } from 'next/navigation';
 
 export function Hero() {
   const { showToast } = useToast();
   
-  const [tenantid, setTenantId] = useState('');
   const [trustedtagline, setTrustedTagline] = useState('');
   const [sitedescription, setSiteDescription] = useState('');
   const [sitesubtitle, setSubSiteTitle] = useState('');
   const [yearsofexperience, setYOE] = useState('');
   const [productssold, setProductsSold] = useState('');
   const [happyclients, setHappyClients] = useState('');
+
+    const searchParams = useSearchParams();
+    const tenantidFromUrl = searchParams.get('tenantid');
+    const [tenantid, setTenantId] = useState(tenantidFromUrl || '');
+
 
   useEffect(() => {
     fetchData();
@@ -22,8 +27,9 @@ export function Hero() {
 
  
   const fetchAdminDetails = async () => {
+    if (!tenantid) return;
     try {
-      const data = await getAdminDetails();
+      const data = await getAdminDetails(tenantid);
       setTenantId(data?.tenantid || '');
       setYOE(data?.yearsofexperience || '');
       setProductsSold(data?.productssold || '');

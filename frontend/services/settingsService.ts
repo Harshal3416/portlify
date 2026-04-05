@@ -2,8 +2,11 @@ import apiClient from "@/lib/apiClient";
 import { SiteDetail } from "@/app/interfaces/interface";
 
 // admin details
-export const getAdminDetails = async () => {
-  const res = await apiClient.get(`/admin-details`);
+export const getAdminDetails = async (tenantid?: string) => {
+  console.log("Fetching admin details for tenantid:", tenantid);
+
+  const endpoint = tenantid ? `/admin-details/${tenantid}` : `/admin-details`;
+  const res = await apiClient.get(endpoint);
   return res.data?.data ?? null;
 }
 

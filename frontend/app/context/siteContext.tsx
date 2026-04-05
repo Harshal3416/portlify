@@ -21,7 +21,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
           console.log("No tenantid available");
           return;
         }
-        const details = await getAdminDetails();
+        const details = await getAdminDetails(tenantid);
         console.log("Context Data", details);
         setSiteDetails(details);
       } catch (error) {

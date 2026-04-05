@@ -2,9 +2,10 @@ const express = require('express')
 const router = express.Router()
 const { upload } = require('../middleware/upload')
 const pool = require('../../database/db/db')
+const clerkAuth = require('../middleware/clerkAuth')
 
 // --- siteinformation routes ---
-router.post('/siteinformation', upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (req, res) => {
+router.post('/siteinformation', clerkAuth, upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (req, res) => {
   const { tenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription } = req.body
 
   if (!tenantid || !sitetitle) {
@@ -58,7 +59,7 @@ router.get('/siteinformation/:tenantid', async (req, res) => {
 })
 
 // --- admincontact routes ---
-router.post('/admincontact', async (req, res) => {
+router.post('/admincontact', clerkAuth, async (req, res) => {
   const { tenantid, contactemail, contactphone, alternatecontactphone, address } = req.body
 
   if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })
@@ -96,7 +97,7 @@ router.get('/admincontact/:tenantid', async (req, res) => {
 })
 
 // --- adminsocial routes ---
-router.post('/adminsocial', async (req, res) => {
+router.post('/adminsocial', clerkAuth, async (req, res) => {
   const { tenantid, instagramurl, googlemapurl, justdialurl } = req.body
   console.log('Received adminsocial data:', req.body) // Debug log
   if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })
@@ -133,7 +134,7 @@ router.get('/adminsocial/:tenantid', async (req, res) => {
 })
 
 // --- openinghours routes ---
-router.post('/openinghours', async (req, res) => {
+router.post('/openinghours', clerkAuth, async (req, res) => {
   const { tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday } = req.body
 
   if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })

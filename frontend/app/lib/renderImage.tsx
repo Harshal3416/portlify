@@ -3,7 +3,7 @@
 
         const baseProps = {
             alt: "Product image",
-            className: `object-contain rounded-md ${forCart? 'h-12' : ''}`,
+            className: `object-contain  ${forCart? 'h-12' : ''}`,
         };
 
         if (typeof image === "string") {

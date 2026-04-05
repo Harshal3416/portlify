@@ -6,7 +6,7 @@ export const useSettings = (tenantid?: string) => {
   const { showToast } = useToast();
 
   return useMutation({
-    mutationFn: () => getAdminDetails(),
+    mutationFn: () => getAdminDetails(tenantid),
 
     onError: (error: any) => {
       showToast(error?.message || "Failed to fetch settings", "danger");

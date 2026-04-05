@@ -1,32 +1,51 @@
 'use client'
 
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
-import { UserButton } from '@clerk/nextjs';
+import { UserButton, useUser } from '@clerk/nextjs';
 import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
 import { useToast } from '../context/ToastContext';
 import { renderImage } from '../lib/renderImage';
 
 export function Header() {
   const { showToast } = useToast();
+  const { user, isLoaded } = useUser();
 
   const router = useRouter();
   const [sitetitle, setSiteTitle] = useState('');
-  const [sitesubtitle, setSubSiteTitle] = useState('');
-  const [tenantid, setTenantId] = useState('');
+
+  const searchParams = useSearchParams();
+  const tenantidFromUrl = searchParams.get('tenantid');
+  const [tenantid, setTenantId] = useState(tenantidFromUrl || '');
   const [sitelogourl, setSiteLogoUrl] = useState<string | { filename: string; size: number; url?: string } | null>(null);
 
-  // Simulate cart count from localStorage (match existing logic)
   useEffect(() => {
-    fetchData();
-    fetchAdminDetails();
-    // setTenantId(tenantidFromUrl || '');
+    setTenantId(tenantidFromUrl || '');
+  }, [tenantidFromUrl]);
+
+  useEffect(() => {
+    if (tenantid) {
+      fetchData();
+    }
   }, [tenantid]);
 
-  const fetchAdminDetails = async () => {
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    if (tenantid) {
+      fetchAdminDetails(tenantid);
+      return;
+    }
+
+    if (user) {
+      fetchAdminDetails();
+    }
+  }, [isLoaded, user, tenantid]);
+
+  const fetchAdminDetails = async (tenantId?: string) => {
     try {
-      const data = await getAdminDetails();
-      setTenantId(data?.tenantid || '');
+      const data = await getAdminDetails(tenantId);
+      setTenantId(data?.tenantid || tenantId || '');
     } catch (err: any) {
       showToast(err.message, "danger");
     }
@@ -37,7 +56,6 @@ export function Header() {
     try {
       const data = await getSiteInformation(tenantid);
       setSiteTitle(data?.sitetitle || '');
-      setSubSiteTitle(data?.sitesubtitle || '');
       setSiteLogoUrl(data?.sitelogourl || null);
     } catch (err: any) {
       showToast(err.message, "danger");
@@ -62,7 +80,7 @@ export function Header() {
           </div>
         </div>
         <div className="nav-actions">
-          {tenantid && (
+          {isLoaded && user && tenantid && (
             <>
               <button className="nav-btn primary" onClick={() => router.push("/admin/products")}>📦 Products</button>
               <button className="nav-btn ghost" onClick={() => router.push("/admin/settings")}>⚙️ Site Settings</button>
