@@ -4,11 +4,16 @@ import { useEffect, useState } from "react";
 import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useSiteDetails } from "../context/siteContext";
 import { useSearchParams } from "next/navigation";
+import { getAdminContactDetails } from "@/services/settingsService";
+import { useToast } from "../context/ToastContext";
 
 export default function About() {
+
+  const { showToast } = useToast();
+  
   // const { user } = useAuth();
   // const router = useRouter();
-  const siteDetails = useSiteDetails();
+  // const siteDetails = useSiteDetails();
   const searchParams = useSearchParams();
   const tenantidFromUrl = searchParams.get('tenantid');
   const tenantid = tenantidFromUrl; // Get tenantid: from URL params first, then from auth context, then fallback
@@ -22,15 +27,26 @@ export default function About() {
   useEffect(() => {
     if (!tenantid) return;
 
-    if(siteDetails) {
-      setSiteTitle(siteDetails.sitetitle);
-      setSiteDescription(siteDetails.sitedescription || '')
-      setOwnerName(siteDetails.ownername || '')
-      if (siteDetails?.sitelogourl && typeof siteDetails.sitelogourl === 'object' && siteDetails.sitelogourl.url) {
-        setSiteLogoUrl("http://localhost:3000" + siteDetails.sitelogourl.url);
-      }
+    fetchAdminContactDetails();
+    // if(siteDetails) {
+    //   setSiteTitle(siteDetails.sitetitle);
+    //   setSiteDescription(siteDetails.sitedescription || '')
+    //   setOwnerName(siteDetails.ownername || '')
+    //   if (siteDetails?.sitelogourl && typeof siteDetails.sitelogourl === 'object' && siteDetails.sitelogourl.url) {
+    //     setSiteLogoUrl("http://localhost:3000" + siteDetails.sitelogourl.url);
+    //   }
+    // }
+  }, [tenantid]);
+
+  const fetchAdminContactDetails = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getAdminContactDetails(tenantid);
+      setOwnerName(data?.ownername || '')
+    } catch (err: any) {
+      showToast(err.message, "danger");
     }
-  }, [siteDetails]);
+  }
 
   const renderLogo = () => {
     // Show the logo if we have a URL

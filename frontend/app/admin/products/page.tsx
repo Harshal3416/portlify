@@ -203,7 +203,7 @@ export default function Products() {
   <div className="stats-row">
     <div className="stat-card">
       <div className="stat-icon blue">📦</div>
-      <div><div className="stat-num">2</div><div className="stat-label">Total Products</div></div>
+      <div><div className="stat-num">{products.length}</div><div className="stat-label">Total Products</div></div>
     </div>
   </div>
 
@@ -381,15 +381,15 @@ export default function Products() {
           </Modal.Header>
           <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
           <Modal.Footer>
-            <Button variant="secondary" onClick={() => setShowDeleteModal(false)}>
+            <button className="btn-enquire" onClick={() => setShowDeleteModal(false)}>
               No
-            </Button>
-            <Button variant="danger" onClick={() => {
+            </button>
+            <button className="btn-remove" onClick={() => {
               setShowDeleteModal(false);
               handleDeleteProduct();
             }}>
               Yes, Delete
-            </Button>
+            </button>
           </Modal.Footer>
         </Modal>
       )}

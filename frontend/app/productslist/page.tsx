@@ -153,8 +153,9 @@ export default function ProductList() {
             {/* <ProductList search={search} /> */}
             {isCartOpen && cartItems && cartItems.length > 0 && (
                 <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
-                    <Modal.Header closeButton>
+                    <Modal.Header>
                         <Modal.Title>Cart</Modal.Title>
+                                    <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
                     </Modal.Header>
                     <Modal.Body>
                         {cartItems.map((item: CartData, index) => {

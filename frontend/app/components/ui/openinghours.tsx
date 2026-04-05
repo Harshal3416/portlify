@@ -1,14 +1,16 @@
 'use client';
 
+import { useToast } from "@/app/context/ToastContext";
+import { getOpeningHours } from "@/services/settingsService";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { useSiteDetails } from "../../context/siteContext";
 
 export default function OpeningHours() {
+  const { showToast } = useToast();
 
-  const siteDetails = useSiteDetails();
-
-  const [open, setOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const tenantidFromUrl = searchParams.get('tenantid');
+  const tenantid = tenantidFromUrl; // Get tenantid: from URL params first, then from auth context, then fallback
 
   const [monday, setMondayTime] = useState('');
   const [tuesday, setTuesdayTime] = useState('');
@@ -20,24 +22,28 @@ export default function OpeningHours() {
   const [today, setToday] = useState('monday')
 
   useEffect(() => {
-    if (siteDetails) {
-      setMondayTime(siteDetails?.monday || '');
-      setTuesdayTime(siteDetails?.tuesday || '');
-      setWednesdayTime(siteDetails?.wednesday || '');
-      setThursdayTime(siteDetails?.thursday || '');
-      setFridayTime(siteDetails?.friday || '');
-      setSaturdayTime(siteDetails?.saturday || '');
-      setSundayTime(siteDetails?.sunday || '');
-    }
+    fetchData();
 
-    // const today = new Date();
-    // const day = String(today.getDate()).padStart(2, '0'); // Pads with 0 if single digit
     const today = new Date();
     const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
     setToday(dayName)
-    console.log("TODAY", dayName)
+  }, []);
 
-  }, [siteDetails]);
+  const fetchData = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getOpeningHours(tenantid);
+      setMondayTime(data?.monday || '');
+      setTuesdayTime(data?.tuesday || '');
+      setWednesdayTime(data?.wednesday || '');
+      setThursdayTime(data?.thursday || '');
+      setFridayTime(data?.friday || '');
+      setSaturdayTime(data?.saturday || '');
+      setSundayTime(data?.sunday || '');
+    } catch (err: any) {
+      showToast(err.message, "danger");
+    }
+  }
 
 const openingHours = [
   { label: "Monday", value: monday },

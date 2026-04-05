@@ -1,24 +1,50 @@
 'use client'
 
-import { useSiteDetails } from '../context/siteContext';
+import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
+import { UserButton } from '@clerk/nextjs';
+import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
+import { useToast } from '../context/ToastContext';
 
 export function Header() {
-  const siteDetails = useSiteDetails();
-  const [cartCount, setCartCount] = useState(0);
+  const { showToast } = useToast();
+
+  const router = useRouter();
+  const [sitetitle, setSiteTitle] = useState('');
+  const [tenantid, setTenantId] = useState('');
 
   // Simulate cart count from localStorage (match existing logic)
   useEffect(() => {
-    const items = JSON.parse(localStorage.getItem("cart") || "[]");
-    setCartCount(items.length);
-  }, [cartCount]);
+    fetchData();
+    fetchAdminDetails();
+    // setTenantId(tenantidFromUrl || '');
+  }, [tenantid]);
 
-  const openWhatsapp = () => {
-    const phoneNumber = siteDetails?.contactphone || siteDetails?.alternatecontactphone || '';
-    const message = "Hello, I would like to inquire about your products.";
-    const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
-    window.open(url, "_blank");
-  };
+  const fetchAdminDetails = async () => {
+    try {
+      const data = await getAdminDetails();
+      setTenantId(data?.tenantid || '');
+    } catch (err: any) {
+      showToast(err.message, "danger");
+    }
+  }
+
+  const fetchData = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getSiteInformation(tenantid);
+      setSiteTitle(data?.sitetitle || '');
+    } catch (err: any) {
+      showToast(err.message, "danger");
+    }
+  }
+
+  // const openWhatsapp = () => {
+  //   const phoneNumber = siteDetails?.contactphone || siteDetails?.alternatecontactphone || '';
+  //   const message = "Hello, I would like to inquire about your products.";
+  //   const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;
+  //   window.open(url, "_blank");
+  // };
 
   return (
     <header className="header">
@@ -26,16 +52,19 @@ export function Header() {
         <div className="logo">
           <div className="logo-icon">🔩</div>
           <div className="logo-text">
-            <h1>{siteDetails?.sitetitle || 'Raj Wholesale'}<span className="admin-badge">Admin</span></h1>
+            <h1>{sitetitle || 'Raj Wholesale'}<span className="admin-badge">Admin</span></h1>
             <span>Stainless Steel Shop</span>
           </div>
         </div>
-    <div className="nav-actions">
-      <button className="nav-btn primary">📦 Products</button>
-      <button className="nav-btn ghost">⚙️ Site Settings</button>
-      <button className="nav-btn ghost">🏪 Customer Portal</button>
-      <div className="avatar">H</div>
-    </div>
+        <div className="nav-actions">
+          {tenantid && (
+            <>
+              <button className="nav-btn primary" onClick={() => router.push("/admin/products")}>📦 Products</button>
+              <button className="nav-btn ghost" onClick={() => router.push("/admin/settings")}>⚙️ Site Settings</button>
+              <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
+            </>)}
+          <div className="avatar"> <UserButton /></div>
+        </div>
       </div>
     </header>
   );

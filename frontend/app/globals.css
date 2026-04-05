@@ -152,14 +152,14 @@ header.header {
 .avatar {
   width: 38px;
   height: 38px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--steel-dark), #5a7a9a);
+  /* border-radius: 50%; */
+  /* background: linear-gradient(135deg, var(--steel-dark), #5a7a9a); */
   display: flex;
   align-items: center;
   justify-content: center;
-  color: white;
+  /* color: white;
   font-weight: 700;
-  font-size: 15px;
+  font-size: 15px; */
   cursor: pointer;
 }
 

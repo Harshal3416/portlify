@@ -1,4 +1,11 @@
 export interface SiteDetail {
+    tenantid: string;
+    tenantdomain: string;
+    shoptype: string;
+    shortdescription: string;
+    yearsofexperience: string;
+    productssold: string;
+    happyclients: string;
     sitetitle: string;
     sitelogourl?: { filename: string; size: number; url?: string } | string | null;
     ownername?: string;
