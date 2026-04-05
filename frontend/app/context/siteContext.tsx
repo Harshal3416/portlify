@@ -17,11 +17,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const loadDetails = async () => {
       try {
-        if (!tenantid) {
-          console.log("No tenantid available");
-          return;
-        }
-        const details = await getAdminDetails(tenantid);
+        const details = await getAdminDetails(tenantid || '');
         console.log("Context Data", details);
         setSiteDetails(details);
       } catch (error) {
@@ -29,7 +25,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
       }
     };
     loadDetails();
-  }, [tenantid]);
+  }, []);
 
   return (
     <SiteContext.Provider value={siteDetails}>

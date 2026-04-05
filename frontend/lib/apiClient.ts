@@ -15,11 +15,13 @@ apiClient.defaults.headers.common["Content-Type"] = "application/json";
 
 // Request interceptor
 apiClient.interceptors.request.use(async (config) => {
+  console.log("API Request:", config.method?.toUpperCase(), config.url);
   if (config.data instanceof FormData) {
     config.headers["Content-Type"] = "multipart/form-data";
   }
 
-  if (config.url?.startsWith("/admin") && getTokenFn) {
+  if ((config.url?.startsWith("/admin") || config.method?.toUpperCase() !== 'GET') && getTokenFn) {
+    console.log("ATTACHING TOKEN TO REQUEST");
     const token = await getTokenFn();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
