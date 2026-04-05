@@ -1,10 +1,9 @@
     export const renderImage = (image: any, forCart: boolean) => {
-        if (!image) return null;
+        if (!image) return '🖼️ ';
 
         const baseProps = {
             alt: "Product image",
-            className: `object-contain rounded-md ${forCart? 'h-12' : 'w-full h-32 sm:h-36 md:h-40'}
-            transition-transform duration-300 ease-in-out hover:scale-150`,
+            className: `object-contain  ${forCart? 'h-12' : ''}`,
         };
 
         if (typeof image === "string") {

@@ -1,23 +1,22 @@
 'use client';
 
-import { useSiteDetails } from "@/app/context/siteContext";
 import { useEffect, useState } from "react";
-import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
+import { getAdminContactDetails } from "@/services/settingsService";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function Contact() {
+  const { showToast } = useToast();
+  
   const searchParams = useSearchParams();
   const tenantidFromUrl = searchParams.get('tenantid');
 
-  const siteDetails = useSiteDetails();
-
-  const [open, setOpen] = useState(false);
   const [gmailId, setContactEmail] = useState("");
   const [phoneNumber, setContactPhone] = useState("");
   const [alternatePhoneNumber, setAlternateContactPhone] = useState("");
   const [address, setAddress] = useState("");
   const [instagramURL, setInstagramURL] = useState("");
-  const [googleURL, setGoogleURL] = useState("");
+  const [googlemap, setGoogleMapURL] = useState("");
   const [justDialLink, setJustDialURL] = useState("");
   const [gmapLink, setGmapLink] = useState("");
 
@@ -25,19 +24,25 @@ export default function Contact() {
   const tenantid = tenantidFromUrl;
 
   useEffect(() => {
-    console.log("siteDetails in contact component", siteDetails)
+    fetchAdminContactDetails();
+  }, [tenantid]);
 
-    if (siteDetails) {
-      setContactEmail(siteDetails.contactemail || "");
-      setContactPhone(siteDetails.contactphone || "");
-      setAlternateContactPhone(siteDetails.alternatecontactphone || "");
-      setAddress(siteDetails.address || "");
-      setInstagramURL(siteDetails.instagramurl || "");
-      setGoogleURL(siteDetails.googleurl || "");
-      setJustDialURL(siteDetails.justdialurl || "");
-      setGmapLink(siteDetails.gmapLink || "");
+  const fetchAdminContactDetails = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getAdminContactDetails(tenantid);
+      setContactEmail(data?.contactemail || "");
+      setContactPhone(data?.contactphone || "");
+      setAlternateContactPhone(data?.alternatecontactphone || "");
+      setAddress(data?.address || "");
+      setInstagramURL(data?.instagramurl || "");
+      setGoogleMapURL(data?.googlemapurl || "");
+      setJustDialURL(data?.justdialurl || "");
+      setGmapLink(data?.gmapLink || "");
+    } catch (err: any) {
+      showToast(err.message, "danger");
     }
-  }, [siteDetails]);
+  }
 
   const openWhatsapp = () => {
     if (!phoneNumber) return;
@@ -54,7 +59,7 @@ export default function Contact() {
     window.open(url, "_blank");
   }
 
-  const openPhoneDialer = (mob: number) => {
+  const openPhoneDialer = (mob: string) => {
     if (!mob) return;
     const phoneNumber = mob; // replace with your phone number
     const url = `tel:${phoneNumber}`;
@@ -67,123 +72,119 @@ export default function Contact() {
   }
 
   const hasContactData =
-  gmailId ||
-  phoneNumber ||
-  alternatePhoneNumber ||
-  address ||
-  instagramURL ||
-  googleURL ||
-  justDialLink;
+    gmailId ||
+    phoneNumber ||
+    alternatePhoneNumber ||
+    address ||
+    instagramURL ||
+    googlemap ||
+    justDialLink;
 
-if (!hasContactData) return null;
+  if (!hasContactData) return null;
 
-return (
-  <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-2">
-    {/* Header */}
-    <div
-          className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-      onClick={() => setOpen(!open)}
-    >
-      <span className="font-medium text-lg">Contact Details</span>
-      {open ? <FaArrowUp /> : <FaArrowDown />}
-    </div>
-
-    {/* Content */}
-    {open && (
-      <div className="border-t border-gray-200 p-4 grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3">
-        
-        {/* Email */}
-        {gmailId && (
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={openGmail}
-          >
-            <img src="/gmail.jpg" alt="Email" className="w-8 h-8" />
-            <span className="text-sm break-all">{gmailId}</span>
-          </div>
-        )}
-
-        {/* Phone */}
-        {(phoneNumber || alternatePhoneNumber) && (
-          <div className="flex items-center gap-3">
-            <img src="/phone.jpg" alt="Phone" className="w-8 h-8" />
-            <div className="text-sm">
-              {phoneNumber && (
-                <span
-                  className="cursor-pointer"
-                  onClick={() => openPhoneDialer(Number(phoneNumber))}
-                >
-                  {phoneNumber}
-                </span>
-              )}
-              {alternatePhoneNumber && (
-                <span
-                  className="cursor-pointer ml-2"
-                  onClick={() =>
-                    openPhoneDialer(Number(alternatePhoneNumber))
-                  }
-                >
-                  | {alternatePhoneNumber}
-                </span>
-              )}
-            </div>
-          </div>
-        )}
-
-        {/* Address */}
-        {address && (
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => openLink(gmapLink)}
-          >
-            <img src="/gmap.jpg" alt="Map" className="w-8 h-8" />
-            <span className="text-sm">{address}</span>
-          </div>
-        )}
-
-        {/* WhatsApp */}
-        {phoneNumber && (
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={openWhatsapp}
-          >
-            <img src="/whatsapp.jpg" alt="Whatsapp" className="w-8 h-8" />
-            <span className="text-sm">Chat on WhatsApp</span>
-          </div>
-        )}
-
-        {/* Social Links */}
-        {instagramURL && (
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => openLink(instagramURL)}
-          >
-            <img src="/instagram.png" alt="Instagram" className="w-8 h-8" />
-            <span className="text-sm">Instagram</span>
-          </div>
-        )}
-
-        {googleURL && (
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => openLink(googleURL)}
-          >
-            <img src="/google.png" alt="Google" className="w-8 h-8" />
-            <span className="text-sm">Google</span>
-          </div>
-        )}
-
-        {justDialLink && (
-          <div
-            className="flex items-center gap-3 cursor-pointer"
-            onClick={() => openLink(justDialLink)}
-          >
-            <img src="/justDial.png" alt="JustDial" className="w-18 h-8" />
-            <span className="text-sm">JustDial</span>
-          </div>
-        )}
+  return (
+    <div className="card">
+      {/* Header */}
+      <div className="custom-card-header">
+        <div className="card-title mb-0">
+          <div className="card-title-icon">📞</div>
+          Contact Details
+        </div>
       </div>
-    )}
-  </div>
-);
+
+      {/* Content */}
+      <div className="card-body" style={{ padding: '16px 24px' }}>
+        <div className="contact-list">
+          {/* Email */}
+          {gmailId && (
+            <button className="contact-item" onClick={openGmail}>
+              <div className="contact-icon mail">
+                <img src="/gmail.jpg" alt="" className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="contact-text">{gmailId}</div>
+                <div className="contact-sub">Email us anytime</div>
+              </div>
+            </button>
+          )}
+
+          {/* Phone */}
+          {(phoneNumber || alternatePhoneNumber) && (
+            <button className="contact-item" onClick={() => openPhoneDialer(phoneNumber || alternatePhoneNumber)}>
+              <div className="contact-icon phone">
+                <img src="/phone.jpg" alt="" className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="contact-text">{phoneNumber}{alternatePhoneNumber && ` | ${alternatePhoneNumber}`}</div>
+                <div className="contact-sub">Call or WhatsApp</div>
+              </div>
+            </button>
+          )}
+
+          {/* Address */}
+          {address && (
+            <button className="contact-item" onClick={() => openLink(gmapLink)}>
+              <div className="contact-icon location">
+                <img src="/gmap.jpg" alt="" className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="contact-text">{address}</div>
+                <div className="contact-sub">Bangalore – 590067</div>
+              </div>
+            </button>
+          )}
+
+          {/* WhatsApp */}
+          {phoneNumber && (
+            <button className="contact-item" onClick={openWhatsapp}>
+              <div className="contact-icon whatsapp">💬</div>
+              <div>
+                <div className="contact-text">Chat on WhatsApp</div>
+                <div className="contact-sub">Quick response</div>
+              </div>
+            </button>
+          )}
+
+          {/* Social Links */}
+          {instagramURL && (
+            <button className="contact-item" onClick={() => openLink(instagramURL)}>
+              <div className="contact-icon instagram">
+                <img src="/instagram.png" alt="" className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="contact-text">Instagram</div>
+                <div className="contact-sub">Follow us</div>
+              </div>
+            </button>
+          )}
+
+          {googlemap && (
+            <button className="contact-item" onClick={(e) => { e.preventDefault(); openLink(googlemap); }}>
+              <div className="contact-icon google">
+                <img src="/google.png" alt="" className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="contact-text">Google Business</div>
+                <div className="contact-sub">Leave a review</div>
+              </div>
+            </button>
+          )}
+
+          {justDialLink && (
+            <button className="contact-item" onClick={(e) => { e.preventDefault(); openLink(justDialLink); }}>
+              <div className="contact-icon jd">
+                <img src="/justdial.png" alt="" className="w-6 h-6" />
+              </div>
+              <div>
+                <div className="contact-text">JustDial</div>
+                <div className="contact-sub">Reviews</div>
+              </div>
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+
+
 }

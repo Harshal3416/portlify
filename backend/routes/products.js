@@ -4,10 +4,12 @@ const router = express.Router()
 const { upload } = require('../middleware/upload')
 const { products } = require('../utils/store')
 const pool = require("../../database/db/db");
+const clerkAuth = require('../middleware/clerkAuth')
 
 // Create product (multipart/form-data only; files are stored and URLs provided)
 router.post(
   '/',
+  clerkAuth,
   upload.fields([
     { name: 'highlightimage', maxCount: 1 },
     { name: 'otherimages', maxCount: 6 },
@@ -100,7 +102,7 @@ router.get('/:productid', (req, res) => {
 })
 
 // Update product by productid
-router.put('/:productid', upload.fields([
+router.put('/:productid', clerkAuth, upload.fields([
     { name: 'highlightimage', maxCount: 1 }
   ]), async (req, res) => {
   const { productid } = req.params
@@ -147,7 +149,7 @@ router.put('/:productid', upload.fields([
 })
 
 // Delete product by productid
-router.delete('/:productid', async (req, res) => {
+router.delete('/:productid', clerkAuth, async (req, res) => {
   const { productid } = req.params
   // const idx = products.findIndex(p => p.productid === productid)
 

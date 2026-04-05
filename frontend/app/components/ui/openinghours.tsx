@@ -1,14 +1,16 @@
 'use client';
 
+import { useToast } from "@/app/context/ToastContext";
+import { getOpeningHours } from "@/services/settingsService";
+import { useSearchParams } from "next/navigation";
 import { useEffect, useState } from "react";
-import { FaArrowDown, FaArrowUp } from "react-icons/fa";
-import { useSiteDetails } from "../../context/siteContext";
 
 export default function OpeningHours() {
+  const { showToast } = useToast();
 
-  const siteDetails = useSiteDetails();
-
-  const [open, setOpen] = useState(false);
+  const searchParams = useSearchParams();
+  const tenantidFromUrl = searchParams.get('tenantid');
+  const tenantid = tenantidFromUrl; // Get tenantid: from URL params first, then from auth context, then fallback
 
   const [monday, setMondayTime] = useState('');
   const [tuesday, setTuesdayTime] = useState('');
@@ -17,18 +19,31 @@ export default function OpeningHours() {
   const [friday, setFridayTime] = useState('');
   const [saturday, setSaturdayTime] = useState('');
   const [sunday, setSundayTime] = useState('');
+  const [today, setToday] = useState('monday')
 
   useEffect(() => {
-    if (siteDetails) {
-      setMondayTime(siteDetails?.monday || '');
-      setTuesdayTime(siteDetails?.tuesday || '');
-      setWednesdayTime(siteDetails?.wednesday || '');
-      setThursdayTime(siteDetails?.thursday || '');
-      setFridayTime(siteDetails?.friday || '');
-      setSaturdayTime(siteDetails?.saturday || '');
-      setSundayTime(siteDetails?.sunday || '');
+    fetchData();
+
+    const today = new Date();
+    const dayName = today.toLocaleDateString('en-US', { weekday: 'long' });
+    setToday(dayName)
+  }, []);
+
+  const fetchData = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getOpeningHours(tenantid);
+      setMondayTime(data?.monday || '');
+      setTuesdayTime(data?.tuesday || '');
+      setWednesdayTime(data?.wednesday || '');
+      setThursdayTime(data?.thursday || '');
+      setFridayTime(data?.friday || '');
+      setSaturdayTime(data?.saturday || '');
+      setSundayTime(data?.sunday || '');
+    } catch (err: any) {
+      showToast(err.message, "danger");
     }
-  }, [siteDetails]);
+  }
 
 const openingHours = [
   { label: "Monday", value: monday },
@@ -45,39 +60,21 @@ const hasOpeningHours = openingHours.some(day => day.value);
 if (!hasOpeningHours) return null;
 
 return (
-  <div className="w-[80%] mx-auto border border-gray-300 rounded-md my-4 overflow-hidden">
-    
-    {/* Header */}
-    <div
-      className="flex items-center justify-between p-4 cursor-pointer bg-gray-50 hover:bg-gray-100 transition"
-      onClick={() => setOpen(!open)}
-    >
-      <span className="font-medium text-lg">Opening Hours</span>
-      {open ? <FaArrowUp /> : <FaArrowDown />}
-    </div>
-
-    {/* Content */}
-    {open && (
-      <div className="border-t border-gray-200 p-4 grid gap-3 grid-cols-3 sm:grid-cols-3">
-        
-        {openingHours
-          .filter(day => day.value)
-          .map((day) => (
-            <div
-              key={day.label}
-              className="flex justify-between text-sm md:text-base"
-            >
-              <span className="font-medium text-gray-700">
-                {day.label}
-              </span>
-              <span className="text-gray-600">
-                {day.value}
-              </span>
-            </div>
-          ))}
-      
+      <div className="card">
+      <div className="custom-card-header">
+        <div className="card-title mb-0"><div className="card-title-icon">🕐</div>Opening Hours</div>
+        {/* <span className="open-badge"><span className="open-dot"></span> Open Now</span> */}
       </div>
-    )}
-  </div>
+      {/* style="padding:8px 24px 16px;" */}
+      <div className="card-body" >
+        <div className="hour-row"><span className={`day-name ${today === 'Monday' ? 'today' : ''}`}>Monday {`${today === 'Monday' ? '← Today' : ''}`}</span><span className="day-time">{monday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Tuesday' ? 'today' : ''}`}>Tuesday {`${today === 'Tuesday' ? '← Today' : ''}`}</span><span className="day-time">{tuesday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Wednesday' ? 'today' : ''}`}>Wednesday {`${today === 'Wednesday' ? '← Today' : ''}`}</span><span className="day-time">{wednesday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Thursday' ? 'today' : ''}`}>Thursday {`${today === 'Thursday' ? '← Today' : ''}`}</span><span className="day-time">{thursday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Friday' ? 'today' : ''}`}>Friday {`${today === 'Friday' ? '← Today' : ''}`}</span><span className="day-time">{friday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Saturday' ? 'today' : ''}`}>Saturday {`${today === 'Saturday' ? '← Today' : ''}`}</span><span className="day-time">{saturday}</span></div>
+        <div className="hour-row"><span className={`day-name ${today === 'Sunday' ? 'today' : ''}`}>Sunday {`${today === 'Sunday' ? '← Today' : ''}`}</span><span className="day-time">{sunday}</span></div>
+      </div>
+    </div>
 );
 }

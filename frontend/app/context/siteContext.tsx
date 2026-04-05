@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect } from "react";
-import { getUserSettings } from "../../services/settingsService";
+import { getAdminDetails } from "../../services/settingsService";
 import { SiteDetail } from "@/app/interfaces/interface";
 import { useSearchParams } from "next/navigation";
 
@@ -21,7 +21,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
           console.log("No tenantid available");
           return;
         }
-        const details = await getUserSettings(tenantid);
+        const details = await getAdminDetails(tenantid);
         console.log("Context Data", details);
         setSiteDetails(details);
       } catch (error) {
