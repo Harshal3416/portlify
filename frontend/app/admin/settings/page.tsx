@@ -54,6 +54,14 @@ export default function Settings() {
     
     const [currentLogoUrl, setCurrentLogoUrl] = useState<string>("");
 
+    // Error states
+    const [errorEmail, setErrorEmail] = useState("");
+    const [errorPhone, setErrorPhone] = useState("");
+    const [errorAlternatePhone, setErrorAlternatePhone] = useState("");
+    const [errorInstagram, setErrorInstagram] = useState("");
+    const [errorGoogleMap, setErrorGoogleMap] = useState("");
+    const [errorJustDial, setErrorJustDial] = useState("");
+
     useEffect(() => {
         fetchAdminDetails()
     }, []);
@@ -99,7 +107,7 @@ export default function Settings() {
     const updateSiteInformationFn = async () => {
         try {
             await updateSiteInformation({ tenantid, sitetitle, sitesubtitle, sitelogourl, trustedtagline, sitedescription });
-            showToast("Details saved!", "success")
+            showToast("Saved Successfully", "success");
             setIsAdminDetailsFromDb(true);
 
         } catch (error: any) {
@@ -127,10 +135,34 @@ export default function Settings() {
 
     // Update admin contact details function
     const updateAdminContactDetailsFn = async () => {
+        console.log("EMAIL VALIDITY", validateEmail(contactemail))
+        if ((!validateEmail(contactemail) ) || (!validatePhone(contactphone)) || (!validatePhone(alternatecontactphone))) {
+            if (!validateEmail(contactemail) && contactemail !== "") {
+                setErrorEmail("Enter a valid email address");
+            } else {
+                setErrorEmail("");
+            }
+            if (!validatePhone(contactphone) && contactphone !== "") {
+                setErrorPhone("Enter a valid 10-digit phone number");
+            } else {
+                setErrorPhone("");
+            }
+            if (!validatePhone(alternatecontactphone) && alternatecontactphone !== "") {
+                setErrorAlternatePhone("Enter a valid 10-digit phone number (Alternate Phone Number)");
+            } else {
+                setErrorAlternatePhone("");
+            }
+            return;
+        }
         try {
             await updateAdminContactDetails({ tenantid, contactemail, contactphone, alternatecontactphone, address });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
+                        showToast("Saved Successfully", "success");
+
+                                  setErrorEmail("");
+            setErrorPhone("");
+            setErrorAlternatePhone("");
 
         } catch (error: any) {
             showToast(error, "danger")
@@ -145,6 +177,9 @@ export default function Settings() {
             setContactPhone(data?.contactphone || '');
             setAlternateContactPhone(data?.alternatecontactphone || '');
             setAddress(data?.address || '');
+
+  
+
         } catch (err: any) {
             showToast(err.message, "danger");
         }
@@ -152,10 +187,26 @@ export default function Settings() {
 
     // Update social links details function
     const updateAdminSocialLinksFn = async () => {
+        if ((instagramurl && !isValidUrl(instagramurl)) || (googlemapurl && !isValidUrl(googlemapurl)) || (justdialurl && !isValidUrl(justdialurl))) {
+            if (instagramurl && !isValidUrl(instagramurl)) {
+                setErrorInstagram("Enter a valid URL for Instagram");
+            }
+            if (googlemapurl && !isValidUrl(googlemapurl)) {
+                setErrorGoogleMap("Enter a valid URL for Google Map");
+            }
+            if (justdialurl && !isValidUrl(justdialurl)) {
+                setErrorJustDial("Enter a valid URL for Just Dial");
+            }
+            return;
+        }
         try {
             await updateAdminSocialLinks({ tenantid, instagramurl, googlemapurl, justdialurl });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
+            setErrorInstagram("");
+            setErrorGoogleMap("");
+            setErrorJustDial("");
+            showToast("Saved Successfully", "success");
 
         } catch (error: any) {
             showToast(error, "danger")
@@ -186,6 +237,7 @@ export default function Settings() {
             setFriday(data?.friday || '');
             setSaturday(data?.saturday || '');
             setSunday(data?.sunday || '');
+            showToast("Saved Successfully", "success");
 
         } catch (error: any) {
             showToast(error, "danger")
@@ -219,7 +271,7 @@ export default function Settings() {
         return regex.test(value);
     };
 
-    function isValidUrl(url: string) {
+    const isValidUrl = (url: string) => {
         try {
             new URL(url);
             return true;
@@ -227,7 +279,6 @@ export default function Settings() {
             return false;
         }
     }
-
 
     const hasSpecialCharacter = (value: string) => {
         const regex = /[^a-zA-Z0-9]/;
@@ -356,7 +407,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-secondary">Reset</button>
+                        {/* <button className="btn-secondary">Reset</button> */}
                         <button className="btn-primary" onClick={updateSiteInformationFn} >💾 Save Site Info</button>
                     </div>
                 </div>
@@ -370,7 +421,13 @@ export default function Settings() {
                             <div className="settings-card-desc">Shown on your customer-facing portal</div>
                         </div>
                     </div>
+                    <div className="mx-4 my-2">
+                        {errorPhone && <p className="text-sm text-[indianred] my-0">{errorPhone}</p>}
+                        {errorAlternatePhone && <p className="text-sm text-[indianred] my-0">{errorAlternatePhone}</p>}
+                        {errorEmail && <p className="text-sm text-[indianred] my-0">{errorEmail}</p>}
+                    </div>
                     <div className="settings-card-body">
+
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Contact Email</label>
@@ -386,7 +443,7 @@ export default function Settings() {
                         <div className="field-row">
                             <div className="field-group">
                                 <label className="field-label">Alternate Phone</label>
-                                <input className="field-input" type="tel" placeholder="Optional" onChange={(e) => setAlternateContactPhone(e.target.value)}
+                                <input className="field-input" type="tel" placeholder="10-digit number" onChange={(e) => setAlternateContactPhone(e.target.value)}
                                     value={alternatecontactphone} />
                             </div>
                             <div className="field-group">
@@ -409,6 +466,11 @@ export default function Settings() {
                             <div className="settings-card-title">Social & Directory Links</div>
                             <div className="settings-card-desc">Links shown in your contact section</div>
                         </div>
+                    </div>
+                    <div className="mx-4 my-2">
+                        {errorInstagram && <p className="text-sm text-[indianred] my-0">{errorInstagram}</p>}
+                        {errorGoogleMap && <p className="text-sm text-[indianred] my-0">{errorGoogleMap}</p>}
+                        {errorJustDial && <p className="text-sm text-[indianred] my-0">{errorJustDial}</p>}
                     </div>
                     <div className="settings-card-body">
                         <div className="field-group">
@@ -479,7 +541,7 @@ export default function Settings() {
                         </table>
                     </div>
                     <div className="save-section">
-                        <button className="btn-secondary">Reset to Default</button>
+                        {/* <button className="btn-secondary">Reset to Default</button> */}
                         <button className="btn-primary" onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
                     </div>
                 </div>

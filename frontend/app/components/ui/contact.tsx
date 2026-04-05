@@ -1,23 +1,22 @@
 'use client';
 
-import { useSiteDetails } from "@/app/context/siteContext";
 import { useEffect, useState } from "react";
-// import { FaArrowDown, FaArrowUp } from "react-icons/fa";
 import { useSearchParams } from "next/navigation";
+import { getAdminContactDetails } from "@/services/settingsService";
+import { useToast } from "@/app/context/ToastContext";
 
 export default function Contact() {
+  const { showToast } = useToast();
+  
   const searchParams = useSearchParams();
   const tenantidFromUrl = searchParams.get('tenantid');
 
-  const siteDetails = useSiteDetails();
-
-  // const [open, setOpen] = useState(false);
   const [gmailId, setContactEmail] = useState("");
   const [phoneNumber, setContactPhone] = useState("");
   const [alternatePhoneNumber, setAlternateContactPhone] = useState("");
   const [address, setAddress] = useState("");
   const [instagramURL, setInstagramURL] = useState("");
-  const [googleURL, setGoogleURL] = useState("");
+  const [googlemap, setGoogleMapURL] = useState("");
   const [justDialLink, setJustDialURL] = useState("");
   const [gmapLink, setGmapLink] = useState("");
 
@@ -25,19 +24,25 @@ export default function Contact() {
   const tenantid = tenantidFromUrl;
 
   useEffect(() => {
-    console.log("siteDetails in contact component", siteDetails)
+    fetchAdminContactDetails();
+  }, [tenantid]);
 
-    if (siteDetails) {
-      setContactEmail(siteDetails.contactemail || "");
-      setContactPhone(siteDetails.contactphone || "");
-      setAlternateContactPhone(siteDetails.alternatecontactphone || "");
-      setAddress(siteDetails.address || "");
-      setInstagramURL(siteDetails.instagramurl || "");
-      setGoogleURL(siteDetails.googleurl || "");
-      setJustDialURL(siteDetails.justdialurl || "");
-      setGmapLink(siteDetails.gmapLink || "");
+  const fetchAdminContactDetails = async () => {
+    if (!tenantid) return;
+    try {
+      const data = await getAdminContactDetails(tenantid);
+      setContactEmail(data?.contactemail || "");
+      setContactPhone(data?.contactphone || "");
+      setAlternateContactPhone(data?.alternatecontactphone || "");
+      setAddress(data?.address || "");
+      setInstagramURL(data?.instagramurl || "");
+      setGoogleMapURL(data?.googlemapurl || "");
+      setJustDialURL(data?.justdialurl || "");
+      setGmapLink(data?.gmapLink || "");
+    } catch (err: any) {
+      showToast(err.message, "danger");
     }
-  }, [siteDetails]);
+  }
 
   const openWhatsapp = () => {
     if (!phoneNumber) return;
@@ -72,7 +77,7 @@ export default function Contact() {
     alternatePhoneNumber ||
     address ||
     instagramURL ||
-    googleURL ||
+    googlemap ||
     justDialLink;
 
   if (!hasContactData) return null;
@@ -153,8 +158,8 @@ export default function Contact() {
             </button>
           )}
 
-          {googleURL && (
-            <button className="contact-item" onClick={(e) => { e.preventDefault(); openLink(googleURL); }}>
+          {googlemap && (
+            <button className="contact-item" onClick={(e) => { e.preventDefault(); openLink(googlemap); }}>
               <div className="contact-icon google">
                 <img src="/google.png" alt="" className="w-6 h-6" />
               </div>
