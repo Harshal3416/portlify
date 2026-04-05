@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Card from "../components/ui/card";
+import Card from "../components/ui/Card";
 import { LuShoppingCart } from "react-icons/lu";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
 import Modal from 'react-bootstrap/Modal';

@@ -1,9 +1,6 @@
 'use client'
 
 import { useSiteDetails } from "@/app/context/siteContext";
-import { Mail } from "lucide-react";
-import { useEffect, useState } from "react";
-import { FaWhatsapp } from "react-icons/fa";
 
 export function FooterComponent() {
   const siteDetails = useSiteDetails();

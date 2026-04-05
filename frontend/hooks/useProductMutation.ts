@@ -23,19 +23,6 @@ export const useGetProductsQuery = (tenantid: string | any) => {
   return query;
 };
 
-// useMutation hook for fetching products (legacy - prefer useQuery above)
-// export const useGetProducts = () => {
-//     const queryClient = useQueryClient();
-
-//     return useMutation({
-//         mutationFn: getProducts,
-
-//         onSuccess: () => {
-//             queryClient.invalidateQueries({ queryKey: ["products"] });
-//         }
-//     })
-// }
-
 export const useCreateProduct = () => {
   const queryClient = useQueryClient();
 

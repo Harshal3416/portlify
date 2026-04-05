@@ -2,13 +2,13 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import 'bootstrap/dist/css/bootstrap.min.css';
 import "./globals.css";
-import { FooterComponent } from "./components/ui/footercomponent";
 import QueryProvider from "@/providers/QueryProvider";
 import { SiteProvider } from "./context/siteContext";
 import { ToastProvider } from "./context/ToastContext";
 import { ClerkProvider, Show, UserButton } from '@clerk/nextjs'
 import AuthInitializer from "./components/ui/AuthInitializer";
-import { Header } from "./components/Header";
+import { Header } from "./components/ui/Header";
+import { FooterComponent } from "./components/ui/Footercomponent";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",

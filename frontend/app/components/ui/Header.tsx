@@ -4,8 +4,8 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { UserButton, useUser } from '@clerk/nextjs';
 import { getAdminDetails, getSiteInformation } from '@/services/settingsService';
-import { useToast } from '../context/ToastContext';
-import { renderImage } from '../lib/renderImage';
+import { useToast } from '../../context/ToastContext';
+import { renderImage } from '../../lib/renderImage';
 
 export function Header() {
   const { showToast } = useToast();
