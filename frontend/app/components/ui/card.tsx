@@ -8,7 +8,7 @@ import { useSiteDetails } from "@/app/context/siteContext";
 import { CardProps, CartData } from "@/app/interfaces/interface";
 
 export default function Card({
-    product,
+    collection,
     mode = "preview",
     onDelete,
     onEdit,
@@ -24,17 +24,17 @@ export default function Card({
     const [showProductDetails, setShowProductDetails] = useState(false);
     const { showToast } = useToast();
 
-      const siteDetails = useSiteDetails();
-      const [phoneNumber, setPhoneNumber] = useState("");
-    
-      useEffect(() => {
+    const siteDetails = useSiteDetails();
+    const [phoneNumber, setPhoneNumber] = useState("");
+
+    useEffect(() => {
         if (siteDetails?.contactphone) {
-          setPhoneNumber(siteDetails.contactphone);
+            setPhoneNumber(siteDetails.contactphone);
         }
-      }, [siteDetails]);
+    }, [siteDetails]);
 
     const openWhatsappForProduct = () => {
-        const message = `Hello, I would like to enquire about "${product.name || "-"}" (ID: ${product.productid || "-"}). Description: ${product.description || "-"}`;
+        const message = `Hello, I would like to enquire about "${collection.itemname || "-"}" (ID: ${collection.itemid || "-"}). Description: ${collection.description || "-"}`;
         const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
     };
@@ -50,45 +50,46 @@ export default function Card({
     const addToCart = () => {
         const existingCartLS = getCartFromLocalStorage();
         existingCartLS.push({
-            productid: product.productid,
-            name: product.name,
-            image: product.highlightimage,
+            productId: collection.itemid,
+            name: collection.itemname,
+            image: collection.imageassets,
             count: 1
         });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
-        showToast(`${product.name || 'Product'} added to cart!`, "success")
+        showToast(`${collection.itemname || 'Product'} added to cart!`, "success")
         cartUpdated && cartUpdated(existingCartLS.length)
     }
 
     const isProductExistInCart = () => {
-        const x = getCartFromLocalStorage().find((el: CartData) => el.productid === product.productid);
+        const x = getCartFromLocalStorage().find((el: CartData) => el.itemid === collection.itemid);
         return x ? true : false
     }
 
     const removeFromCart = () => {
         const remainingProducts = getCartFromLocalStorage().filter((el: CartData) => {
-            return el.productid !== product.productid
+            return el.itemid !== collection.itemid
         })
         setAvailableInCart(false)
         localStorage.setItem('cart', JSON.stringify(remainingProducts))
-        showToast(`${product.name || 'Product'} removed from cart!`, "success")
+        showToast(`${collection.itemname || 'Product'} removed from cart!`, "success")
         cartUpdated && cartUpdated(remainingProducts.length)
     }
 
     return (
         <div className="product-card">
             <div className="product-img" onClick={() => setShowProductDetails(true)}>
-                {renderImage(product.highlightimage, false)}<span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
+                {collection.imageassets && renderImage(collection.imageassets.images[0], false)}
+                <span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
             <div className="product-info">
-                <div className="product-name">{product.name || "-"}</div>
-                <div className="product-id">ID: {product.productid || "-"}</div>
-                <div className="product-desc">{product.description || "-"}</div>
+                <div className="product-name">{collection.itemname || "-"}</div>
+                <div className="product-id">ID: {collection.itemid || "-"}</div>
+                <div className="product-desc">{collection.description || "-"}</div>
                 <div className="product-actions">
                     {canEdit ? (
                         <>
-                            <button className="btn-enquire" onClick={() => onEdit && onEdit(product)}>✏️ Edit</button>
-                            <button className="btn-remove" onClick={() => onDelete && onDelete(product.productid)}>🗑 Delete</button>
+                            <button className="btn-enquire" onClick={() => onEdit && onEdit(collection)}>✏️ Edit</button>
+                            <button className="btn-remove" onClick={() => onDelete && onDelete(collection.itemid)}>🗑 Delete</button>
                         </>
                     ) : (
                         <>
@@ -105,7 +106,7 @@ export default function Card({
             {showProductDetails && (
                 <Modal show={showProductDetails} centered>
                     <Modal.Header>
-                        <Modal.Title>{product.name}</Modal.Title>
+                        <Modal.Title>{collection.itemname}</Modal.Title>
                         <button className="modal-close" onClick={(e) => {
                             e.stopPropagation();
                             setShowProductDetails(false);
@@ -113,8 +114,8 @@ export default function Card({
                         }>✕</button>
                     </Modal.Header>
                     <Modal.Body>
-                        {product.description}
-                        {renderImage(product.highlightimage, false)}
+                        {collection.description}
+                        {renderImage(collection.imageassets, false)}
                     </Modal.Body>
                     <Modal.Footer>
                         <button className="btn-save"

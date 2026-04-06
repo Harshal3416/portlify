@@ -1,37 +1,41 @@
 import apiClient from "@/lib/apiClient";
 
 export const getProducts = async (tenantid:string) => {
-  const { data } = await apiClient.get(`/products?tenantid=${tenantid}`);
+  const { data } = await apiClient.get(`/collections?tenantid=${tenantid}`);
   if (!data.success) {
-    throw new Error(data.error || "Failed to fetch products");
+    throw new Error(data.error || "Failed to fetch collections");
   }
   return data.data;
 };
 
-export const createProduct = async (formData: FormData) => {
-  const { data } = await apiClient.post("/products", formData);
+export const createCollection = async (formData: FormData) => {
+  const { data } = await apiClient.post("/collections", formData);
 
   if (!data.success) {
-    throw new Error(data.error || "Failed to create product");
+    throw new Error(data.error || "Failed to create item");
   }
 
   return data.data;
 };
 
-export const updateProduct = async ({
+export const updateCollection = async ({
   id,
   formData,
 }: {
   id: string;
   formData: FormData;
 }) => {
-  const { data } = await apiClient.put(`/products/${id}`, formData);
+  const { data } = await apiClient.put(`/collections/${id}`, formData);
 
-  return data.rows[0];
+  if (!data.success) {
+    throw new Error(data.error || "Failed to update item");
+  }
+
+  return data.data;
 };
 
-export const deleteProduct = async ({productid}:{productid: string}) => {
-    const response = await apiClient.delete(`/products/${productid}`);
+export const deleteProduct = async ({itemid}:{itemid: string}) => {
+    const response = await apiClient.delete(`/collections/${itemid}`);
     
     // Check if response has data with success flag
     // If the API call was successful, it should either:
@@ -45,5 +49,5 @@ export const deleteProduct = async ({productid}:{productid: string}) => {
     }
     
     // If we got here, there was an error
-    throw new Error(responseData?.error || "Failed to delete product");
+    throw new Error(responseData?.error || "Failed to delete item");
 }

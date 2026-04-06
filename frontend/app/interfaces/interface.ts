@@ -31,31 +31,31 @@ export interface SiteDetail {
     sunday?: string;
 }
 
-export interface Product {
-    productid: string;
-    name?: string;
+export interface Collections {
+    itemid: string;
+    itemname?: string;
     description?: string;
-    // highlightimage can be:
-    // - a Blob/File (while previewing before upload)
-    // - a string path
-    // - an object with a `url` field from the backend
-    highlightimage?: Blob | string | { filename: string; size: number; url?: string } | null;
+    tenantid?: string;
+    imageassets?: { images: {filename: string; size: number; url?: string }[], videos: {filename: string; size: number; url?: string }[] };
+    otherImages?: { filename: string; size: number; url?: string }[];
+    videos?: { filename: string; size: number; url?: string }[];
+    createdAt?: string;
 }
 
 export type CardMode = "public" | "admin" | "preview";
 
 export interface CardProps {
-    product: Product;
+    collection: Collections;
     mode?: CardMode;
-    onDelete?: (productid: string) => void;
-    onEdit?: (product: Product) => void;
+    onDelete?: (itemid: string) => void;
+    onEdit?: (item: Collections) => void;
     whatsappNumber?: string;
     cartUpdated?: (count: number) => void;
 }
 
 export interface CartData {
-    productid: string,
-    name: string,
+    itemid: string,
+    itemname: string,
     image: Blob | string | { filename: string; size: number; url?: string } | null,
     count: number
 }
