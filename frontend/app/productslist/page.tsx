@@ -2,17 +2,15 @@
 
 import { useEffect, useState } from "react";
 import Card from "../components/ui/Card";
-import { LuShoppingCart } from "react-icons/lu";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import { renderImage } from "../lib/renderImage";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { IoRemoveCircleOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
 import { useSiteDetails } from "../context/siteContext";
-import { CartData, Product } from "../interfaces/interface";
+import { CartData, Collections } from "../interfaces/interface";
 
 export default function ProductList() {
 
@@ -41,10 +39,10 @@ export default function ProductList() {
     useEffect(() => {
         // get product details and filter from local storage
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        const productids = products.map((item: Product) => item.productid);
+        const productids = products.map((item: Collections) => item.itemid);
         console.log("Product ids", productids, products)
         const x = items.filter((item: CartData) => {
-            productids.includes(item.productid)
+            productids.includes(item.itemid)
         })
         console.log("items", items, x)
         handleCart(items.length);
@@ -78,7 +76,7 @@ export default function ProductList() {
         }
         let itemDetails = ''
         cartItems.map((item) => {
-            itemDetails += `\n Product Name: ${item.name} - Product ID: ${item.productid} - Count: ${item.count}`
+            itemDetails += `\n Product Name: ${item.itemname} - Product ID: ${item.itemid} - Count: ${item.count}`
         })
         console.log("itemDetails", itemDetails)
         const message = "Hello, I would like to buy these products." + itemDetails + "\n";
@@ -90,7 +88,7 @@ export default function ProductList() {
         if (!isCartOpen) return;
 
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        const index = items.findIndex((item: CartData) => item.productid === id);
+        const index = items.findIndex((item: CartData) => item.itemid === id);
         if (index !== -1) {
             if (action === 'delete') {
                 items.splice(index, 1);
@@ -123,10 +121,10 @@ export default function ProductList() {
                 />
             </div>
             <div className="gallery-grid">
-                {paginatedProducts.map((product: any) => (
+                {paginatedProducts.map((colection: any) => (
                     <Card
-                        key={product.productid}
-                        product={product}
+                        key={colection.itemid}
+                        collection={colection}
                         mode="public"
                         cartUpdated={(count: number) => handleCart(count)}
                     />
@@ -143,11 +141,11 @@ export default function ProductList() {
                         {cartItems.map((item: CartData, index) => {
                             return (
                                 <div key={index} className="flex flex-row items-center p-4">
-                                    <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
+                                    <span className="w-50">{item.itemname}:</span> <span> {renderImage(item.image, true)}</span>
                                     <div className="flex items-center space-x-2">
                                         <button
                                             type="button"
-                                            onClick={() => handleItemCount(item.productid, 'add')}
+                                            onClick={() => handleItemCount(item.itemid, 'add')}
                                             className="px-3 py-1 rounded-md hover:text-green-600"
                                         >
                                             <IoMdAddCircleOutline />
@@ -159,7 +157,7 @@ export default function ProductList() {
 
                                         <button
                                             type="button"
-                                            onClick={() => handleItemCount(item.productid, 'remove')}
+                                            onClick={() => handleItemCount(item.itemid, 'remove')}
                                             disabled={item.count === 1}
                                             className="px-3 py-1 rounded-md hover:text-red-600"
                                         >
@@ -167,7 +165,7 @@ export default function ProductList() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => handleItemCount(item.productid, 'delete')}
+                                            onClick={() => handleItemCount(item.itemid, 'delete')}
                                             className="py-1 rounded-md hover:text-red-600"
                                         >
                                             <MdDeleteOutline />
