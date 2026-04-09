@@ -20,8 +20,9 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
         const details = await getAdminDetails(tenantid || '');
         console.log("Context Data", details);
         setSiteDetails(details);
-      } catch (error) {
-        console.error("Failed to load site details:", error);
+      } 
+      catch (error) {
+        console.log("Failed to load site details:", error);
       }
     };
     loadDetails();

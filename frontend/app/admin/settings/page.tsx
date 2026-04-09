@@ -64,16 +64,19 @@ export default function Settings() {
     const [errorJustDial, setErrorJustDial] = useState("");
 
     useEffect(() => {
-    setTenantid(siteDetails?.tenantid || '');
-    setOwnerName(siteDetails?.ownername || '');
-    setOwnerTitle(siteDetails?.ownertitle || '');
-    setAboutOwner(siteDetails?.aboutowner || '');
-    setYearsOfExperience(siteDetails?.yearsofexperience || '');
-    setProductsSold(siteDetails?.productssold || '');
-    setHappyClients(siteDetails?.happyclients || '');
-  }, [siteDetails])
+        setTenantid(siteDetails?.tenantid || '');
+        setOwnerName(siteDetails?.ownername || '');
+        setOwnerTitle(siteDetails?.ownertitle || '');
+        setAboutOwner(siteDetails?.aboutowner || '');
+        setYearsOfExperience(siteDetails?.yearsofexperience || '');
+        setProductsSold(siteDetails?.productssold || '');
+        setHappyClients(siteDetails?.happyclients || '');
+    }, [siteDetails])
 
     useEffect(() => {
+        if(!isAdminDetailsFromDb) {
+            return;
+        }
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
@@ -94,6 +97,7 @@ export default function Settings() {
 
     // Site information update function
     const updateSiteInformationFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         try {
             await updateSiteInformation({ tenantid, sitetitle, sitesubtitle, sitelogourl, trustedtagline, sitedescription });
             showToast("Saved Successfully", "success");
@@ -124,6 +128,7 @@ export default function Settings() {
 
     // Update admin contact details function
     const updateAdminContactDetailsFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         if ((!validateEmail(contactemail)) || (!validatePhone(contactphone)) || (!validatePhone(alternatecontactphone))) {
             if (!validateEmail(contactemail) && contactemail !== "") {
                 setErrorEmail("Enter a valid email address");
@@ -172,6 +177,7 @@ export default function Settings() {
 
     // Update social links details function
     const updateAdminSocialLinksFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         if ((instagramurl && !isValidUrl(instagramurl)) || (googlemapurl && !isValidUrl(googlemapurl)) || (justdialurl && !isValidUrl(justdialurl))) {
             if (instagramurl && !isValidUrl(instagramurl)) {
                 setErrorInstagram("Enter a valid URL for Instagram");
@@ -212,6 +218,8 @@ export default function Settings() {
 
     // Update opening hours details function
     const updateOpeningHoursFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
+
         try {
             const data = await updateOpeningHours({ tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday });
             showToast("Details saved!", "success")
@@ -284,6 +292,7 @@ export default function Settings() {
     }, []);
 
     const handleNavClick = (sectionId: string) => {
+        if(!tenantid) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         setActiveSection(sectionId);
         const element = document.getElementById(sectionId);
         if (element) {
