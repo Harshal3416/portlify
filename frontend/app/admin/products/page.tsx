@@ -72,9 +72,66 @@ export default function Products() {
   const handleSubmitProduct = async () => {
     // Validate required fields
     if (!itemid || !itemname || !tenantid) {
-      setSubmitError("Item ID, name and tenantid are required");
+      showToast("Item ID, name and tenantid are required", "danger");
       return;
     }
+
+    console.log("Images", highlightFiles)
+
+    const imageCount = highlightFiles.filter(f => f.type.startsWith('image/')).length;
+    const videoCount = highlightFiles.filter(f => f.type.startsWith('video/')).length;
+
+    if (imageCount === 0) {
+      showToast("At least one image is required.", "warning");
+      return;
+    }
+
+    if (imageCount > 5) {
+      showToast("Maximum 5 images allowed.", "warning");
+      return;
+    }
+
+    if (videoCount > 1) {
+      showToast("Maximum 1 video allowed.", "warning");
+      return;
+    }
+
+    highlightFiles.some(file => {
+      if (file.size > 50 * 1024 * 1024) {
+        showToast(`File ${file.name} is too large. Max size is 50MB.`, "warning");
+        return true; // ✅ stop here
+      }
+
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        showToast(`File ${file.name} has invalid type. Only images and videos are allowed.`, "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('image/') &&
+        highlightFiles.filter(f => f.type.startsWith('image/')).length > 5) {
+        showToast("Maximum 5 images allowed.", "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('video/') &&
+        highlightFiles.filter(f => f.type.startsWith('video/')).length > 1) {
+        showToast("Maximum 1 video allowed.", "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('image/') &&
+        !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        showToast(`File ${file.name} has invalid image format.`, "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('video/') && file.type !== 'video/mp4') {
+        showToast(`File ${file.name} has invalid video format.`, "warning");
+        return true;
+      }
+
+      return false;
+    });
 
     const form = new FormData();
 

@@ -35,7 +35,7 @@ app.use('/api/admin-details', adminDetailsRoutes)
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'FILE_TOO_LARGE') {
-      return res.status(413).json({ success: false, error: 'File too large (max 10MB)' })
+      return res.status(413).json({ success: false, error: 'File too large (max 50MB)' })
     }
     return res.status(400).json({ success: false, error: 'Upload error: ' + err.message })
   } else if (err) {

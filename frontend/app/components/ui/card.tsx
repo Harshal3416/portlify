@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
+import Carousel from 'react-bootstrap/Carousel';
 import { renderImage } from "@/app/lib/renderImage";
 import { useSiteDetails } from "@/app/context/siteContext";
 import { CardProps, CartData } from "@/app/interfaces/interface";
@@ -52,7 +53,7 @@ export default function Card({
         existingCartLS.push({
             productId: collection.itemid,
             name: collection.itemname,
-            image: collection.imageassets,
+            image: collection.itemassets?.images[0] || null,
             count: 1
         });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
@@ -79,7 +80,7 @@ export default function Card({
     return (
         <div className="product-card">
             <div className="product-img" onClick={() => setShowProductDetails(true)}>
-                {collection.imageassets && renderImage(collection.imageassets.images[0], false)}
+                {collection.itemassets && renderImage(collection.itemassets?.images[0], false)}
                 <span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
             <div className="product-info">
                 <div className="product-name">{collection.itemname || "-"}</div>
@@ -115,7 +116,20 @@ export default function Card({
                     </Modal.Header>
                     <Modal.Body>
                         {collection.description}
-                        {renderImage(collection.imageassets, false)}
+                        <Carousel>
+                            {collection.itemassets?.images?.map((img, index) => (
+                                <Carousel.Item key={`img-${index}`}>
+                                    <img src={"http://localhost:3000" + img.url} alt={img.filename} className="d-block w-100" />
+                                </Carousel.Item>
+                            ))}
+                            {collection.itemassets?.videos?.map((vid, index) => (
+                                <Carousel.Item key={`vid-${index}`}>
+                                    <video controls className="d-block w-100">
+                                        <source src={"http://localhost:3000" + vid.url} type="video/mp4" />
+                                    </video>
+                                </Carousel.Item>
+                            ))}
+                        </Carousel>
                     </Modal.Body>
                     <Modal.Footer>
                         <button className="btn-save"

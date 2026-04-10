@@ -36,7 +36,7 @@ export interface Collections {
     itemname?: string;
     description?: string;
     tenantid?: string;
-    imageassets?: { images: {filename: string; size: number; url?: string }[], videos: {filename: string; size: number; url?: string }[] };
+    itemassets?: { images: {filename: string; size: number; url?: string }[], videos: {filename: string; size: number; url?: string }[] };
     otherImages?: { filename: string; size: number; url?: string }[];
     videos?: { filename: string; size: number; url?: string }[];
     createdAt?: string;

@@ -77,6 +77,8 @@ export default function Settings() {
         if(!isAdminDetailsFromDb) {
             return;
         }
+        console.log("admin details from db", true);
+        setIsAdminDetailsFromDb(true);
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
@@ -431,7 +433,7 @@ export default function Settings() {
                     </div>
                     <div className="save-section">
                         {/* <button className="btn-secondary">Reset</button> */}
-                        <button className="btn-primary" onClick={updateSiteInformationFn} >💾 Save Site Info</button>
+                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateSiteInformationFn} >💾 Save Site Info</button>
                     </div>
                 </div>
 
@@ -477,7 +479,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary" onClick={updateAdminContactDetailsFn}>💾 Save Contact</button>
+                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateAdminContactDetailsFn}>💾 Save Contact</button>
                     </div>
                 </div>
 
@@ -510,7 +512,7 @@ export default function Settings() {
                             </div>
                         </div>
                         <div className="save-section">
-                            <button className="btn-primary" onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
+                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateAdminSocialLinksFn}>💾 Save Links</button>
                         </div>
                     </div>
 
@@ -565,7 +567,7 @@ export default function Settings() {
                         </div>
                         <div className="save-section">
                             {/* <button className="btn-secondary">Reset to Default</button> */}
-                            <button className="btn-primary" onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
+                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateOpeningHoursFn}>💾 Save All Settings</button>
                         </div>
                     </div>
 
