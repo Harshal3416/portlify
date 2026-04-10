@@ -9,7 +9,7 @@ import { useSiteDetails } from "@/app/context/siteContext";
 export default function Settings() {
 
     const { showToast } = useToast();
-    const siteDetails = useSiteDetails();
+    const { siteDetails, refetchSiteInfo } = useSiteDetails();
     
     const [tenantid, setTenantid] = useState('');
 
@@ -78,10 +78,8 @@ export default function Settings() {
     }, [siteDetails])
 
     useEffect(() => {
-        if(!isAdminDetailsFromDb) {
-            return;
-        }
-        console.log("admin details from db", true);
+        if(!tenantid) return;
+        console.log("fetching additional details for tenantid", tenantid);
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
@@ -109,8 +107,10 @@ export default function Settings() {
         try {
             await updateSiteInformation({ tenantid, sitetitle, sitesubtitle, sitelogourl, trustedtagline, sitedescription });
             showToast("Saved Successfully", "success");
+            await fetchSiteInformation();
+            refetchSiteInfo?.();
             setIsAdminDetailsFromDb(true);
-
+            refetchSiteInfo && refetchSiteInfo();
         } catch (error: any) {
             showToast(error?.message, "danger")
         }
@@ -433,7 +433,9 @@ export default function Settings() {
                         </div>
                         <div className="field-group">
                             <label className="field-label">Site Description</label>
-                            <textarea className="field-input" rows={4} value={sitedescription} onChange={(e) => setSiteDescription(e.target.value)}></textarea>
+                            <textarea className="field-input" rows={4} 
+                            placeholder="Give a nice description, it will be displayed on the top section of your page."
+                            value={sitedescription} onChange={(e) => setSiteDescription(e.target.value)}></textarea>
                         </div>
                     </div>
                     <div className="save-section">

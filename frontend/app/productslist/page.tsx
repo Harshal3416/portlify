@@ -40,7 +40,7 @@ export default function ProductList() {
         // get product details and filter from local storage
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
         const productids = products.map((item: Collections) => item.itemid);
-        console.log("Product ids", productids, products)
+        console.log("Product ids", productids, products, products.itemassets?.images[0])
         const x = items.filter((item: CartData) => {
             productids.includes(item.itemid)
         })

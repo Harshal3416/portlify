@@ -14,7 +14,7 @@ export default function Products() {
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
   const { showToast } = useToast();
-  const siteDetails = useSiteDetails();
+  const { siteDetails } = useSiteDetails();
   
   const [tenantid, setTenantId] = useState('');
 
