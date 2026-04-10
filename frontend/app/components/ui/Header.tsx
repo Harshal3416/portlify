@@ -51,9 +51,9 @@ export function Header() {
     <header className="header">
       <div className="header-inner">
         <div className="logo">
-          <div className="logo-icon">{renderImage(sitelogourl, false)}</div>
+          <div className="logo-icon">{sitelogourl && renderImage(sitelogourl, false)}</div>
           <div className="logo-text">
-            <h1>{sitetitle || 'Raj Wholesale'}</h1>
+            <h1>{sitetitle}</h1>
             {/* {sitesubtitle &&  <span>{sitesubtitle}</span>} */}
           </div>
         </div>

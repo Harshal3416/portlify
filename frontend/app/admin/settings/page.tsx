@@ -71,6 +71,10 @@ export default function Settings() {
         setYearsOfExperience(siteDetails?.yearsofexperience || '');
         setProductsSold(siteDetails?.productssold || '');
         setHappyClients(siteDetails?.happyclients || '');
+
+        if(siteDetails?.tenantid) {
+            setIsAdminDetailsFromDb(true);
+        }
     }, [siteDetails])
 
     useEffect(() => {
@@ -78,7 +82,6 @@ export default function Settings() {
             return;
         }
         console.log("admin details from db", true);
-        setIsAdminDetailsFromDb(true);
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
@@ -91,6 +94,9 @@ export default function Settings() {
             await updateAdminDetails({ tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
+            // set tenant id in url without refreshing the page
+                const newUrl = `${window.location.pathname}?tenantid=${tenantid}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
 
         } catch (error: any) {
             showToast(error, "danger")
@@ -389,8 +395,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary" onClick={updateAdminDetailsFn}
-                        disabled={!tenantid}
+                        <button className={tenantid ? "btn-primary" : "btn-secondary"} disabled={!tenantid} onClick={updateAdminDetailsFn}
                         >💾 Save Admin Details</button>
                     </div>
                 </div>
@@ -433,7 +438,7 @@ export default function Settings() {
                     </div>
                     <div className="save-section">
                         {/* <button className="btn-secondary">Reset</button> */}
-                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateSiteInformationFn} >💾 Save Site Info</button>
+                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateSiteInformationFn} >💾 Save Site Info</button>
                     </div>
                 </div>
 

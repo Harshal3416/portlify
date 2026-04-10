@@ -50,7 +50,7 @@ router.get('/siteinformation/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM siteinformation WHERE tenantid = $1', [tenantid])
-    if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
+    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching siteinformation:', error)
@@ -88,7 +88,7 @@ router.get('/admincontact/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM admincontact WHERE tenantid = $1', [tenantid])
-    if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
+    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching admincontact:', error)
@@ -125,7 +125,7 @@ router.get('/adminsocial/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM adminsocial WHERE tenantid = $1', [tenantid])
-    if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
+    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching adminsocial:', error)
