@@ -25,6 +25,7 @@ export default function Products() {
   // shared state for add / edit form
   const [itemname, setItemName] = useState("");
   const [itemid, setProductId] = useState("");
+  const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [highlightFiles, setHighlightFiles] = useState<File[]>([]);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
@@ -138,6 +139,7 @@ export default function Products() {
     // ✅ Updated field names
     form.append("itemid", itemid);
     form.append("itemname", itemname);
+    form.append("price", price);
     form.append("description", description || "");
     form.append("tenantid", tenantid);
 
@@ -268,6 +270,10 @@ export default function Products() {
               <label className="field-label">Item ID</label>
               <input className="field-input" type="text" value={itemid} disabled />
               <span className="field-hint">Auto-generated — cannot be changed</span>
+            </div>
+            <div className="field-group">
+              <label className="field-label">Price</label>
+              <input className="field-input" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
             </div>
             <div className="field-group">
               <label className="field-label">Description <span className="text-red-500">*</span></label>

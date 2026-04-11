@@ -486,7 +486,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateAdminContactDetailsFn}>💾 Save Contact</button>
+                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateAdminContactDetailsFn}>💾 Save Contact</button>
                     </div>
                 </div>
 
@@ -519,7 +519,7 @@ export default function Settings() {
                             </div>
                         </div>
                         <div className="save-section">
-                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateAdminSocialLinksFn}>💾 Save Links</button>
+                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
                         </div>
                     </div>
 
@@ -574,10 +574,9 @@ export default function Settings() {
                         </div>
                         <div className="save-section">
                             {/* <button className="btn-secondary">Reset to Default</button> */}
-                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={() => isAdminDetailsFromDb && updateOpeningHoursFn}>💾 Save All Settings</button>
+                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
                         </div>
                     </div>
-
                 </div>
             </div>
     );

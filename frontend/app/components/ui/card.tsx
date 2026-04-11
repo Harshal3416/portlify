@@ -28,11 +28,11 @@ export default function Card({
     const siteDetails = useSiteDetails();
     const [phoneNumber, setPhoneNumber] = useState("");
 
-    useEffect(() => {
-        if (siteDetails?.contactphone) {
-            setPhoneNumber(siteDetails.contactphone);
-        }
-    }, [siteDetails]);
+    // useEffect(() => {
+    //     if (siteDetails?.contactphone) {
+    //         setPhoneNumber(siteDetails.contactphone);
+    //     }
+    // }, [siteDetails]);
 
     const openWhatsappForProduct = () => {
         const message = `Hello, I would like to enquire about "${collection.itemname || "-"}" (ID: ${collection.itemid || "-"}). Description: ${collection.description || "-"}`;
@@ -83,6 +83,7 @@ export default function Card({
                 {collection.itemassets && renderImage(collection.itemassets?.images[0], false)}
                 <span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
             <div className="product-info">
+                <span className="price-badge">₹ {collection.price} /-</span>
                 <div className="product-name">{collection.itemname || "-"}</div>
                 <div className="product-id">ID: {collection.itemid || "-"}</div>
                 <div className="product-desc">{collection.description || "-"}</div>
@@ -116,7 +117,7 @@ export default function Card({
                     </Modal.Header>
                     <Modal.Body>
                         {collection.description}
-                        <Carousel>
+                        <Carousel >
                             {collection.itemassets?.images?.map((img, index) => (
                                 <Carousel.Item key={`img-${index}`}>
                                     <img src={"http://localhost:3000" + img.url} alt={img.filename} className="d-block w-100" />

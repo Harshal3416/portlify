@@ -825,6 +825,10 @@ main {
   padding: 24px;
 }
 
+.carousel-control-prev, .carousel-control-next {
+    display: none;
+}
+
 /* ── PRODUCT CARDS ───────────────────────────── */
 .product-card {
   background: var(--white);
@@ -869,6 +873,7 @@ main {
 
 .product-info {
   padding: 14px;
+  position: relative;
 }
 
 .product-name {
@@ -898,6 +903,20 @@ main {
 .product-actions {
   display: flex;
   gap: 8px;
+}
+
+.price-badge{
+  border: 1px solid var(--gold);
+  background: white;
+  position: absolute;
+  font-weight: 600;
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 50px;
+  border-radius: var(--radius-sm);
+  margin-left: auto;
+  top: -12px;
+  right: 5px;
 }
 
 .btn-enquire {

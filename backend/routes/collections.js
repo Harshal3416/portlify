@@ -13,7 +13,7 @@ router.post(
   upload.fields([{ name: "itemassets", maxCount: 10 }]),
   async (req, res) => {
     try {
-      const { itemid, itemname, description, tenantid } = req.body;
+      const { itemid, itemname, description, tenantid, price} = req.body;
 
       if (!itemid || !itemname || !tenantid) {
         return res.status(400).json({
@@ -52,10 +52,10 @@ router.post(
 
       const result = await pool.query(
         `INSERT INTO collections 
-         (id, tenantid, itemid, itemname, description, itemassets, createdAt, updatedAt)
-         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
+         (id, tenantid, itemid, itemname, description, itemassets, price, createdAt, updatedAt)
+         VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
          RETURNING *`,
-        [id, tenantid, itemid, itemname, description || "", itemassets],
+        [id, tenantid, itemid, itemname, description || "", itemassets, price || 0],
       );
 
       return res.status(201).json({
@@ -122,7 +122,7 @@ router.put(
   async (req, res) => {
     try {
       const { itemid } = req.params;
-      const { itemname, description, tenantid } = req.body;
+      const { itemname, description, tenantid, price} = req.body;
 
       if (!tenantid) {
         return res.status(400).json({
@@ -165,20 +165,22 @@ router.put(
           UPDATE collections 
           SET itemname = $1,
               description = $2,
-              itemassets = $3,
+              price = $3,
+              itemassets = $4,
               updatedAt = NOW()
-          WHERE itemid = $4 AND tenantid = $5
+          WHERE itemid = $5 AND tenantid = $6
           RETURNING *`;
-        params = [itemname, description, itemassets, itemid, tenantid];
+        params = [itemname, description, price, itemassets, itemid, tenantid];
       } else {
         query = `
           UPDATE collections 
           SET itemname = $1,
               description = $2,
+              price = $3,
               updatedAt = NOW()
-          WHERE itemid = $3 AND tenantid = $4
+          WHERE itemid = $4 AND tenantid = $5
           RETURNING *`;
-        params = [itemname, description, itemid, tenantid];
+        params = [itemname, description, price, itemid, tenantid];
       }
 
       const result = await pool.query(query, params);
