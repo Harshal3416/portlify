@@ -83,7 +83,7 @@ export default function Card({
                 {collection.itemassets && renderImage(collection.itemassets?.images[0], false)}
                 <span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
             <div className="product-info">
-                <span className="price-badge">₹ {collection.price} /-</span>
+                {collection.price !== "" && <span className="price-badge">₹ {collection.price} /-</span>}
                 <div className="product-name">{collection.itemname || "-"}</div>
                 <div className="product-id">ID: {collection.itemid || "-"}</div>
                 <div className="product-desc">{collection.description || "-"}</div>

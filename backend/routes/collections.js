@@ -55,7 +55,7 @@ router.post(
          (id, tenantid, itemid, itemname, description, itemassets, price, createdAt, updatedAt)
          VALUES ($1, $2, $3, $4, $5, $6, $7, NOW(), NOW())
          RETURNING *`,
-        [id, tenantid, itemid, itemname, description || "", itemassets, price || 0],
+        [id, tenantid, itemid, itemname, description || "", itemassets, price],
       );
 
       return res.status(201).json({

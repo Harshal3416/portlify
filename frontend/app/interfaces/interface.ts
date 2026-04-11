@@ -35,7 +35,7 @@ export interface Collections {
     itemid: string;
     itemname?: string;
     description?: string;
-    price?: number;
+    price?: string;
     tenantid?: string;
     itemassets?: { images: {filename: string; size: number; url?: string }[], videos: {filename: string; size: number; url?: string }[] };
     otherImages?: { filename: string; size: number; url?: string }[];

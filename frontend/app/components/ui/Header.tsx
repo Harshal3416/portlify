@@ -43,7 +43,7 @@ const { siteDetails } = useSiteDetails();
         <div className="nav-actions">
           {isLoaded && user && tenantid && (
             <>
-              <button className="nav-btn primary" onClick={() => router.push(`/admin/products?tenantid=${tenantid}`)}>📦 Products</button>
+              <button className="nav-btn ghost" onClick={() => router.push(`/admin/products?tenantid=${tenantid}`)}>📦 Manage Collection</button>
               <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>
               <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
             </>)}

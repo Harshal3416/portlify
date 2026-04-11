@@ -54,10 +54,6 @@ export default function Products() {
     setProductId(generateProductId());
   }, []);
 
-  useEffect(() => {
-            console.log("ITEMS data", items)
-  }, [items])
-
   const resetProductForm = () => {
     setItemName("");
     setProductId(generateProductId());
@@ -194,11 +190,12 @@ export default function Products() {
     setItemName(items.itemname || "");
     setProductId(items.itemid || "");
     setDescription(items.description || "");
+    setPrice(items.price || "");
     setHighlightFiles([]);
   };
 
   return (
-    <div className="m-4 w-[80%] mx-auto">
+    <div className="m-4 w-[80%] mx-auto h-screen">
       <div className="page-header">
         <div>
           <div className="page-title">Collection</div>
@@ -216,7 +213,7 @@ export default function Products() {
       <div className="stats-row">
         <div className="stat-card">
           <div className="stat-icon blue">📦</div>
-          <div><div className="stat-num">{items.length}</div><div className="stat-label">Total Products</div></div>
+          <div><div className="stat-num">{items.length}</div><div className="stat-label">Total Items</div></div>
         </div>
       </div>
 
@@ -234,7 +231,7 @@ export default function Products() {
         {/* Existing product cards */}
         {items.length === 0 ? (
           <p className="text-sm text-gray-500 self-center">
-            No items added yet. Use the first card to add one.
+            No items added yet. Click "Add New Item" to create your first product!
           </p>
         ) : (
           items.map((items: any) => (
