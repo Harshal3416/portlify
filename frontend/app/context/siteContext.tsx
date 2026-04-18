@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getAdminDetails, getSiteInformation } from "../../services/settingsService";
+import { getAdminContactDetails, getAdminDetails, getSiteInformation } from "../../services/settingsService";
 import { SiteDetail } from "@/app/interfaces/interface";
 import { useSearchParams } from "next/navigation";
 
@@ -42,7 +42,8 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
       const adminData = await getAdminDetails(tenantid || "");
       setTenantidFromDb(adminData.tenantid);
       const siteData = await getSiteInformation(adminData.tenantid);
-      const details = adminData ? { ...adminData, ...siteData } : siteData;
+      const contactDetails = await getAdminContactDetails(adminData.tenantid);
+      const details = adminData ? { ...adminData, ...siteData, ...contactDetails } : { ...siteData, ...contactDetails };
       console.log("Context Data", details);
       setSiteDetails(details);
     } catch (error) {

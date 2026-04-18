@@ -17,9 +17,8 @@ export default function ProductList() {
     const searchParams = useSearchParams();
     const tenantidFromUrl = searchParams.get('tenantid');
 
-    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantidFromUrl);
+    let { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantidFromUrl);
 
-    // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [cartCount, setCartCount] = useState(1);
     const itemsPerPage = 20; // show 5 items per page
@@ -27,14 +26,8 @@ export default function ProductList() {
     const [isCartOpen, setCartOpen] = useState(false);
     const [cartItems, setCartItems] = useState<CartData[]>([])
 
-    const siteDetails = useSiteDetails();
-    const [phoneNumber, setPhoneNumber] = useState("");
-
-    useEffect(() => {
-        if (siteDetails?.contactphone) {
-            setPhoneNumber(siteDetails.contactphone);
-        }
-    }, [siteDetails]);
+    const siteDetails = useSiteDetails().siteDetails;
+    const [searchText, setSearchText] = useState("");
 
     useEffect(() => {
         // get product details and filter from local storage
@@ -51,12 +44,25 @@ export default function ProductList() {
     // Calculate pagination
     const totalPages = Math.ceil(products.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
+    // const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
 
     // const handlePageChange = (page: number) => {
     //     if (page < 1 || page > totalPages) return;
     //     setCurrentPage(page);
     // };
+
+    useEffect(() => {
+        console.log("Products in ProductList", products);
+        const filtered = products.filter((product: Collections) => {
+            const searchLower = searchText.toLowerCase();
+            return (
+                product.itemname?.toLowerCase().includes(searchLower) ||
+                product.itemid.toLowerCase().includes(searchLower)
+            );
+        });
+        products = [...filtered];
+        console.log("Filtered products", filtered, products);
+    }, [searchText]);
 
     const openCart = () => {
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -70,7 +76,7 @@ export default function ProductList() {
     }
 
     const contactOverWhatsapp = () => {
-        if (!phoneNumber) {
+        if (!siteDetails?.contactphone) {
             alert("Phone number not available");
             return;
         }
@@ -80,7 +86,7 @@ export default function ProductList() {
         })
         console.log("itemDetails", itemDetails)
         const message = "Hello, I would like to buy these products." + itemDetails + "\n";
-        const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)} Thank You!`;
+        const url = `https://wa.me/${siteDetails?.contactphone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)} Thank You!`;
         window.open(url, "_blank");
     }
 
@@ -118,10 +124,11 @@ export default function ProductList() {
                     className="search-input"
                     type="text"
                     placeholder="Search products by name or ID…"
+                    onChange={(e) => setSearchText(e.target.value)}
                 />
             </div>
             <div className="gallery-grid">
-                {paginatedProducts.map((colection: any) => (
+                {products.map((colection: any) => (
                     <Card
                         key={colection.itemid}
                         collection={colection}

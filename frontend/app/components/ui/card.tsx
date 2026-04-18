@@ -25,18 +25,11 @@ export default function Card({
     const [showProductDetails, setShowProductDetails] = useState(false);
     const { showToast } = useToast();
 
-    const siteDetails = useSiteDetails();
-    const [phoneNumber, setPhoneNumber] = useState("");
-
-    // useEffect(() => {
-    //     if (siteDetails?.contactphone) {
-    //         setPhoneNumber(siteDetails.contactphone);
-    //     }
-    // }, [siteDetails]);
+    const siteDetails = useSiteDetails().siteDetails;
 
     const openWhatsappForProduct = () => {
         const message = `Hello, I would like to enquire about "${collection.itemname || "-"}" (ID: ${collection.itemid || "-"}). Description: ${collection.description || "-"}`;
-        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        const url = `https://wa.me/${siteDetails?.contactphone}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
     };
 
