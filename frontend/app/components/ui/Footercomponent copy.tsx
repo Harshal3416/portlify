@@ -13,6 +13,7 @@ export function FooterComponent() {
   };
 
   const openWhatsapp = () => {
+    console.log("Opening WhatsApp with contact", siteDetails?.contactphone);
     const phoneNumber = siteDetails?.contactphone || "9909090909";
     const message = "Hello from Raj Wholesale";
     const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)}`;

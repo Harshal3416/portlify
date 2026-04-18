@@ -28,6 +28,7 @@ export default function Card({
     const siteDetails = useSiteDetails().siteDetails;
 
     const openWhatsappForProduct = () => {
+        console.log("Opening WhatsApp for product with contact", siteDetails?.contactphone);
         const message = `Hello, I would like to enquire about "${collection.itemname || "-"}" (ID: ${collection.itemid || "-"}). Description: ${collection.description || "-"}`;
         const url = `https://wa.me/${siteDetails?.contactphone}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");

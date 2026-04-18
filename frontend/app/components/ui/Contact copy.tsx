@@ -45,6 +45,7 @@ export default function Contact() {
   }
 
   const openWhatsapp = () => {
+    console.log("Opening WhatsApp with contact", phoneNumber);
     if (!phoneNumber) return;
     const message = "Hello, I would like to inquire about your products."; // replace with your default message
     const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;

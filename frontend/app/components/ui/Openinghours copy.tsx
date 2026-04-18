@@ -65,7 +65,6 @@ return (
         <div className="card-title mb-0"><div className="card-title-icon">🕐</div>Opening Hours</div>
         {/* <span className="open-badge"><span className="open-dot"></span> Open Now</span> */}
       </div>
-      {/* style="padding:8px 24px 16px;" */}
       <div className="card-body" >
         <div className="hour-row"><span className={`day-name ${today === 'Monday' ? 'today' : ''}`}>Monday {`${today === 'Monday' ? '← Today' : ''}`}</span><span className="day-time">{monday}</span></div>
         <div className="hour-row"><span className={`day-name ${today === 'Tuesday' ? 'today' : ''}`}>Tuesday {`${today === 'Tuesday' ? '← Today' : ''}`}</span><span className="day-time">{tuesday}</span></div>
