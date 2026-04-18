@@ -6,7 +6,7 @@ const cors = require("cors");
 // const corsMiddleware = require('./middleware/cors')
 const { uploadsDir } = require('./middleware/upload')
 
-const productRoutes = require('./routes/products')
+const collectionRoutes = require('./routes/collections')
 const siteDetailsRoutes = require('./routes/siteDetails')
 const adminDetailsRoutes = require('./routes/adminDetails')
 
@@ -27,7 +27,7 @@ app.use( cors({ origin: ["http://localhost:4000"], credentials: true,
 
 // Routes
 app.get('/', (req, res) => res.send('Enquiry App backend'))
-app.use('/api/products', productRoutes)
+app.use('/api/collections', collectionRoutes)
 app.use('/api/site-details', siteDetailsRoutes)
 app.use('/api/admin-details', adminDetailsRoutes)
 
@@ -35,7 +35,7 @@ app.use('/api/admin-details', adminDetailsRoutes)
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
     if (err.code === 'FILE_TOO_LARGE') {
-      return res.status(413).json({ success: false, error: 'File too large (max 10MB)' })
+      return res.status(413).json({ success: false, error: 'File too large (max 50MB)' })
     }
     return res.status(400).json({ success: false, error: 'Upload error: ' + err.message })
   } else if (err) {

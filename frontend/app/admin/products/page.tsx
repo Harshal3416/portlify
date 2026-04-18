@@ -1,133 +1,180 @@
 "use client";
 
 import { useEffect, useState, useRef } from "react";
-import { useRouter } from "next/navigation";
-import Card from "@/app/components/ui/card";
+import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
-import { getAdminDetails } from "@/services/settingsService";
 import { renderImage } from "@/app/lib/renderImage";
-import { Product } from "@/app/interfaces/interface";
+import { Collections } from "@/app/interfaces/interface";
+import { useSiteDetails } from "@/app/context/siteContext";
 
 export default function Products() {
-  const router = useRouter();
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
   const { showToast } = useToast();
-  const [tenantid, setTenantid] = useState('');
+  const { siteDetails } = useSiteDetails();
+  
+  const [tenantid, setTenantId] = useState('');
 
-  // Use React Query for fetching products - simplifies data fetching with caching
+  // Use React Query for fetching items - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
-  const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantid);
+  const { data: items = [], isLoading: loadingProducts } = useGetProductsQuery(tenantid);
 
   // shared state for add / edit form
-  const [productName, setProductName] = useState("");
-  const [productid, setProductId] = useState("");
+  const [itemname, setItemName] = useState("");
+  const [itemid, setProductId] = useState("");
+  const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
-  const [highlightimage, setHighlightImage] = useState<File | null>(null);
-  const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [highlightFiles, setHighlightFiles] = useState<File[]>([]);
+  const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState('');
-  const [addProductsModal, setAddProductModal] = useState(false);
+  const [addItemsModal, setAddProductModal] = useState(false);
 
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
     const id = Math.floor(100000 + Math.random() * 900000) + '';
-    if (products.find((p: any) => p.productid === id)) {
+    if (items.find((p: any) => p.productId === id)) {
       return generateProductId(); // ensure uniqueness
     }
     return id;
   };
 
   useEffect(() => {
-    fetchAdminDetails()
+    setTenantId(siteDetails?.tenantid || '');
+  }, [siteDetails])
+
+  useEffect(() => {
     setProductId(generateProductId());
   }, []);
 
-  async function fetchAdminDetails() {
-    try {
-      const data = await getAdminDetails();
-      setTenantid(data.tenantid)
-    } catch (err: any) {
-      showToast(err.message, "danger");
-    }
-  }
-
   const resetProductForm = () => {
-    setProductName("");
+    setItemName("");
     setProductId(generateProductId());
     setDescription("");
-    setHighlightImage(null);
+    setHighlightFiles([]);
     // Clear file input visually
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
-    setEditingProductId(null);
+    setEditingItemId(null);
   };
 
   const handleSubmitProduct = async () => {
     // Validate required fields
-    if (!productid || !productName) {
-      setSubmitError("Product ID and name are required");
+    if (!itemid || !itemname || !tenantid) {
+      showToast("Item ID, name and tenantid are required", "danger");
       return;
     }
 
-    // Build FormData - common for both create and update
-    const form = new FormData();
-    form.append("productid", productid);
-    form.append("name", productName);
-    form.append("description", description);
-    form.append("tenantid", tenantid);
+    console.log("Images", highlightFiles)
 
-    // Only append image if a new file is selected
-    if (highlightimage) {
-      form.append("highlightimage", highlightimage);
+    const imageCount = highlightFiles.filter(f => f.type.startsWith('image/')).length;
+    const videoCount = highlightFiles.filter(f => f.type.startsWith('video/')).length;
+
+    if (imageCount === 0) {
+      showToast("At least one image is required.", "warning");
+      return;
     }
 
+    if (imageCount > 5) {
+      showToast("Maximum 5 images allowed.", "warning");
+      return;
+    }
+
+    if (videoCount > 1) {
+      showToast("Maximum 1 video allowed.", "warning");
+      return;
+    }
+
+    highlightFiles.some(file => {
+      if (file.size > 50 * 1024 * 1024) {
+        showToast(`File ${file.name} is too large. Max size is 50MB.`, "warning");
+        return true; // ✅ stop here
+      }
+
+      if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+        showToast(`File ${file.name} has invalid type. Only images and videos are allowed.`, "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('image/') &&
+        highlightFiles.filter(f => f.type.startsWith('image/')).length > 5) {
+        showToast("Maximum 5 images allowed.", "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('video/') &&
+        highlightFiles.filter(f => f.type.startsWith('video/')).length > 1) {
+        showToast("Maximum 1 video allowed.", "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('image/') &&
+        !['image/png', 'image/jpeg', 'image/webp'].includes(file.type)) {
+        showToast(`File ${file.name} has invalid image format.`, "warning");
+        return true;
+      }
+
+      if (file.type.startsWith('video/') && file.type !== 'video/mp4') {
+        showToast(`File ${file.name} has invalid video format.`, "warning");
+        return true;
+      }
+
+      return false;
+    });
+
+    const form = new FormData();
+
+    // ✅ Updated field names
+    form.append("itemid", itemid);
+    form.append("itemname", itemname);
+    form.append("price", price);
+    form.append("description", description || "");
+    form.append("tenantid", tenantid);
+
+    // ✅ Files remain same (backend expects itemassets)
+    highlightFiles.forEach((file) => {
+      form.append("itemassets", file);
+    });
+
     try {
-      if (editingProductId) {
-        // Update existing product
+      if (editingItemId) {
         await updateMutation.mutateAsync({
-          id: editingProductId,
+          id: editingItemId,
           formData: form,
         });
-        // React Query handles cache invalidation via onSuccess in the mutation hook
       } else {
-        // Create new product
         await createMutation.mutateAsync(form);
-        // React Query handles cache invalidation via onSuccess in the mutation hook
       }
-      showToast(`Product Added!`, "success")
 
-      // Reset form after successful submit
+      showToast(`Item saved successfully!`, "success");
       resetProductForm();
+
     } catch (err: any) {
-      // Display error message to user
-      setSubmitError(err.message || "Failed to save product");
+      setSubmitError(err?.message || "Failed to save item");
     }
   };
 
   const handleDeleteProduct = async () => {
-    const productid = deleteId;
+    const itemid = deleteId;
     deleteMutation.mutate(
       {
-        productid
+        itemid
       },
       {
         onSuccess: (data) => {
           // remove from cart
           const remainingProducts = JSON.parse(localStorage.getItem("cart") || "[]").filter((el: any) => {
-            return el.productid !== productid
+            return el.productId !== itemid
           })
-          showToast(`${data.name || 'Product'} Deleted!`, "success")
+          showToast(`${data.name || 'Item'} Deleted!`, "success")
           setShowDeleteModal(false)
           localStorage.setItem('cart', JSON.stringify(remainingProducts))
         },
@@ -138,34 +185,35 @@ export default function Products() {
     )
   }
 
-  const startEditingProduct = (product: Product) => {
-    setEditingProductId(product.productid);
-    setProductName(product.name || "");
-    setProductId(product.productid || "");
-    setDescription(product.description || "");
-    setHighlightImage(null);
+  const startEditingProduct = (items: Collections) => {
+    setEditingItemId(items.itemid || null);
+    setItemName(items.itemname || "");
+    setProductId(items.itemid || "");
+    setDescription(items.description || "");
+    setPrice(items.price || "");
+    setHighlightFiles([]);
   };
 
   return (
-    <div className="m-4 w-[80%] mx-auto">
+    <div className="m-4 w-[80%] mx-auto h-screen">
       <div className="page-header">
         <div>
-          <div className="page-title">Products</div>
-          <div className="page-subtitle">Manage your product catalog</div>
+          <div className="page-title">Collection</div>
+          <div className="page-subtitle">Manage your collection here</div>
         </div>
         <button className="add-btn"
           onClick={() => {
             setAddProductModal(true);
             resetProductForm()
-            console.log("addProductsModal", addProductsModal)
-          }}>+ Add New Product</button>
+            console.log("addItemsModal", addItemsModal)
+          }}>+ Add New Item</button>
       </div>
 
       {/* <!-- Stats --> */}
       <div className="stats-row">
         <div className="stat-card">
           <div className="stat-icon blue">📦</div>
-          <div><div className="stat-num">{products.length}</div><div className="stat-label">Total Products</div></div>
+          <div><div className="stat-num">{items.length}</div><div className="stat-label">Total Items</div></div>
         </div>
       </div>
 
@@ -176,32 +224,32 @@ export default function Products() {
       )}
 
       {loadingProducts && (
-        <p>Loading products...</p>
+        <p>Loading items...</p>
       )}
 
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
         {/* Existing product cards */}
-        {products.length === 0 ? (
+        {items.length === 0 ? (
           <p className="text-sm text-gray-500 self-center">
-            No products added yet. Use the first card to add one.
+            No items added yet. Click "Add New Item" to create your first product!
           </p>
         ) : (
-          products.map((product: any) => (
+          items.map((items: any) => (
             <Card
-              key={product.productid}
-              product={product}
+              key={items.itemid}
+              collection={items}
               mode="admin"
-              onDelete={() => { setDeleteId(product.productid); setShowDeleteModal(true) }}
-              onEdit={() => { startEditingProduct(product); setAddProductModal(true) }}
+              onDelete={() => { setDeleteId(items.itemid); setShowDeleteModal(true) }}
+              onEdit={() => { startEditingProduct(items); setAddProductModal(true) }}
             />
           ))
         )}
       </div>
 
-      {addProductsModal &&
-        <Modal show={addProductsModal} centered>
+      {addItemsModal &&
+        <Modal show={addItemsModal} centered>
           <Modal.Header>
-            <Modal.Title>{editingProductId ? "Edit product" : "Add a product"}
+            <Modal.Title>{editingItemId ? "Edit product" : "Add a product"}
             </Modal.Title>
             <button className="modal-close" onClick={() => {
               resetProductForm
@@ -211,14 +259,18 @@ export default function Products() {
           </Modal.Header>
           <Modal.Body>
             <div className="field-group">
-              <label className="field-label">Product Name <span className="text-red-500">*</span></label>
-              <input className="field-input" type="text" id="productName" placeholder="e.g. Prestige Pressure Cooker" value={productName}
-                onChange={(e) => setProductName(e.target.value)} />
+              <label className="field-label">Item Name <span className="text-red-500">*</span></label>
+              <input className="field-input" type="text" id="itemname" placeholder="e.g. Prestige Pressure Cooker" value={itemname}
+                onChange={(e) => setItemName(e.target.value)} />
             </div>
             <div className="field-group">
-              <label className="field-label">Product ID</label>
-              <input className="field-input" type="text" value={productid} disabled />
+              <label className="field-label">Item ID</label>
+              <input className="field-input" type="text" value={itemid} disabled />
               <span className="field-hint">Auto-generated — cannot be changed</span>
+            </div>
+            <div className="field-group">
+              <label className="field-label">Price</label>
+              <input className="field-input" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
             </div>
             <div className="field-group">
               <label className="field-label">Description <span className="text-red-500">*</span></label>
@@ -227,18 +279,40 @@ export default function Products() {
               <div className="char-count" id="charCount">18/150 characters</div>
             </div>
             <div className="field-group">
-              <label className="field-label">Product Image</label>
+              <label className="field-label">Item Image</label>
               <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
-                {/* If image is selected, use renderImage method which will render the image or else show the default image 🖼️ */}
-                <div className="upload-area-icon">{renderImage(highlightimage, true)}</div>
+                <div className="upload-area-icon">
+                  {highlightFiles.length > 0 ? (
+                    highlightFiles.map((file, i) => (
+                      file.type.startsWith('image/') ? (
+                        <img key={i} src={URL.createObjectURL(file)} alt="" className="w-10 h-10 inline mr-1" />
+                      ) : (
+                        <span key={i} className="inline mr-1">🎥</span>
+                      )
+                    ))
+                  ) : '📁'}
+                </div>
                 <p>Click to upload or drag & drop</p>
-                <span>PNG, JPG, WEBP · Max 5MB</span>
+                <span>PNG, JPG, WEBP, MP4 · Max 5 images, 1 video</span>
                 <input type="file" id="imgUpload" className="hidden"
-                  ref={fileInputRef} name="highlightimage"
-                  accept="image/*"
-                  onChange={(e) =>
-                    setHighlightImage(e.target.files?.[0] || null)
-                  } />
+                  ref={fileInputRef} name="itemassets"
+                  accept="image/*,video/*"
+                  multiple
+                  onChange={(e) => {
+                    const files = Array.from(e.target.files || []);
+                    const images = files.filter(f => f.type.startsWith('image/'));
+                    const videos = files.filter(f => f.type.startsWith('video/'));
+                    if (images.length > 5) {
+                      setSubmitError("Maximum 5 images allowed");
+                      return;
+                    }
+                    if (videos.length > 1) {
+                      setSubmitError("Maximum 1 video allowed");
+                      return;
+                    }
+                    setSubmitError(null);
+                    setHighlightFiles(files);
+                  }} />
               </div>
             </div>
           </Modal.Body>
@@ -250,10 +324,9 @@ export default function Products() {
             }
             }>Cancel</button>
             <button className="btn-save" onClick={handleSubmitProduct} disabled={
-              submitting ||
-              !productid ||
-              !productName ||
-              (!editingProductId && !highlightimage)
+              !itemid ||
+              !itemname ||
+              (!editingItemId && highlightFiles.length === 0)
             }
             >💾 Save Changes</button>
           </Modal.Footer>

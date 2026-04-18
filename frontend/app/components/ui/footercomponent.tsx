@@ -1,9 +1,6 @@
 'use client'
 
 import { useSiteDetails } from "@/app/context/siteContext";
-import { Mail } from "lucide-react";
-import { useEffect, useState } from "react";
-import { FaWhatsapp } from "react-icons/fa";
 
 export function FooterComponent() {
   const siteDetails = useSiteDetails();
@@ -28,7 +25,7 @@ export function FooterComponent() {
         <div>
           Contact developer: <button onClick={openGmail}>professor3416@gmail.com</button> · <button onClick={openWhatsapp}>WhatsApp</button>
         </div>
-        <div>© {new Date().getFullYear()} {siteDetails?.sitetitle || 'Raj Wholesale Stainless Steel Shop'}. All rights reserved.</div>
+        <div>© {new Date().getFullYear()} {siteDetails?.sitetitle} All rights reserved.</div>
       </div>
     </footer>
   );

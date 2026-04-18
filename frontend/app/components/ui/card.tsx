@@ -3,12 +3,13 @@
 import { useEffect, useState } from "react";
 import { useToast } from "@/app/context/ToastContext";
 import Modal from 'react-bootstrap/Modal';
+import Carousel from 'react-bootstrap/Carousel';
 import { renderImage } from "@/app/lib/renderImage";
 import { useSiteDetails } from "@/app/context/siteContext";
 import { CardProps, CartData } from "@/app/interfaces/interface";
 
 export default function Card({
-    product,
+    collection,
     mode = "preview",
     onDelete,
     onEdit,
@@ -24,18 +25,11 @@ export default function Card({
     const [showProductDetails, setShowProductDetails] = useState(false);
     const { showToast } = useToast();
 
-      const siteDetails = useSiteDetails();
-      const [phoneNumber, setPhoneNumber] = useState("");
-    
-      useEffect(() => {
-        if (siteDetails?.contactphone) {
-          setPhoneNumber(siteDetails.contactphone);
-        }
-      }, [siteDetails]);
+    const siteDetails = useSiteDetails().siteDetails;
 
     const openWhatsappForProduct = () => {
-        const message = `Hello, I would like to enquire about "${product.name || "-"}" (ID: ${product.productid || "-"}). Description: ${product.description || "-"}`;
-        const url = `https://wa.me/${phoneNumber}?text=${encodeURIComponent(message)}`;
+        const message = `Hello, I would like to enquire about "${collection.itemname || "-"}" (ID: ${collection.itemid || "-"}). Description: ${collection.description || "-"}`;
+        const url = `https://wa.me/${siteDetails?.contactphone}?text=${encodeURIComponent(message)}`;
         window.open(url, "_blank");
     };
 
@@ -50,45 +44,47 @@ export default function Card({
     const addToCart = () => {
         const existingCartLS = getCartFromLocalStorage();
         existingCartLS.push({
-            productid: product.productid,
-            name: product.name,
-            image: product.highlightimage,
+            productId: collection.itemid,
+            name: collection.itemname,
+            image: collection.itemassets?.images[0] || null,
             count: 1
         });
         localStorage.setItem("cart", JSON.stringify(existingCartLS));
         setAvailableInCart(true)
-        showToast(`${product.name || 'Product'} added to cart!`, "success")
+        showToast(`${collection.itemname || 'Product'} added to cart!`, "success")
         cartUpdated && cartUpdated(existingCartLS.length)
     }
 
     const isProductExistInCart = () => {
-        const x = getCartFromLocalStorage().find((el: CartData) => el.productid === product.productid);
+        const x = getCartFromLocalStorage().find((el: CartData) => el.itemid === collection.itemid);
         return x ? true : false
     }
 
     const removeFromCart = () => {
         const remainingProducts = getCartFromLocalStorage().filter((el: CartData) => {
-            return el.productid !== product.productid
+            return el.itemid !== collection.itemid
         })
         setAvailableInCart(false)
         localStorage.setItem('cart', JSON.stringify(remainingProducts))
-        showToast(`${product.name || 'Product'} removed from cart!`, "success")
+        showToast(`${collection.itemname || 'Product'} removed from cart!`, "success")
         cartUpdated && cartUpdated(remainingProducts.length)
     }
 
     return (
         <div className="product-card">
             <div className="product-img" onClick={() => setShowProductDetails(true)}>
-                {renderImage(product.highlightimage, false)}<span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
+                {collection.itemassets && renderImage(collection.itemassets?.images[0], false)}
+                <span className="product-badge">{availableInCart ? 'In Cart' : 'Available'}</span></div>
             <div className="product-info">
-                <div className="product-name">{product.name || "-"}</div>
-                <div className="product-id">ID: {product.productid || "-"}</div>
-                <div className="product-desc">{product.description || "-"}</div>
+                {collection.price !== "" && <span className="price-badge">₹ {collection.price} /-</span>}
+                <div className="product-name">{collection.itemname || "-"}</div>
+                <div className="product-id">ID: {collection.itemid || "-"}</div>
+                <div className="product-desc">{collection.description || "-"}</div>
                 <div className="product-actions">
                     {canEdit ? (
                         <>
-                            <button className="btn-enquire" onClick={() => onEdit && onEdit(product)}>✏️ Edit</button>
-                            <button className="btn-remove" onClick={() => onDelete && onDelete(product.productid)}>🗑 Delete</button>
+                            <button className="btn-enquire" onClick={() => onEdit && onEdit(collection)}>✏️ Edit</button>
+                            <button className="btn-remove" onClick={() => onDelete && onDelete(collection.itemid)}>🗑 Delete</button>
                         </>
                     ) : (
                         <>
@@ -105,7 +101,7 @@ export default function Card({
             {showProductDetails && (
                 <Modal show={showProductDetails} centered>
                     <Modal.Header>
-                        <Modal.Title>{product.name}</Modal.Title>
+                        <Modal.Title>{collection.itemname}</Modal.Title>
                         <button className="modal-close" onClick={(e) => {
                             e.stopPropagation();
                             setShowProductDetails(false);
@@ -113,8 +109,21 @@ export default function Card({
                         }>✕</button>
                     </Modal.Header>
                     <Modal.Body>
-                        {product.description}
-                        {renderImage(product.highlightimage, false)}
+                        {collection.description}
+                        <Carousel >
+                            {collection.itemassets?.images?.map((img, index) => (
+                                <Carousel.Item key={`img-${index}`}>
+                                    <img src={"http://localhost:3000" + img.url} alt={img.filename} className="d-block w-100" />
+                                </Carousel.Item>
+                            ))}
+                            {collection.itemassets?.videos?.map((vid, index) => (
+                                <Carousel.Item key={`vid-${index}`}>
+                                    <video controls className="d-block w-100">
+                                        <source src={"http://localhost:3000" + vid.url} type="video/mp4" />
+                                    </video>
+                                </Carousel.Item>
+                            ))}
+                        </Carousel>
                     </Modal.Body>
                     <Modal.Footer>
                         <button className="btn-save"

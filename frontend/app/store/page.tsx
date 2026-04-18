@@ -1,14 +1,13 @@
 "use client";
 
 import About from "@/app/about/page";
-import Contact from "@/app/components/ui/contact";
-import OpeningHours from "@/app/components/ui/openinghours";
 import ProductList from "@/app/productslist/page";
 import { useState } from "react";
-import { Hero } from "../components/Hero";
+import { Hero } from "../components/ui/Hero";
+import Contact from "../components/ui/Contact";
+import OpeningHours from "../components/ui/Openinghours";
 
 export default function Store() {
-  const [search, setSearch] = useState("");
 
   return (
     <>

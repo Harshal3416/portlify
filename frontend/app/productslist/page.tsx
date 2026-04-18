@@ -1,27 +1,24 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Card from "../components/ui/card";
-import { LuShoppingCart } from "react-icons/lu";
+import Card from "../components/ui/Card";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
 import Modal from 'react-bootstrap/Modal';
-import Button from 'react-bootstrap/Button';
 import { renderImage } from "../lib/renderImage";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { IoRemoveCircleOutline } from "react-icons/io5";
 import { MdDeleteOutline } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
 import { useSiteDetails } from "../context/siteContext";
-import { CartData, Product } from "../interfaces/interface";
+import { CartData, Collections } from "../interfaces/interface";
 
 export default function ProductList() {
 
     const searchParams = useSearchParams();
     const tenantidFromUrl = searchParams.get('tenantid');
 
-    const { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantidFromUrl);
+    let { data: products = [], isLoading: loadingProducts, error } = useGetProductsQuery(tenantidFromUrl);
 
-    // const [products, setProducts] = useState<Product[]>([]);
     const [currentPage, setCurrentPage] = useState(1);
     const [cartCount, setCartCount] = useState(1);
     const itemsPerPage = 20; // show 5 items per page
@@ -29,22 +26,16 @@ export default function ProductList() {
     const [isCartOpen, setCartOpen] = useState(false);
     const [cartItems, setCartItems] = useState<CartData[]>([])
 
-    const siteDetails = useSiteDetails();
-    const [phoneNumber, setPhoneNumber] = useState("");
-
-    useEffect(() => {
-    if (siteDetails?.contactphone) {
-        setPhoneNumber(siteDetails.contactphone);
-    }
-    }, [siteDetails]);
+    const siteDetails = useSiteDetails().siteDetails;
+    const [searchText, setSearchText] = useState("");
 
     useEffect(() => {
         // get product details and filter from local storage
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        const productids = products.map((item: Product) => item.productid);
-        console.log("Product ids", productids, products)
+        const productids = products.map((item: Collections) => item.itemid);
+        console.log("Product ids", productids, products, products.itemassets?.images[0])
         const x = items.filter((item: CartData) => {
-            productids.includes(item.productid)
+            productids.includes(item.itemid)
         })
         console.log("items", items, x)
         handleCart(items.length);
@@ -53,12 +44,25 @@ export default function ProductList() {
     // Calculate pagination
     const totalPages = Math.ceil(products.length / itemsPerPage);
     const startIndex = (currentPage - 1) * itemsPerPage;
-    const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
+    // const paginatedProducts = products.slice(startIndex, startIndex + itemsPerPage);
 
     // const handlePageChange = (page: number) => {
     //     if (page < 1 || page > totalPages) return;
     //     setCurrentPage(page);
     // };
+
+    useEffect(() => {
+        console.log("Products in ProductList", products);
+        const filtered = products.filter((product: Collections) => {
+            const searchLower = searchText.toLowerCase();
+            return (
+                product.itemname?.toLowerCase().includes(searchLower) ||
+                product.itemid.toLowerCase().includes(searchLower)
+            );
+        });
+        products = [...filtered];
+        console.log("Filtered products", filtered, products);
+    }, [searchText]);
 
     const openCart = () => {
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
@@ -72,25 +76,25 @@ export default function ProductList() {
     }
 
     const contactOverWhatsapp = () => {
-        if (!phoneNumber) {
+        if (!siteDetails?.contactphone) {
             alert("Phone number not available");
             return;
         }
         let itemDetails = ''
         cartItems.map((item) => {
-            itemDetails += `\n Product Name: ${item.name} - Product ID: ${item.productid} - Count: ${item.count}`
+            itemDetails += `\n Product Name: ${item.itemname} - Product ID: ${item.itemid} - Count: ${item.count}`
         })
         console.log("itemDetails", itemDetails)
         const message = "Hello, I would like to buy these products." + itemDetails + "\n";
-        const url = `https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)} Thank You!`;
+        const url = `https://wa.me/${siteDetails?.contactphone.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(message)} Thank You!`;
         window.open(url, "_blank");
     }
 
     const handleItemCount = (id: string, action: string) => {
         if (!isCartOpen) return;
-        
+
         const items = JSON.parse(localStorage.getItem("cart") || "[]");
-        const index = items.findIndex((item: CartData) => item.productid === id);
+        const index = items.findIndex((item: CartData) => item.itemid === id);
         if (index !== -1) {
             if (action === 'delete') {
                 items.splice(index, 1);
@@ -109,11 +113,10 @@ export default function ProductList() {
     return (
         <div>
             <div className="gallery-header">
-                <span className="section-title">Our Products</span>
-                          <button className="cart-btn" onClick={openCart}>
-            <span>🛒</span> Cart <span className="cart-badge">{cartCount}</span>
-          </button>
-                {/* <span className="section-count">{cartCount} item</span> */}
+                <span className="section-title">Our Gallery</span>
+                <button className="cart-btn" onClick={openCart}>
+                    <span>🛒</span> Cart <span className="cart-badge">{cartCount}</span>
+                </button>
             </div>
             <div className="search-wrap">
                 <span className="search-icon">🔍</span>
@@ -121,13 +124,14 @@ export default function ProductList() {
                     className="search-input"
                     type="text"
                     placeholder="Search products by name or ID…"
+                    onChange={(e) => setSearchText(e.target.value)}
                 />
             </div>
             <div className="gallery-grid">
-                {paginatedProducts.map((product: any) => (
+                {products.map((colection: any) => (
                     <Card
-                        key={product.productid}
-                        product={product}
+                        key={colection.itemid}
+                        collection={colection}
                         mode="public"
                         cartUpdated={(count: number) => handleCart(count)}
                     />
@@ -138,17 +142,17 @@ export default function ProductList() {
                 <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
                     <Modal.Header>
                         <Modal.Title>Cart</Modal.Title>
-                                    <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
+                        <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
                     </Modal.Header>
                     <Modal.Body>
                         {cartItems.map((item: CartData, index) => {
                             return (
                                 <div key={index} className="flex flex-row items-center p-4">
-                                    <span className="w-50">{item.name}:</span> <span> {renderImage(item.image, true)}</span>
+                                    <span className="w-50">{item.itemname}:</span> <span> {renderImage(item.image, true)}</span>
                                     <div className="flex items-center space-x-2">
                                         <button
                                             type="button"
-                                            onClick={() => handleItemCount(item.productid, 'add')}
+                                            onClick={() => handleItemCount(item.itemid, 'add')}
                                             className="px-3 py-1 rounded-md hover:text-green-600"
                                         >
                                             <IoMdAddCircleOutline />
@@ -160,7 +164,7 @@ export default function ProductList() {
 
                                         <button
                                             type="button"
-                                            onClick={() => handleItemCount(item.productid, 'remove')}
+                                            onClick={() => handleItemCount(item.itemid, 'remove')}
                                             disabled={item.count === 1}
                                             className="px-3 py-1 rounded-md hover:text-red-600"
                                         >
@@ -168,7 +172,7 @@ export default function ProductList() {
                                         </button>
                                         <button
                                             type="button"
-                                            onClick={() => handleItemCount(item.productid, 'delete')}
+                                            onClick={() => handleItemCount(item.itemid, 'delete')}
                                             className="py-1 rounded-md hover:text-red-600"
                                         >
                                             <MdDeleteOutline />
@@ -193,61 +197,5 @@ export default function ProductList() {
                 </Modal>
             )}
         </div>
-        // <div className="flex flex-col my-10 border-t-2 border-gray-300 m-2 px-4 w-[80%] mx-auto">
-        //     <header className="flex flex-row justify-between items-center my-4">
-        //         <div className="text-2xl m-2">Gallery</div>
-
-        //         <button className="flex flex-row items-center p-2 bg-black text-white rounded-md" onClick={openCart}>
-        //             <span><LuShoppingCart /> </span><span className="m-2">{cartCount}</span>
-        //         </button>
-        //     </header>
-        //     {products.length > 0 ? (
-        //         <>
-        //             <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
-        //                 {paginatedProducts.map((product: any) => (
-        //                     <Card
-        //                         key={product.productid}
-        //                         product={product}
-        //                         mode="public"
-        //                         cartUpdated={(count: number) => handleCart(count)}
-        //                     />
-        //                 ))}
-        //             </div>
-        //             {/* Pagination Controls */}
-        //             {/* <div className="flex justify-center items-center mt-8 space-x-2">
-        //                 <button
-        //                     onClick={() => handlePageChange(currentPage - 1)}
-        //                     disabled={currentPage === 1}
-        //                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-        //                 >
-        //                     Previous
-        //                 </button>
-        //                 {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
-        //                     <button
-        //                         key={page}
-        //                         onClick={() => handlePageChange(page)}
-        //                         className={`px-4 py-2 rounded-md ${page === currentPage
-        //                                 ? 'bg-blue-500 text-white'
-        //                                 : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-        //                             }`}
-        //                     >
-        //                         {page}
-        //                     </button>
-        //                 ))}
-        //                 <button
-        //                     onClick={() => handlePageChange(currentPage + 1)}
-        //                     disabled={currentPage === totalPages}
-        //                     className="px-4 py-2 bg-gray-200 text-gray-700 rounded-md disabled:opacity-50 disabled:cursor-not-allowed hover:bg-gray-300"
-        //                 >
-        //                     Next
-        //                 </button>
-        //             </div> */}
-        //         </>
-        //     ) : (
-        //         <p>No products available.</p>
-        //     )}
-
-            
-        // </div>
     );
 }

@@ -1,51 +1,26 @@
 'use client';
 
-import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
-import { getAdminDetails } from "@/services/settingsService";
-import { useToast } from "../context/ToastContext";
+import { useSiteDetails } from "../context/siteContext";
 
 export default function About() {
- 
-  const { showToast } = useToast();
+  const { siteDetails } = useSiteDetails();
+  const ownerName = siteDetails?.ownername ?? "";
+  const ownerTitle = siteDetails?.ownertitle ?? "";
+  const aboutOwner = siteDetails?.aboutowner ?? "";
+  const ownerInitial = siteDetails?.ownername?.charAt(0) ?? "";
 
-  const searchParams = useSearchParams();
-  const tenantidFromUrl = searchParams.get('tenantid');
-  const tenantid = tenantidFromUrl; // Get tenantid: from URL params first, then from auth context, then fallback
-
-  const [ownername, setOwnerName] = useState("");
-  const [ownertitle, setOwnerTitle] = useState("");
-  const [aboutowner, setAboutOwner] = useState("");
-
-  useEffect(() => {
-    fetchAdminDetails();
-  }, [tenantid]);
-
-  const fetchAdminDetails = async () => {
-    if (!tenantid) return;
-    console.log("About page tenantid:", tenantid);
-    try {
-      const data = await getAdminDetails(tenantid);
-      setOwnerName(data?.ownername || '')
-      setOwnerTitle(data?.ownertitle || '')
-      setAboutOwner(data?.aboutowner || '')
-    } catch (err: any) {
-      showToast(err.message, "danger");
-    }
-  }
-
-return (
-  <div className="card">
+  return (
+    <div className="card">
       <div className="custom-card-header">
         <div className="card-title mb-0"><div className="card-title-icon">👤</div>About Us</div>
       </div>
       <div className="card-body">
         <div className="owner-row">
-          <div className="owner-avatar">{ownername.charAt(0)}</div>
-          <div><div className="owner-name">{ownername}</div><div className="owner-role">{ownertitle}</div></div>
+          <div className="owner-avatar">{ownerInitial}</div>
+          <div><div className="owner-name">{ownerName}</div><div className="owner-role">{ownerTitle}</div></div>
         </div>
-        <p className="about-text">{aboutowner}</p>
+        <p className="about-text">{aboutOwner}</p>
       </div>
     </div>
-);
+  );
 }

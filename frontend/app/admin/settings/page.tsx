@@ -1,17 +1,17 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
-import { getAdminContactDetails, getAdminDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
+import { getAdminContactDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
 import { renderImage } from "@/app/lib/renderImage";
+import { useSiteDetails } from "@/app/context/siteContext";
 
 export default function Settings() {
 
     const { showToast } = useToast();
-
+    const { siteDetails, refetchSiteInfo } = useSiteDetails();
+    
     const [tenantid, setTenantid] = useState('');
-
-    const [tenantdomain, setTenantDomain] = useState("Shop owner");
 
     // Admin details states
     const [ownername, setOwnerName] = useState("");
@@ -64,10 +64,22 @@ export default function Settings() {
     const [errorJustDial, setErrorJustDial] = useState("");
 
     useEffect(() => {
-        fetchAdminDetails()
-    }, []);
+        setTenantid(siteDetails?.tenantid || '');
+        setOwnerName(siteDetails?.ownername || '');
+        setOwnerTitle(siteDetails?.ownertitle || '');
+        setAboutOwner(siteDetails?.aboutowner || '');
+        setYearsOfExperience(siteDetails?.yearsofexperience || '');
+        setProductsSold(siteDetails?.productssold || '');
+        setHappyClients(siteDetails?.happyclients || '');
+
+        if(siteDetails?.tenantid) {
+            setIsAdminDetailsFromDb(true);
+        }
+    }, [siteDetails])
 
     useEffect(() => {
+        if(!tenantid) return;
+        console.log("fetching additional details for tenantid", tenantid);
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
@@ -80,37 +92,25 @@ export default function Settings() {
             await updateAdminDetails({ tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
+            // set tenant id in url without refreshing the page
+                const newUrl = `${window.location.pathname}?tenantid=${tenantid}`;
+                window.history.pushState({ path: newUrl }, '', newUrl);
 
         } catch (error: any) {
             showToast(error, "danger")
         }
     };
 
-    // Fetch Admin details
-    const fetchAdminDetails = async () => {
-        try {
-            const data = await getAdminDetails();
-            setTenantid(data.tenantid)
-            setTenantDomain(data.tenantdomain)
-            setOwnerName(data.ownername)
-            setOwnerTitle(data.ownertitle)
-            setAboutOwner(data.aboutowner)
-            setYearsOfExperience(data.yearsofexperience)
-            setProductsSold(data.productssold)
-            setHappyClients(data.happyclients)
-            setIsAdminDetailsFromDb(true)
-        } catch (err: any) {
-            showToast(err.message, "danger");
-        }
-    }
-
     // Site information update function
     const updateSiteInformationFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         try {
             await updateSiteInformation({ tenantid, sitetitle, sitesubtitle, sitelogourl, trustedtagline, sitedescription });
             showToast("Saved Successfully", "success");
+            await fetchSiteInformation();
+            refetchSiteInfo?.();
             setIsAdminDetailsFromDb(true);
-
+            refetchSiteInfo && refetchSiteInfo();
         } catch (error: any) {
             showToast(error?.message, "danger")
         }
@@ -136,6 +136,7 @@ export default function Settings() {
 
     // Update admin contact details function
     const updateAdminContactDetailsFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         if ((!validateEmail(contactemail)) || (!validatePhone(contactphone)) || (!validatePhone(alternatecontactphone))) {
             if (!validateEmail(contactemail) && contactemail !== "") {
                 setErrorEmail("Enter a valid email address");
@@ -184,6 +185,7 @@ export default function Settings() {
 
     // Update social links details function
     const updateAdminSocialLinksFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         if ((instagramurl && !isValidUrl(instagramurl)) || (googlemapurl && !isValidUrl(googlemapurl)) || (justdialurl && !isValidUrl(justdialurl))) {
             if (instagramurl && !isValidUrl(instagramurl)) {
                 setErrorInstagram("Enter a valid URL for Instagram");
@@ -224,6 +226,8 @@ export default function Settings() {
 
     // Update opening hours details function
     const updateOpeningHoursFn = async () => {
+        if(!isAdminDetailsFromDb) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
+
         try {
             const data = await updateOpeningHours({ tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday });
             showToast("Details saved!", "success")
@@ -296,6 +300,7 @@ export default function Settings() {
     }, []);
 
     const handleNavClick = (sectionId: string) => {
+        if(!tenantid) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
         setActiveSection(sectionId);
         const element = document.getElementById(sectionId);
         if (element) {
@@ -390,8 +395,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary" onClick={updateAdminDetailsFn}
-                        disabled={!tenantid}
+                        <button className={tenantid ? "btn-primary" : "btn-secondary"} disabled={!tenantid} onClick={updateAdminDetailsFn}
                         >💾 Save Admin Details</button>
                     </div>
                 </div>
@@ -429,12 +433,14 @@ export default function Settings() {
                         </div>
                         <div className="field-group">
                             <label className="field-label">Site Description</label>
-                            <textarea className="field-input" rows={4} value={sitedescription} onChange={(e) => setSiteDescription(e.target.value)}></textarea>
+                            <textarea className="field-input" rows={4} 
+                            placeholder="Give a nice description, it will be displayed on the top section of your page."
+                            value={sitedescription} onChange={(e) => setSiteDescription(e.target.value)}></textarea>
                         </div>
                     </div>
                     <div className="save-section">
                         {/* <button className="btn-secondary">Reset</button> */}
-                        <button className="btn-primary" onClick={updateSiteInformationFn} >💾 Save Site Info</button>
+                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateSiteInformationFn} >💾 Save Site Info</button>
                     </div>
                 </div>
 
@@ -480,7 +486,7 @@ export default function Settings() {
                         </div>
                     </div>
                     <div className="save-section">
-                        <button className="btn-primary" onClick={updateAdminContactDetailsFn}>💾 Save Contact</button>
+                        <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateAdminContactDetailsFn}>💾 Save Contact</button>
                     </div>
                 </div>
 
@@ -513,7 +519,7 @@ export default function Settings() {
                             </div>
                         </div>
                         <div className="save-section">
-                            <button className="btn-primary" onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
+                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateAdminSocialLinksFn}>💾 Save Links</button>
                         </div>
                     </div>
 
@@ -568,10 +574,9 @@ export default function Settings() {
                         </div>
                         <div className="save-section">
                             {/* <button className="btn-secondary">Reset to Default</button> */}
-                            <button className="btn-primary" onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
+                            <button className={isAdminDetailsFromDb ? "btn-primary" : "btn-secondary"} disabled={!isAdminDetailsFromDb} onClick={updateOpeningHoursFn}>💾 Save All Settings</button>
                         </div>
                     </div>
-
                 </div>
             </div>
     );
