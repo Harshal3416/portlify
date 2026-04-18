@@ -1,7 +1,7 @@
 const express = require('express')
 const router = express.Router()
 const { upload } = require('../middleware/upload')
-const pool = require('../../database/db/db')
+const pool = require('../database/db/db')
 const clerkAuth = require('../middleware/clerkAuth')
 
 // --- siteinformation routes ---

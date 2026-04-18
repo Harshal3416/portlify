@@ -3,7 +3,7 @@ const crypto = require('crypto')
 const router = express.Router()
 const { upload } = require('../middleware/upload')
 const { collections } = require('../utils/store')
-const pool = require("../../database/db/db");
+const pool = require("../database/db/db");
 const clerkAuth = require('../middleware/clerkAuth')
 
 // Create item (multipart/form-data only; files are stored and URLs provided)

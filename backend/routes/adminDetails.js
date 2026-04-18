@@ -1,7 +1,7 @@
 // backend/routes/adminDetails.js
 const express = require('express')
 const router = express.Router()
-const pool = require("../../database/db/db");
+const pool = require("../database/db/db");
 const clerkAuth = require('../middleware/clerkAuth')
 
 // POST — save admin details for logged-in user
