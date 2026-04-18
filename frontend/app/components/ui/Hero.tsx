@@ -8,7 +8,7 @@ import { useSiteDetails } from '@/app/context/siteContext';
 
 export function Hero() {
   const { showToast } = useToast();
-  const siteDetails = useSiteDetails();
+    const siteDetails = useSiteDetails().siteDetails;
   
   const [trustedtagline, setTrustedTagline] = useState('');
   const [sitedescription, setSiteDescription] = useState('');

@@ -3,7 +3,7 @@
 import { useSiteDetails } from "@/app/context/siteContext";
 
 export function FooterComponent() {
-  const siteDetails = useSiteDetails();
+    const siteDetails = useSiteDetails().siteDetails;
 
   const openGmail = () => {
     const subject = "Inquiry about products";

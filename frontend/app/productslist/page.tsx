@@ -1,7 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import Card from "../components/ui/Card";
+import { useEffect, useState, Suspense } from "react";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
 import Modal from 'react-bootstrap/Modal';
 import { renderImage } from "../lib/renderImage";
@@ -11,9 +10,9 @@ import { MdDeleteOutline } from "react-icons/md";
 import { useSearchParams } from "next/navigation";
 import { useSiteDetails } from "../context/siteContext";
 import { CartData, Collections } from "../interfaces/interface";
+import Card from "../components/ui/Card";
 
-export default function ProductList() {
-
+function ProductListContent() {
     const searchParams = useSearchParams();
     const tenantidFromUrl = searchParams.get('tenantid');
 
@@ -197,5 +196,13 @@ export default function ProductList() {
                 </Modal>
             )}
         </div>
+    );
+}
+
+export default function ProductList() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ProductListContent />
+        </Suspense>
     );
 }

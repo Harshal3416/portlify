@@ -9,6 +9,7 @@ import { ClerkProvider, Show, UserButton } from '@clerk/nextjs'
 import AuthInitializer from "./components/ui/AuthInitializer";
 import { Header } from "./components/ui/Header";
 import { FooterComponent } from "./components/ui/Footercomponent";
+import { Suspense } from "react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,16 @@ export const metadata: Metadata = {
   description: "Premium stainless steel products wholesale supplier in Bangalore",
 };
 
+function SiteProviderWrapper({ children }: { children: React.ReactNode }) {
+  return (
+    <Suspense fallback={null}>
+      <SiteProvider>
+        {children}
+      </SiteProvider>
+    </Suspense>
+  );
+}
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,7 +44,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f9f6f0]`}>
-        <SiteProvider>
+        <SiteProviderWrapper>
           <QueryProvider>
             <ToastProvider>
               <ClerkProvider>
@@ -44,7 +55,7 @@ export default function RootLayout({
               </ClerkProvider>
             </ToastProvider>
           </QueryProvider>
-        </SiteProvider>
+        </SiteProviderWrapper>
         <button className="fab-whatsapp">
           💬
         </button>

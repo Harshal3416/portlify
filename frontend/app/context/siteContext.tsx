@@ -15,10 +15,22 @@ const SiteContext = createContext<SiteContextType | null>(null);
 export function SiteProvider({ children }: { children: React.ReactNode }) {
   const [siteDetails, setSiteDetails] = useState<SiteDetail | null>(null);
 
-  const searchParams = useSearchParams();
-  const tenantidFromUrl = searchParams.get('tenantid');
+  // Only use search params on client side
+  const [isClient, setIsClient] = useState(false);
+  const searchParams = isClient ? useSearchParams() : null;
+  const tenantidFromUrl = searchParams?.get('tenantid') || null;
   const tenantid = tenantidFromUrl;
   const [tenantidfromdb, setTenantidFromDb] = useState('');
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    if (isClient && tenantid) {
+      loadDetails();
+    }
+  }, [isClient, tenantid]);
 
   const refetchSiteInfo = useCallback(async () => {
     loadDetails();
@@ -34,8 +46,11 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   }, [tenantid, tenantidfromdb]);
 
   useEffect(() => {
-    loadDetails();
-  }, []);
+    if (isClient && !tenantid) {
+      // If no tenantid from URL, try to load with empty string or default
+      loadDetails();
+    }
+  }, [isClient]);
 
   const loadDetails = async () => {
     try {

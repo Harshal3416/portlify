@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, Suspense } from "react";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
@@ -9,7 +9,7 @@ import { renderImage } from "@/app/lib/renderImage";
 import { Collections } from "@/app/interfaces/interface";
 import { useSiteDetails } from "@/app/context/siteContext";
 
-export default function Products() {
+function ProductsContent() {
   const createMutation = useCreateProduct();
   const updateMutation = useUpdateProduct();
   const deleteMutation = useDeleteProduct();
@@ -359,5 +359,13 @@ export default function Products() {
 
     </div>
   );
+}
+
+export default function Products() {
+    return (
+        <Suspense fallback={<div>Loading...</div>}>
+            <ProductsContent />
+        </Suspense>
+    );
 }
 
