@@ -78,13 +78,13 @@ export default function Settings() {
     }, [siteDetails])
 
     useEffect(() => {
-        if(!tenantid) return;
+        if(!isAdminDetailsFromDb) return;
         console.log("fetching additional details for tenantid", tenantid);
         fetchSiteInformation()
         fetchAdminContactDetails()
         fetchAdminSocialLinks()
         fetchOpeningHours()
-    }, [tenantid]);
+    }, [isAdminDetailsFromDb]);
 
     // Admin details Update functions
     const updateAdminDetailsFn = async () => {
