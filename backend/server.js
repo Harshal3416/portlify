@@ -19,7 +19,7 @@ app.use('/uploads', express.static(uploadsDir))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use( cors({ origin: ["http://localhost:4000"], credentials: true,
+app.use( cors({ origin: [process.env.BASE_URL], credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowedHeaders: ['Content-Type', 'Authorization'],  // 👈 Authorization is required for your Bearer token
  }) );
