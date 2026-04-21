@@ -17,7 +17,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
   // Only use search params on client side
   const [isClient, setIsClient] = useState(false);
-  const searchParams = isClient ? useSearchParams() : null;
+  const searchParams = useSearchParams();
   const tenantidFromUrl = searchParams?.get('tenantid') || null;
   const tenantid = tenantidFromUrl;
   const [tenantidfromdb, setTenantidFromDb] = useState('');
