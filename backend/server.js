@@ -19,10 +19,21 @@ app.use('/uploads', express.static(uploadsDir))
 app.use(express.json())
 app.use(express.urlencoded({ extended: true }))
 
-app.use( cors({ origin: [process.env.BASE_URL], credentials: true,
+const getAllowedOrigins = () => {
+  const baseUrl = process.env.BASE_URL;
+  if (!baseUrl) {
+    console.warn('⚠️  BASE_URL environment variable not set. CORS may not work properly in production.');
+    return ['http://localhost:3000', 'http://localhost:3001'];
+  }
+  return Array.isArray(baseUrl) ? baseUrl : [baseUrl];
+};
+
+app.use(cors({ 
+  origin: getAllowedOrigins(), 
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],  // 👈 Authorization is required for your Bearer token
- }) );
+  allowedHeaders: ['Content-Type', 'Authorization'],
+}));
 
 
 // Routes
