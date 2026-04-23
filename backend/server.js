@@ -13,17 +13,14 @@ const adminDetailsRoutes = require('./routes/adminDetails')
 const app = express()
 const port = process.env.PORT || 3000
 
-// Serve static files from uploads directory
-app.use('/uploads', express.static(uploadsDir))
-
-app.use(express.json())
-app.use(express.urlencoded({ extended: true }))
-
 const getAllowedOrigins = () => {
   const baseUrl = process.env.BASE_URL;
+  console.log("BASE_URL:", baseUrl); // 👈 Add this to debug
   if (!baseUrl) {
-    console.warn('⚠️  BASE_URL environment variable not set. CORS may not work properly in production.');
-    return ['http://localhost:3000', 'http://localhost:3001'];
+    console.warn(
+      "⚠️ BASE_URL environment variable not set. CORS may not work properly in production.",
+    );
+    return ["http://localhost:3000", "http://localhost:3001"];
   }
   return Array.isArray(baseUrl) ? baseUrl : [baseUrl];
 };
@@ -35,6 +32,12 @@ app.use(cors({
   allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
+
+app.use(express.json())
+app.use(express.urlencoded({ extended: true }))
+
+// Serve static files from uploads directory
+app.use('/uploads', express.static(uploadsDir))
 
 // Routes
 app.get('/', (req, res) => res.send('Enquiry App backend'))
