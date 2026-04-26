@@ -13,23 +13,41 @@ const adminDetailsRoutes = require('./routes/adminDetails')
 const app = express()
 const port = process.env.PORT || 3000
 
-const getAllowedOrigins = () => {
-  const baseUrl = process.env.BASE_URL;
-  console.log("BASE_URL:", baseUrl); // 👈 Add this to debug
-  if (!baseUrl) {
-    console.warn(
-      "⚠️ BASE_URL environment variable not set. CORS may not work properly in production.",
-    );
-    return ["http://localhost:3000", "http://localhost:3001"];
-  }
-  return Array.isArray(baseUrl) ? baseUrl : [baseUrl];
-};
+// const getAllowedOrigins = () => {
+//   const baseUrl = process.env.BASE_URL;
+//   console.log("BASE_URL:", baseUrl); // 👈 Add this to debug
+//   if (!baseUrl) {
+//     console.warn(
+//       "⚠️ BASE_URL environment variable not set. CORS may not work properly in production.",
+//     );
+//     return ["http://localhost:3000", "http://localhost:3001"];
+//   }
+//   return Array.isArray(baseUrl) ? baseUrl : [baseUrl];
+// };
 
-app.use(cors({ 
-  origin: getAllowedOrigins(), 
+// app.use(cors({ 
+//   origin: getAllowedOrigins(), 
+//   credentials: true,
+//   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+//   allowedHeaders: ['Content-Type', 'Authorization'],
+// }));
+
+app.use(cors({
+  origin: function (origin, callback) {
+    // allow requests with no origin (Postman, mobile apps, etc.)
+    if (!origin) return callback(null, true);
+
+    if (
+      origin.endsWith(".vercel.app") ||   // ✅ allow all Vercel deployments
+      origin.includes("localhost")        // ✅ allow local dev
+    ) {
+      callback(null, true);
+    } else {
+      console.error("❌ Blocked by CORS:", origin);
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 
