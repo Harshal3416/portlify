@@ -9,7 +9,7 @@
         if (typeof image === "string") {
             return (
                 <img
-                    src={"http://localhost:3000" + image}
+                    src={process.env.BACKEND_URL + image}
                     {...baseProps}
                 />
             );
@@ -18,7 +18,7 @@
         if (typeof image === "object" && "url" in image && image.url) {
             return (
                 <img
-                    src={"http://localhost:3000" + image.url}
+                    src={process.env.BACKEND_URL + image.url}
                     {...baseProps}
                 />
             );
