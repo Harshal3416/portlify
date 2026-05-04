@@ -63,6 +63,16 @@ app.use('/api/collections', collectionRoutes)
 app.use('/api/site-details', siteDetailsRoutes)
 app.use('/api/admin-details', adminDetailsRoutes)
 
+app.get('/test-db', async (req, res) => {
+  try {
+    const result = await pool.query('SELECT NOW()');
+    res.json({ success: true, time: result.rows[0] });
+  } catch (err) {
+    console.error("DB ERROR:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Global error handler (catches multer and other errors)
 app.use((err, req, res, next) => {
   if (err instanceof multer.MulterError) {
