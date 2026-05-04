@@ -115,7 +115,7 @@ export default function Card({
                             {collection.itemassets?.images?.map((img, index) => (
                                 <Carousel.Item key={`img-${index}`}>
                                     {img.url && 
-                                    <img src={process.env.BACKEND_URL + img.url} alt={img.filename} className="d-block w-100" />
+                                    <img src={process.env.NEXT_PUBLIC_BACKEND_URL + img.url} alt={img.filename} className="d-block w-100" />
                                     }
                                 </Carousel.Item>
                             ))}
@@ -123,7 +123,7 @@ export default function Card({
                                 <Carousel.Item key={`vid-${index}`}>
                                     <video controls className="d-block w-100">
                                         {vid.url && 
-                                        <source src={process.env.BACKEND_URL + vid.url} type="video/mp4" />
+                                        <source src={process.env.NEXT_PUBLIC_BACKEND_URL + vid.url} type="video/mp4" />
                                         }
                                     </video>
                                 </Carousel.Item>
