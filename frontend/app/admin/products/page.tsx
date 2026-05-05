@@ -59,6 +59,7 @@ function ProductsContent() {
     setItemName("");
     setProductId(generateProductId());
     setDescription("");
+    setPrice("");
     setHighlightFiles([]);
     setExistingAssets([]);
     // Clear file input visually
