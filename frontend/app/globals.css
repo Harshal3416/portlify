@@ -340,6 +340,14 @@ header.header {
   display: grid; grid-template-columns: 240px 1fr; gap: 28px; align-items: start;
 }
 
+@media (max-width: 900px) {
+  .settings-layout {
+    /* grid-template-columns: 1fr; */
+    padding: 24px 20px;
+    gap: 20px;
+  }
+}
+
 /* SIDEBAR NAV */
 .settings-nav {
   background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
