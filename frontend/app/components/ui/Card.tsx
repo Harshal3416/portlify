@@ -45,8 +45,8 @@ export default function Card({
     const addToCart = () => {
         const existingCartLS = getCartFromLocalStorage();
         existingCartLS.push({
-            productId: collection.itemid,
-            name: collection.itemname,
+            itemid: collection.itemid,
+            itemname: collection.itemname,
             image: collection.itemassets?.images[0] || null,
             count: 1
         });
@@ -80,7 +80,7 @@ export default function Card({
                 {collection.price !== "" && <span className="price-badge">₹ {collection.price} /-</span>}
                 <div className="product-name">{collection.itemname || "-"}</div>
                 <div className="product-id">ID: {collection.itemid || "-"}</div>
-                <div className="product-desc">{collection.description || "-"}</div>
+                <div className="product-desc line-clamp-2">{collection.description || "-"}</div>
                 <div className="product-actions">
                     {canEdit ? (
                         <>
