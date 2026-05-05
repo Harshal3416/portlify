@@ -28,6 +28,7 @@ function ProductsContent() {
   const [price, setPrice] = useState("");
   const [description, setDescription] = useState("");
   const [highlightFiles, setHighlightFiles] = useState<File[]>([]);
+  const [existingAssets, setExistingAssets] = useState<{ filename: string; size: number; url?: string; type: 'image' | 'video' }[]>([]);
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -59,11 +60,20 @@ function ProductsContent() {
     setProductId(generateProductId());
     setDescription("");
     setHighlightFiles([]);
+    setExistingAssets([]);
     // Clear file input visually
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
     setEditingItemId(null);
+  };
+
+  const removeHighlightFile = (index: number) => {
+    setHighlightFiles((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const removeExistingAsset = (index: number) => {
+    setExistingAssets((prev) => prev.filter((_, i) => i !== index));
   };
 
   const handleSubmitProduct = async () => {
@@ -75,8 +85,10 @@ function ProductsContent() {
 
     console.log("Images", highlightFiles)
 
-    const imageCount = highlightFiles.filter(f => f.type.startsWith('image/')).length;
-    const videoCount = highlightFiles.filter(f => f.type.startsWith('video/')).length;
+    const existingImageCount = existingAssets.filter((asset) => asset.type === 'image').length;
+    const existingVideoCount = existingAssets.filter((asset) => asset.type === 'video').length;
+    const imageCount = existingImageCount + highlightFiles.filter(f => f.type.startsWith('image/')).length;
+    const videoCount = existingVideoCount + highlightFiles.filter(f => f.type.startsWith('video/')).length;
 
     if (imageCount === 0) {
       showToast("At least one image is required.", "warning");
@@ -146,6 +158,7 @@ function ProductsContent() {
 
     try {
       if (editingItemId) {
+        form.append("existingAssets", JSON.stringify(existingAssets));
         await updateMutation.mutateAsync({
           id: editingItemId,
           formData: form,
@@ -192,6 +205,10 @@ function ProductsContent() {
     setDescription(items.description || "");
     setPrice(items.price || "");
     setHighlightFiles([]);
+    setExistingAssets([
+      ...(items.itemassets?.images?.map((asset) => ({ ...asset, type: 'image' as const })) || []),
+      ...(items.itemassets?.videos?.map((asset) => ({ ...asset, type: 'video' as const })) || []),
+    ]);
   };
 
   return (
@@ -252,7 +269,7 @@ function ProductsContent() {
             <Modal.Title>{editingItemId ? "Edit product" : "Add a product"}
             </Modal.Title>
             <button className="modal-close" onClick={() => {
-              resetProductForm
+              resetProductForm();
               setAddProductModal(false);
             }
             }>✕</button>
@@ -281,15 +298,48 @@ function ProductsContent() {
             <div className="field-group">
               <label className="field-label">Item Image</label>
               <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
-                <div className="upload-area-icon">
-                  {highlightFiles.length > 0 ? (
-                    highlightFiles.map((file, i) => (
-                      file.type.startsWith('image/') ? (
-                        <img key={i} src={URL.createObjectURL(file)} alt="" className="w-10 h-10 inline mr-1" />
-                      ) : (
-                        <span key={i} className="inline mr-1">🎥</span>
-                      )
-                    ))
+                <div className="upload-area-icon flex flex-wrap items-start">
+                  {existingAssets.length + highlightFiles.length > 0 ? (
+                    <>
+                      {existingAssets.map((asset, i) => (
+                        <div key={`existing-${i}`} className="relative inline-block mr-1 mb-1">
+                          {asset.type === 'image' ? (
+                            <img src={asset.url || ''} alt={asset.filename} className="w-10 h-10 object-cover rounded" />
+                          ) : (
+                            <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">🎥</div>
+                          )}
+                          <button
+                            type="button"
+                            className="absolute top-0 right-0 -mt-1 -mr-1 bg-black/70 text-white rounded-full w-5 h-5 text-[10px] leading-5"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeExistingAsset(i);
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                      {highlightFiles.map((file, i) => (
+                        <div key={`new-${i}`} className="relative inline-block mr-1 mb-1">
+                          {file.type.startsWith('image/') ? (
+                            <img src={URL.createObjectURL(file)} alt={file.name} className="w-10 h-10 object-cover rounded" />
+                          ) : (
+                            <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">🎥</div>
+                          )}
+                          <button
+                            type="button"
+                            className="absolute top-0 right-0 -mt-1 -mr-1 bg-black/70 text-white rounded-full w-5 h-5 text-[10px] leading-5"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              removeHighlightFile(i);
+                            }}
+                          >
+                            ×
+                          </button>
+                        </div>
+                      ))}
+                    </>
                   ) : '📁'}
                 </div>
                 <p>Click to upload or drag & drop</p>
@@ -302,16 +352,18 @@ function ProductsContent() {
                     const files = Array.from(e.target.files || []);
                     const images = files.filter(f => f.type.startsWith('image/'));
                     const videos = files.filter(f => f.type.startsWith('video/'));
-                    if (images.length > 5) {
+                    const currentImageCount = existingAssets.filter((asset) => asset.type === 'image').length + highlightFiles.filter(f => f.type.startsWith('image/')).length;
+                    const currentVideoCount = existingAssets.filter((asset) => asset.type === 'video').length + highlightFiles.filter(f => f.type.startsWith('video/')).length;
+                    if (currentImageCount + images.length > 5) {
                       setSubmitError("Maximum 5 images allowed");
                       return;
                     }
-                    if (videos.length > 1) {
+                    if (currentVideoCount + videos.length > 1) {
                       setSubmitError("Maximum 1 video allowed");
                       return;
                     }
                     setSubmitError(null);
-                    setHighlightFiles(files);
+                    setHighlightFiles((prev) => [...prev, ...files]);
                   }} />
               </div>
             </div>
@@ -319,7 +371,7 @@ function ProductsContent() {
           <Modal.Footer>
             {/* <div className="modal-footer"> */}
             <button className="btn-cancel" onClick={() => {
-              resetProductForm
+              resetProductForm();
               setAddProductModal(false);
             }
             }>Cancel</button>

@@ -132,11 +132,27 @@ router.put(
       }
 
       let itemassets;
+      let existingAssets = [];
 
-      if (req.files?.itemassets) {
-        const allFiles = req.files.itemassets;
+      if (req.body.existingAssets) {
+        try {
+          existingAssets = JSON.parse(req.body.existingAssets);
+        } catch (e) {
+          console.warn('Failed to parse existingAssets payload:', e);
+        }
+      }
 
-        const images = allFiles
+      const existingImages = Array.isArray(existingAssets)
+        ? existingAssets.filter((asset) => asset.type === 'image')
+        : [];
+      const existingVideos = Array.isArray(existingAssets)
+        ? existingAssets.filter((asset) => asset.type === 'video')
+        : [];
+
+      if (req.files?.itemassets || req.body.existingAssets !== undefined) {
+        const allFiles = req.files?.itemassets || [];
+
+        const newImages = allFiles
           .filter(f => f.mimetype.startsWith('image/'))
           .map(f => ({
             type: 'image',
@@ -145,7 +161,7 @@ router.put(
             url: `/uploads/${f.filename}`,
           }));
 
-        const videos = allFiles
+        const newVideos = allFiles
           .filter(f => f.mimetype.startsWith('video/'))
           .map(f => ({
             type: 'video',
@@ -154,7 +170,10 @@ router.put(
             url: `/uploads/${f.filename}`,
           }));
 
-        itemassets = { images, videos };
+        itemassets = {
+          images: [...existingImages, ...newImages],
+          videos: [...existingVideos, ...newVideos],
+        };
       }
 
       let query;
