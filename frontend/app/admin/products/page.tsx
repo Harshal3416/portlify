@@ -304,7 +304,7 @@ function ProductsContent() {
                       {existingAssets.map((asset, i) => (
                         <div key={`existing-${i}`} className="relative inline-block mr-1 mb-1">
                           {asset.type === 'image' ? (
-                            <img src={asset.url || ''} alt={asset.filename} className="w-10 h-10 object-cover rounded" />
+                            <img src={process.env.NEXT_PUBLIC_BACKEND_URL + (asset.url || '')} alt={asset.filename} className="w-10 h-10 object-cover rounded" />
                           ) : (
                             <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">🎥</div>
                           )}
