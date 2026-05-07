@@ -10,6 +10,7 @@ import AuthInitializer from "./components/ui/AuthInitializer";
 import { Header } from "./components/ui/Header";
 import { FooterComponent } from "./components/ui/Footercomponent";
 import { Suspense } from "react";
+import { Playfair_Display, DM_Sans } from 'next/font/google'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,6 +26,19 @@ export const metadata: Metadata = {
   title: "Raj Wholesale Stainless Steel Shop",
   description: "Premium stainless steel products wholesale supplier in Bangalore",
 };
+
+const playfair = Playfair_Display({
+  subsets: ['latin'],
+  variable: '--font-display',
+  weight: ['400', '700', '900'],
+  style: ['normal', 'italic'],
+})
+
+const dmSans = DM_Sans({
+  subsets: ['latin'],
+  variable: '--font-sans',
+  weight: ['300', '400', '500', '600'],
+})
 
 function SiteProviderWrapper({ children }: { children: React.ReactNode }) {
   return (
@@ -43,7 +57,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f9f6f0]`}>
+      <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-[#f9f6f0] 
+      ${playfair.variable} ${dmSans.variable}`}>
         <SiteProviderWrapper>
           <QueryProvider>
             <ToastProvider>
