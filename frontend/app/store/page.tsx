@@ -12,7 +12,7 @@ export default function Store() {
   return (
     <>
       <Hero />
-      <main>
+      <main className="store-layout">
         <ProductList />
         <aside className="sidebar">
           <About />
