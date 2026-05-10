@@ -1,4 +1,7 @@
+'use client';
+
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 /* ─────────────────────────────────────────────────────────────
    DATA
@@ -200,17 +203,18 @@ const BUSINESSES = [
 ];
 
 const TABS = [
-  { cat: "all",    label: "All",     icon: "🏢", count: 9 },
+  { cat: "all", label: "All", icon: "🏢", count: 9 },
   { cat: "broker", label: "Brokers", icon: "🤝", count: 3 },
-  { cat: "shop",   label: "Shops",   icon: "🏪", count: 3 },
-  { cat: "bakery", label: "Bakeries",icon: "🥐", count: 2 },
-  { cat: "lodge",  label: "Lodges",  icon: "🏨", count: 1 },
+  { cat: "shop", label: "Shops", icon: "🏪", count: 3 },
+  { cat: "bakery", label: "Bakeries", icon: "🥐", count: 2 },
+  { cat: "lodge", label: "Lodges", icon: "🏨", count: 1 },
 ];
 
 /* ─────────────────────────────────────────────────────────────
    HEADER
 ───────────────────────────────────────────────────────────── */
 function Header() {
+  const router = useRouter();
   return (
     <header className="bg-white/90 backdrop-blur-md border-b border-gray-100 sticky top-0 z-50 shadow-(--shadow-card)">
       <div className="max-w-6xl mx-auto px-6 h-[70px] flex items-center justify-between">
@@ -233,16 +237,16 @@ function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center gap-2">
-          <Link href="#features"     className="px-4 py-2 rounded-full text-sm font-medium text-steel-mid hover:text-steel-dark hover:bg-cream transition-all duration-200">Features</Link>
+          <Link href="#features" className="px-4 py-2 rounded-full text-sm font-medium text-steel-mid hover:text-steel-dark hover:bg-cream transition-all duration-200">Features</Link>
           <Link href="#how-it-works" className="px-4 py-2 rounded-full text-sm font-medium text-steel-mid hover:text-steel-dark hover:bg-cream transition-all duration-200">How it Works</Link>
-          <Link href="#directory"    className="px-4 py-2 rounded-full text-sm font-medium text-steel-mid hover:text-steel-dark hover:bg-cream transition-all duration-200">Directory</Link>
+          <Link href="#directory" className="px-4 py-2 rounded-full text-sm font-medium text-steel-mid hover:text-steel-dark hover:bg-cream transition-all duration-200">Directory</Link>
           <div className="w-px h-5 bg-gray-200 mx-1" />
-          <Link
-            href="/admin/settings"
+          <div
+            onClick={() => router.push(`/admin/settings`)}
             className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-steel-dark text-white text-sm font-semibold hover:bg-gold hover:text-steel-dark transition-all duration-200 shadow-md hover:shadow-(--shadow-gold) hover:-translate-y-0.5"
           >
             <span>✦</span> Create Free Store
-          </Link>
+          </div>
         </nav>
 
         {/* Mobile hamburger — interaction handled via CSS peer trick or client component */}
@@ -263,6 +267,8 @@ function Header() {
    HERO
 ───────────────────────────────────────────────────────────── */
 function Hero() {
+  const router = useRouter();
+
   return (
     <section className="hero-clip hero-grid relative overflow-hidden bg-linear-to-br from-steel-dark via-[#3a5570] to-[#2c4a62] pt-24 pb-32 px-6">
       {/* Glow blobs */}
@@ -295,12 +301,13 @@ function Hero() {
 
           {/* CTAs */}
           <div className="flex flex-wrap items-center gap-3 mb-12">
-            <Link
-              href="/admin/settings"
+            <div
+              onClick={() => router.push(`/admin/settings `)}
+
               className="flex items-center gap-2 bg-gold hover:bg-gold-light text-steel-dark font-bold text-sm px-7 py-4 rounded-full shadow-(--shadow-gold) hover:-translate-y-0.5 transition-all duration-200"
             >
               Create Your Free Store →
-            </Link>
+            </div>
             <Link
               href="#directory"
               className="flex items-center gap-2 bg-white/10 hover:bg-white/20 text-white border border-white/20 hover:border-white/40 text-sm font-medium px-6 py-4 rounded-full transition-all duration-200"
@@ -365,8 +372,8 @@ function Hero() {
             <div className="grid grid-cols-3 gap-1.5 mb-2">
               {[
                 { emoji: "🥘", label: "Pressure Cooker", inCart: false },
-                { emoji: "🍳", label: "Steel Pan Set",   inCart: false },
-                { emoji: "🍱", label: "Tiffin Box",      inCart: true  },
+                { emoji: "🍳", label: "Steel Pan Set", inCart: false },
+                { emoji: "🍱", label: "Tiffin Box", inCart: true },
               ].map((p) => (
                 <div key={p.label} className="bg-white/10 rounded-lg p-2 flex flex-col items-center gap-1">
                   <span className="text-xl">{p.emoji}</span>
@@ -449,6 +456,8 @@ function Features() {
    HOW IT WORKS
 ───────────────────────────────────────────────────────────── */
 function HowItWorks() {
+  const router = useRouter();
+
   return (
     <section id="how-it-works" className="py-24 px-6 bg-white">
       <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
@@ -503,27 +512,27 @@ function HowItWorks() {
                 Works for every business
               </h3>
               <div className="grid grid-cols-2 gap-2 mb-6">
-                {["Wholesale dealers","Brokers & agents","Bakeries","Guest lodges","Boutiques","Any business!"].map((item) => (
+                {["Wholesale dealers", "Brokers & agents", "Bakeries", "Guest lodges", "Boutiques", "Any business!"].map((item) => (
                   <div key={item} className="flex items-center gap-2 text-sm text-white/80">
                     <span className="text-gold">✓</span> {item}
                   </div>
                 ))}
               </div>
-              <Link
-                href="/admin/settings"
+              <div
+                onClick={() => router.push(`/admin/settings `)}
                 className="inline-flex items-center gap-2 bg-gold hover:bg-gold-light text-steel-dark font-bold text-sm px-6 py-3 rounded-full transition-all duration-200 shadow-(--shadow-gold)"
               >
                 Start for free →
-              </Link>
+              </div>
             </div>
           </div>
 
           {/* Trust badges */}
           <div className="grid grid-cols-3 gap-3">
             {[
-              { icon: "🔒", label: "Secure",       sub: "Private by default"  },
+              { icon: "🔒", label: "Secure", sub: "Private by default" },
               { icon: "📱", label: "Mobile-first", sub: "Works on all devices" },
-              { icon: "💸", label: "Free forever", sub: "No hidden charges"   },
+              { icon: "💸", label: "Free forever", sub: "No hidden charges" },
             ].map((b) => (
               <div key={b.label} className="bg-cream rounded-xl p-4 text-center border border-gray-200">
                 <div className="text-2xl mb-1">{b.icon}</div>
@@ -542,6 +551,8 @@ function HowItWorks() {
    DIRECTORY  (static — filtering needs a Client Component)
 ───────────────────────────────────────────────────────────── */
 function Directory() {
+  const router = useRouter();
+
   return (
     <section id="directory" className="py-24 px-6 bg-cream">
       <div className="max-w-6xl mx-auto">
@@ -644,12 +655,12 @@ function Directory() {
           <div className="inline-flex items-center gap-3 bg-white border border-gray-200 rounded-2xl px-6 py-4 shadow-(--shadow-card)">
             <span className="text-2xl">✨</span>
             <span className="text-sm text-steel-mid">Want your business listed here?</span>
-            <Link
-              href="/admin/settings"
+            <div
+              onClick={() => router.push(`/admin/settings`)}
               className="bg-steel-dark hover:bg-gold text-white hover:text-steel-dark text-sm font-semibold px-5 py-2 rounded-full transition-all duration-200"
             >
               Join for free →
-            </Link>
+            </div>
           </div>
         </div>
       </div>
@@ -661,6 +672,7 @@ function Directory() {
    FOOTER CTA BANNER
 ───────────────────────────────────────────────────────────── */
 function FooterCTA() {
+  const router = useRouter();
   return (
     <section className="bg-linear-to-br from-steel-dark to-steel-mid py-20 px-6 relative overflow-hidden">
       <div className="absolute inset-0 hero-grid opacity-50" />
@@ -675,12 +687,12 @@ function FooterCTA() {
           Join 50+ businesses already on Catalogr. Free to start, free forever.
           Your store goes live in minutes.
         </p>
-        <Link
-          href="/admin/settings"
+        <div
+          onClick={() => router.push(`/admin/settings`)}
           className="inline-flex items-center gap-3 bg-gold hover:bg-gold-light text-steel-dark font-bold text-base px-8 py-4 rounded-full shadow-(--shadow-gold) hover:-translate-y-1 transition-all duration-200"
         >
           ✦ Create Your Free Store
-        </Link>
+        </div>
         <p className="text-white/35 text-xs mt-5">
           No credit card · No downloads · No code
         </p>
