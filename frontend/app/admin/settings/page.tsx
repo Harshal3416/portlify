@@ -20,6 +20,7 @@ export default function Settings() {
     const [yearsofexperience, setYearsOfExperience] = useState("");
     const [productssold, setProductsSold] = useState("");
     const [happyclients, setHappyClients] = useState("");
+    const [shopType, setShopType] = useState<"shopOwner" | "broker" | "garage" | "parlour">("shopOwner");
 
     // Site Information states
     const [sitelogourl, setSitelogourl] = useState<File | null>(null);
@@ -71,6 +72,7 @@ export default function Settings() {
         setYearsOfExperience(siteDetails?.yearsofexperience || '');
         setProductsSold(siteDetails?.productssold || '');
         setHappyClients(siteDetails?.happyclients || '');
+        setShopType(siteDetails?.shoptype as "shopOwner" | "broker" | "garage" | "parlour" || 'shopOwner');
 
         if(siteDetails?.tenantid) {
             setIsAdminDetailsFromDb(true);
@@ -89,7 +91,7 @@ export default function Settings() {
     // Admin details Update functions
     const updateAdminDetailsFn = async () => {
         try {
-            await updateAdminDetails({ tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients });
+            await updateAdminDetails({ tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype: shopType });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
             // set tenant id in url without refreshing the page
@@ -358,17 +360,27 @@ export default function Settings() {
                         <div className="field-group">
                             <label className="field-label">I am a</label>
                             <div className="role-options">
-                                <div className="role-option selected">
-                                    <div className="role-icon">🏪</div>
-                                    <div className="role-name">Shop Owner</div>
-                                    <div className="role-desc">Direct retail / wholesale</div>
-                                </div>
-                                <div className="role-option">
-                                    <div className="role-icon">🤝</div>
-                                    <div className="role-name">Broker</div>
-                                    <div className="role-desc">Agent / intermediary</div>
-                                </div>
+                            <div className={`role-option ${shopType === 'shopOwner' ? 'selected' : ''}`} onClick={() => setShopType('shopOwner')}>
+                                <div className="role-icon">🏪</div>
+                                <div className="role-name">Shop Owner</div>
+                                <div className="role-desc">Direct retail / wholesale</div>
                             </div>
+                            <div className={`role-option ${shopType === 'broker' ? 'selected' : ''}`} onClick={() => setShopType('broker')}>
+                                <div className="role-icon">🤝</div>
+                                <div className="role-name">Broker</div>
+                                <div className="role-desc">Agent / intermediary</div>
+                            </div>
+                            <div className={`role-option ${shopType === 'garage' ? 'selected' : ''}`} onClick={() => setShopType('garage')}>
+                                <div className="role-icon">🔧</div>
+                                <div className="role-name">Garage</div>
+                                <div className="role-desc">Repair, service, and spare parts</div>
+                            </div>
+                            <div className={`role-option ${shopType === 'parlour' ? 'selected' : ''}`} onClick={() => setShopType('parlour')}>
+                                <div className="role-icon">💇‍♀️</div>
+                                <div className="role-name">Parlour</div>
+                                <div className="role-desc">Beauty, grooming and salon services</div>
+                            </div>
+                        </div>
                         </div>
                         <div className="field-group">
                             <label className="field-label">Owner Name</label>

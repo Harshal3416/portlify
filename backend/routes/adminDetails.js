@@ -6,7 +6,7 @@ const clerkAuth = require('../middleware/clerkAuth')
 
 // POST — save admin details for logged-in user
 router.post("/", clerkAuth, async (req, res) => {
-  const { tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients} = req.body;
+  const { tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype } = req.body;
   const clerkId = req.clerkId; // injected by middleware
 
   if (!tenantid) {
@@ -17,8 +17,8 @@ router.post("/", clerkAuth, async (req, res) => {
 
   try {
     const result = await pool.query(
-      `INSERT INTO admindetails (clerkid, tenantid, ownername, ownertitle, aboutowner,  yearsofexperience, productssold, happyclients)
-   VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+      `INSERT INTO admindetails (clerkid, tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype)
+   VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)
    ON CONFLICT (clerkid) DO UPDATE
    SET 
      tenantid = EXCLUDED.tenantid,
@@ -27,9 +27,10 @@ router.post("/", clerkAuth, async (req, res) => {
      aboutowner = EXCLUDED.aboutowner,
      yearsofexperience = EXCLUDED.yearsofexperience,
      productssold = EXCLUDED.productssold,
-     happyclients = EXCLUDED.happyclients
+     happyclients = EXCLUDED.happyclients,
+     shoptype = EXCLUDED.shoptype
    RETURNING *`,
-      [clerkId, tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients],
+      [clerkId, tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype],
     );
 
     return res.status(200).json({

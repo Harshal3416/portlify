@@ -10,7 +10,7 @@ export const getAdminDetails = async (tenantid?: string) => {
   return res.data?.data ?? null;
 }
 
-export const updateAdminDetails = async (data: { tenantid: string; ownername: string; ownertitle: string; aboutowner: string; yearsofexperience: string; productssold: string; happyclients: string; }) => {
+export const updateAdminDetails = async (data: { tenantid: string; ownername: string; ownertitle: string; aboutowner: string; yearsofexperience: string; productssold: string; happyclients: string; shoptype: string; }) => {
   try {
     const res = await apiClient.post(`/admin-details`, data);
     return res.data?.data ?? null;
