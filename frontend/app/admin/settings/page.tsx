@@ -300,15 +300,16 @@ export default function Settings() {
     }, []);
 
     const handleNavClick = (sectionId: string) => {
-        if(!tenantid) { return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning") }
+        if (!tenantid) {
+            return showToast("Please enter Tenant ID first in Admin Details section and save it to navigate.", "warning");
+        }
         setActiveSection(sectionId);
         const element = document.getElementById(sectionId);
         if (element) {
-            const navHeight = 120; // Adjust based on your nav height
-            const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
-            const offsetPosition = elementPosition - navHeight;
+            const computedOffset = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--header-offset')) || 72;
+            const topPosition = element.getBoundingClientRect().top + window.pageYOffset - computedOffset - 16;
             window.scrollTo({
-                top: offsetPosition,
+                top: topPosition,
                 behavior: 'smooth'
             });
         }

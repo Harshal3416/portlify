@@ -25,6 +25,8 @@
    /* Fonts */
   --font-display: "Playfair Display", serif;
   --font-sans: "DM Sans", sans-serif;
+  /* Height (in pixels) to offset in-page anchor scrolling for sticky header */
+  --header-offset: 72px;
 
   /* Colors */
   --color-steel-dark:    #2c3e50;
@@ -101,11 +103,13 @@ header.header {
 .header-inner {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 0 24px;
+  padding: 24px;
   /* height: 72px; */
-  /* display: flex; */
+  display: flex;
   align-items: center;
   justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px;
 }
 
 .logo {
@@ -388,7 +392,7 @@ header.header {
 
 @media (max-width: 900px) {
   .settings-layout {
-    /* grid-template-columns: 1fr; */
+    grid-template-columns: 1fr;
     padding: 24px 20px;
     gap: 20px;
   }
@@ -396,8 +400,25 @@ header.header {
 
 /* SIDEBAR NAV */
 .settings-nav {
-  background: var(--white); border: 1px solid var(--border); border-radius: var(--radius);
-  overflow: hidden; box-shadow: var(--shadow-sm); position: sticky; top: 90px;
+  background: var(--white);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+  position: sticky;
+  top: 90px;
+
+  .settings-nav {
+    transition: none;
+  }
+
+  @media (max-width: 900px) {
+    .settings-nav {
+      position: static;
+      top: auto;
+      width: 100%;
+    }
+  }
 }
 .settings-nav-header {
   padding: 16px 20px; border-bottom: 1px solid var(--border);
@@ -994,6 +1015,89 @@ main.store-layout {
   background: var(--steel-dark);
   color: white;
 }
+
+/* Scroll offset for in-page anchors (adjusted by header height) */
+.settings-layout [id] {
+  scroll-margin-top: calc(var(--header-offset) + 16px);
+}
+
+html {
+  scroll-padding-top: var(--header-offset);
+}
+
+/* RESPONSIVE HEADER ADJUSTMENTS */
+@media (max-width: 900px) {
+  .header-inner {
+    padding: 0 16px;
+  }
+
+  .logo-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 18px;
+  }
+
+  .logo-text h1 {
+    font-size: 16px;
+  }
+
+  .nav-btn {
+    padding: 8px 14px;
+    font-size: 12px;
+  }
+
+  .avatar {
+    width: 34px;
+    height: 34px;
+  }
+
+  .logo {
+    flex-basis: 100%;
+    order: 1;
+  }
+
+  .nav-actions {
+    flex-basis: 100%;
+    order: 2;
+    justify-content: flex-end;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    padding-bottom: 6px;
+  }
+}
+
+@media (max-width: 640px) {
+  .header-inner {
+    padding: 8px 12px;
+  }
+
+  .logo-icon {
+    width: 36px;
+    height: 36px;
+    font-size: 16px;
+  }
+
+  .logo-text h1 {
+    font-size: 15px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: calc(100% - 56px);
+  }
+
+  .nav-actions {
+    gap: 6px;
+    justify-content: flex-end;
+  }
+
+  .nav-btn {
+    padding: 7px 10px;
+    font-size: 12px;
+    border-radius: 999px;
+  }
+}
+
 
 .btn-add {
   flex: 1;

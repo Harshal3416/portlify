@@ -30,6 +30,17 @@ const { siteDetails } = useSiteDetails();
     setTenantId(tenantidFromUrl || '');
   }, [tenantidFromUrl]);
 
+  useEffect(() => {
+    function updateHeaderOffset() {
+      const el = document.querySelector('header.header');
+      const height = el ? (el.getBoundingClientRect().height) : 72;
+      document.documentElement.style.setProperty('--header-offset', `${Math.ceil(height + 8)}px`);
+    }
+    updateHeaderOffset();
+    window.addEventListener('resize', updateHeaderOffset);
+    return () => window.removeEventListener('resize', updateHeaderOffset);
+  }, []);
+
   return (
     <header className="header">
       <div className="header-inner">
