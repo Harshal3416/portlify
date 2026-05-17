@@ -54,14 +54,14 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
   const loadDetails = async () => {
     try {
-      if (tenantid) {
-        const details = await getBusinessDetails(tenantid);
-        if (details) {
-          setTenantidFromDb(details.tenantid || "");
-          setSiteDetails(details);
-          return;
-        }
-      }
+      // if (tenantid) {
+      //   const details = await getBusinessDetails(tenantid);
+      //   if (details) {
+      //     setTenantidFromDb(details.tenantid || "");
+      //     setSiteDetails(details);
+      //     return;
+      //   }
+      // }
 
       const adminData = await getAdminDetails(tenantid || "");
       setTenantidFromDb(adminData.tenantid);

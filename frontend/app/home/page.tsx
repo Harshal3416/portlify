@@ -554,8 +554,22 @@ function Directory() {
                 className="biz-card bg-white border border-gray-200 rounded-2xl p-5 shadow-(--shadow-card) hover:shadow-(--shadow-card-hover) hover:-translate-y-1 transition-all duration-200 no-underline block"
               >
                 <div className="flex items-start gap-3 mb-4">
-                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-steel-dark to-steel-mid flex items-center justify-center text-2xl flex-shrink-0">
-                    <span>{biz.siteTitle?.charAt(0) ?? "🏢"}</span>
+                  <div className="w-12 h-12 rounded-xl overflow-hidden bg-linear-to-br from-steel-dark to-steel-mid flex items-center justify-center text-2xl flex-shrink-0">
+                    {typeof biz.siteLogo === "string" ? (
+                      <img
+                        src={biz.siteLogo}
+                        alt={biz.siteTitle || "Business logo"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : typeof biz.siteLogo === "object" && biz.siteLogo !== null && "url" in biz.siteLogo ? (
+                      <img
+                        src={(biz.siteLogo as { url?: string }).url}
+                        alt={biz.siteTitle || "Business logo"}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <span>{biz.siteTitle?.charAt(0) ?? "🏢"}</span>
+                    )}
                   </div>
                   <div className="flex-1 min-w-0">
                     <h4 className="font-display text-base font-bold text-steel-dark leading-tight truncate">
