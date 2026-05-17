@@ -20,7 +20,7 @@ export default function Settings() {
     const [yearsofexperience, setYearsOfExperience] = useState("");
     const [productssold, setProductsSold] = useState("");
     const [happyclients, setHappyClients] = useState("");
-    const [shoptype, setShopType] = useState<"shopOwner" | "broker" | "garage" | "parlour">("shopOwner");
+    const [shoptype, setShopType] = useState<"Shop Owner" | "Broker" | "Garage" | "Parlour">("Shop Owner");
 
     // Site Information states
     const [sitelogourl, setSitelogourl] = useState<File | null>(null);
@@ -72,7 +72,7 @@ export default function Settings() {
         setYearsOfExperience(siteDetails?.yearsofexperience || '');
         setProductsSold(siteDetails?.productssold || '');
         setHappyClients(siteDetails?.happyclients || '');
-        setShopType(siteDetails?.shoptype as "shopOwner" | "broker" | "garage" | "parlour" || 'shopOwner');
+        setShopType(siteDetails?.shoptype as "Shop Owner" | "Broker" | "Garage" | "Parlour" || 'Shop Owner');
 
         if(siteDetails?.tenantid) {
             setIsAdminDetailsFromDb(true);
@@ -360,22 +360,22 @@ export default function Settings() {
                         <div className="field-group">
                             <label className="field-label">I am a</label>
                             <div className="role-options">
-                            <div className={`role-option ${shoptype === 'shopOwner' ? 'selected' : ''}`} onClick={() => setShopType('shopOwner')}>
+                            <div className={`role-option ${shoptype === 'Shop Owner' ? 'selected' : ''}`} onClick={() => setShopType('Shop Owner')}>
                                 <div className="role-icon">🏪</div>
                                 <div className="role-name">Shop Owner</div>
                                 <div className="role-desc">Direct retail / wholesale</div>
                             </div>
-                            <div className={`role-option ${shoptype === 'broker' ? 'selected' : ''}`} onClick={() => setShopType('broker')}>
+                            <div className={`role-option ${shoptype === 'Broker' ? 'selected' : ''}`} onClick={() => setShopType('Broker')}>
                                 <div className="role-icon">🤝</div>
                                 <div className="role-name">Broker</div>
                                 <div className="role-desc">Agent / intermediary</div>
                             </div>
-                            <div className={`role-option ${shoptype === 'garage' ? 'selected' : ''}`} onClick={() => setShopType('garage')}>
+                            <div className={`role-option ${shoptype === 'Garage' ? 'selected' : ''}`} onClick={() => setShopType('Garage')}>
                                 <div className="role-icon">🔧</div>
                                 <div className="role-name">Garage</div>
                                 <div className="role-desc">Repair, service, and spare parts</div>
                             </div>
-                            <div className={`role-option ${shoptype === 'parlour' ? 'selected' : ''}`} onClick={() => setShopType('parlour')}>
+                            <div className={`role-option ${shoptype === 'Parlour' ? 'selected' : ''}`} onClick={() => setShopType('Parlour')}>
                                 <div className="role-icon">💇‍♀️</div>
                                 <div className="role-name">Parlour</div>
                                 <div className="role-desc">Beauty, grooming and salon services</div>
