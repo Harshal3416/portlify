@@ -2,6 +2,8 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { useGetBusinessesQuery } from "@/hooks/useBusinessQuery";
 
 /* ─────────────────────────────────────────────────────────────
    DATA
@@ -80,134 +82,6 @@ const STEPS = [
     numColor: "text-steel-dark",
     isLast: true,
   },
-];
-
-const BUSINESSES = [
-  {
-    id: "raj-wholesale",
-    emoji: "🔩",
-    iconBg: "bg-linear-to-br from-blue-50 to-steel-light",
-    name: "Raj Wholesale Steel",
-    owner: "Harshal Kapoor",
-    cat: "broker",
-    catLabel: "Broker",
-    catColor: "bg-blue-50 text-steel-mid border-steel-light",
-    desc: "Premium stainless steel wholesale — cookware, industrial supplies, and more. 20+ years in Bangalore.",
-    location: "Chikpete, Bangalore",
-    open: true,
-  },
-  {
-    id: "krishna-textile",
-    emoji: "🧵",
-    iconBg: "bg-linear-to-br from-purple-50 to-purple-200",
-    name: "Krishna Textile Brokers",
-    owner: "Suresh Menon",
-    cat: "broker",
-    catLabel: "Broker",
-    catColor: "bg-blue-50 text-steel-mid border-steel-light",
-    desc: "Fabric wholesale brokers connecting manufacturers with retailers across Karnataka and Tamil Nadu.",
-    location: "Shivajinagar, Bangalore",
-    open: true,
-  },
-  {
-    id: "apex-hardware",
-    emoji: "🔧",
-    iconBg: "bg-linear-to-br from-orange-50 to-orange-200",
-    name: "Apex Hardware Trading",
-    owner: "Ramesh Pillai",
-    cat: "broker",
-    catLabel: "Broker",
-    catColor: "bg-blue-50 text-steel-mid border-steel-light",
-    desc: "Industrial hardware brokers — tools, fasteners, safety equipment. Serving construction since 2010.",
-    location: "Peenya, Bangalore",
-    open: false,
-  },
-  {
-    id: "sunita-sarees",
-    emoji: "👗",
-    iconBg: "bg-linear-to-br from-pink-50 to-pink-200",
-    name: "Sunita Sarees",
-    owner: "Sunita Reddy",
-    cat: "shop",
-    catLabel: "Shop",
-    catColor: "bg-gold-pale text-amber-700 border-gold/30",
-    desc: "Handloom and silk sarees from Kanchipuram, Mysore, and Banarasi. Wholesale and retail available.",
-    location: "Commercial Street, Blr",
-    open: true,
-  },
-  {
-    id: "deepak-electronics",
-    emoji: "📱",
-    iconBg: "bg-linear-to-br from-yellow-50 to-yellow-200",
-    name: "Deepak Electronics",
-    owner: "Deepak Sharma",
-    cat: "shop",
-    catLabel: "Shop",
-    catColor: "bg-gold-pale text-amber-700 border-gold/30",
-    desc: "Mobiles, accessories, and home appliances at wholesale prices. Authorized service center.",
-    location: "SP Road, Bangalore",
-    open: true,
-  },
-  {
-    id: "priya-fresh",
-    emoji: "🥦",
-    iconBg: "bg-linear-to-br from-green-50 to-green-200",
-    name: "Priya Fresh Produce",
-    owner: "Priya Nair",
-    cat: "shop",
-    catLabel: "Shop",
-    catColor: "bg-gold-pale text-amber-700 border-gold/30",
-    desc: "Farm-fresh fruits and vegetables delivered to your door. Bulk orders for restaurants and caterers.",
-    location: "KR Market, Bangalore",
-    open: true,
-  },
-  {
-    id: "golden-crust",
-    emoji: "🥐",
-    iconBg: "bg-linear-to-br from-amber-50 to-amber-200",
-    name: "Golden Crust Bakery",
-    owner: "Ananya Bose",
-    cat: "bakery",
-    catLabel: "Bakery",
-    catColor: "bg-orange-50 text-orange-700 border-orange-200",
-    desc: "Artisan breads, cakes, and pastries baked fresh every morning. Custom cakes for weddings and events.",
-    location: "Indiranagar, Bangalore",
-    open: true,
-  },
-  {
-    id: "sweet-moments",
-    emoji: "🎂",
-    iconBg: "bg-linear-to-br from-pink-50 to-rose-200",
-    name: "Sweet Moments Studio",
-    owner: "Meera Thomas",
-    cat: "bakery",
-    catLabel: "Bakery",
-    catColor: "bg-orange-50 text-orange-700 border-orange-200",
-    desc: "Designer cakes, cupcakes and dessert tables for birthdays, anniversaries, and corporate events.",
-    location: "Koramangala, Bangalore",
-    open: true,
-  },
-  {
-    id: "sunrise-lodge",
-    emoji: "🏨",
-    iconBg: "bg-linear-to-br from-teal-50 to-teal-200",
-    name: "Sunrise Guest Lodge",
-    owner: "Vijay Kumar",
-    cat: "lodge",
-    catLabel: "Lodge",
-    catColor: "bg-teal-50 text-teal-700 border-teal-200",
-    desc: "Comfortable rooms for business and leisure travelers. AC rooms, WiFi, and home-cooked meals included.",
-    location: "Majestic, Bangalore",
-    open: true,
-  },
-];
-
-const TABS = [
-  { cat: "all", label: "All", icon: "🏢", count: 9 },
-  { cat: "broker", label: "Brokers", icon: "🤝", count: 3 },
-  { cat: "shop", label: "Shops", icon: "🏪", count: 3 },
-  { cat: "bakery", label: "Bakeries", icon: "🥐", count: 2 },
-  { cat: "lodge", label: "Lodges", icon: "🏨", count: 1 },
 ];
 
 /* ─────────────────────────────────────────────────────────────
@@ -548,10 +422,39 @@ function HowItWorks() {
 }
 
 /* ─────────────────────────────────────────────────────────────
-   DIRECTORY  (static — filtering needs a Client Component)
+   DIRECTORY  (API-driven with filtering)
 ───────────────────────────────────────────────────────────── */
 function Directory() {
   const router = useRouter();
+  const [selectedCategory, setSelectedCategory] = useState<string>("all");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+
+  const { data: businesses = [], isLoading } = useGetBusinessesQuery();
+
+  const normalizedSearch = searchQuery.trim().toLowerCase();
+  const filteredBusinesses = businesses.filter((biz) => {
+    const matchesCategory =
+      selectedCategory === "all" ||
+      biz.shopType?.toLowerCase() === selectedCategory;
+
+    const matchesSearch =
+      !normalizedSearch ||
+      biz.siteTitle?.toLowerCase().includes(normalizedSearch) ||
+      biz.ownerName?.toLowerCase().includes(normalizedSearch) ||
+      biz.shopType?.toLowerCase().includes(normalizedSearch) ||
+      biz.address?.toLowerCase().includes(normalizedSearch) ||
+      biz.siteDescription?.toLowerCase().includes(normalizedSearch);
+
+    return matchesCategory && matchesSearch;
+  });
+
+  const allCategories = ["all", "broker", "shop", "bakery", "lodge"];
+  const getCategoryCount = (cat: string) => {
+    if (cat === "all") return businesses.length;
+    return businesses.filter((b) => b.shopType?.toLowerCase() === cat).length;
+  };
+
+  const displayedBusinesses = filteredBusinesses;
 
   return (
     <section id="directory" className="py-24 px-6 bg-cream">
@@ -579,31 +482,53 @@ function Directory() {
             <input
               type="text"
               placeholder="Search businesses..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full pl-11 pr-4 py-3 rounded-full border border-gray-200 bg-white text-sm text-steel-dark placeholder:text-steel shadow-(--shadow-card) focus:outline-none focus:border-steel-mid focus:ring-2 focus:ring-steel-light/40 transition-all"
             />
           </div>
 
           {/* Tabs */}
           <div className="flex items-center gap-2 flex-wrap">
-            {TABS.map((tab, i) => (
-              <button
-                key={tab.cat}
-                className={`dir-tab ${i === 0 ? "active" : ""} flex items-center gap-2 px-4 py-2.5 rounded-full border border-gray-200 bg-white text-steel-mid text-sm font-medium transition-all hover:border-steel-light hover:bg-cream cursor-pointer`}
-              >
-                <span>{tab.icon}</span>
-                {tab.label}
-                <span className="tab-count bg-cream text-steel text-[10px] font-bold px-2 py-0.5 rounded-full">
-                  {tab.count}
-                </span>
-              </button>
-            ))}
+            {allCategories.map((cat) => {
+              const tabLabels: Record<string, { icon: string; label: string }> = {
+                all: { icon: "🏢", label: "All" },
+                broker: { icon: "🤝", label: "Brokers" },
+                shop: { icon: "🏪", label: "Shops" },
+                bakery: { icon: "🥐", label: "Bakeries" },
+                lodge: { icon: "🏨", label: "Lodges" },
+              };
+              const tabInfo = tabLabels[cat] || { icon: "🏢", label: "All" };
+              const count = getCategoryCount(cat);
+
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setSelectedCategory(cat)}
+                  className={`dir-tab ${
+                    selectedCategory === cat ? "active" : ""
+                  } flex items-center gap-2 px-4 py-2.5 rounded-full border transition-all cursor-pointer ${
+                    selectedCategory === cat
+                      ? "border-steel-mid bg-white text-steel-dark"
+                      : "border-gray-200 bg-white text-steel-mid hover:border-steel-light hover:bg-cream"
+                  }`}
+                >
+                  <span>{tabInfo.icon}</span>
+                  {tabInfo.label}
+                  <span className="tab-count bg-cream text-steel text-[10px] font-bold px-2 py-0.5 rounded-full">
+                    {count}
+                  </span>
+                </button>
+              );
+            })}
           </div>
         </div>
 
         {/* Meta */}
         <div className="flex items-center justify-between mb-5">
           <p className="text-sm text-steel">
-            Showing <strong className="text-steel-dark">{BUSINESSES.length}</strong> businesses
+            Showing <strong className="text-steel-dark">{displayedBusinesses.length}</strong> businesses
+            {isLoading && <span className="text-xs text-steel ml-2">(loading...)</span>}
           </p>
           <div className="flex items-center gap-1.5">
             <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
@@ -613,41 +538,45 @@ function Directory() {
 
         {/* Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {BUSINESSES.map((biz) => (
-            <Link
-              key={biz.id}
-              href={`/store?tenantid=${biz.id}`}
-              className="biz-card bg-white border border-gray-200 rounded-2xl p-5 shadow-(--shadow-card) hover:shadow-(--shadow-card-hover) hover:-translate-y-1 transition-all duration-200 no-underline block"
-            >
-              <div className="flex items-start gap-3 mb-4">
-                <div
-                  className={`w-12 h-12 rounded-xl ${biz.iconBg} flex items-center justify-center text-2xl flex-shrink-0`}
-                >
-                  {biz.emoji}
+          {isLoading ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-steel">Loading businesses...</p>
+            </div>
+          ) : displayedBusinesses.length === 0 ? (
+            <div className="col-span-full text-center py-12">
+              <p className="text-steel">No businesses found. Try adjusting your filters.</p>
+            </div>
+          ) : (
+            displayedBusinesses.map((biz) => (
+              <Link
+                key={biz.tenantid}
+                href={`/store?tenantid=${biz.tenantid}`}
+                className="biz-card bg-white border border-gray-200 rounded-2xl p-5 shadow-(--shadow-card) hover:shadow-(--shadow-card-hover) hover:-translate-y-1 transition-all duration-200 no-underline block"
+              >
+                <div className="flex items-start gap-3 mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-linear-to-br from-steel-dark to-steel-mid flex items-center justify-center text-2xl flex-shrink-0">
+                    <span>{biz.siteTitle?.charAt(0) ?? "🏢"}</span>
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <h4 className="font-display text-base font-bold text-steel-dark leading-tight truncate">
+                      {biz.siteTitle || "Untitled Business"}
+                    </h4>
+                    <p className="text-xs text-steel mt-0.5">{biz.ownerName || "Owner"}</p>
+                  </div>
+                  <span className="flex-shrink-0 bg-cream text-steel-dark border text-[10px] font-semibold px-2.5 py-1 rounded-full">
+                    {biz.shopType || "Business"}
+                  </span>
                 </div>
-                <div className="flex-1 min-w-0">
-                  <h4 className="font-display text-base font-bold text-steel-dark leading-tight truncate">
-                    {biz.name}
-                  </h4>
-                  <p className="text-xs text-steel mt-0.5">{biz.owner}</p>
+                <p className="text-xs text-steel leading-relaxed mb-4 line-clamp-3">
+                  {biz.siteDescription || "No description available."}
+                </p>
+                <div className="flex items-center justify-between text-[10px] text-steel">
+                  <span>📍 {biz.address || "Location not set"}</span>
+                  <span className="font-semibold text-steel-dark">View Store</span>
                 </div>
-                <span
-                  className={`flex-shrink-0 ${biz.catColor} border text-[10px] font-semibold px-2.5 py-1 rounded-full`}
-                >
-                  {biz.catLabel}
-                </span>
-              </div>
-              <p className="text-xs text-steel leading-relaxed mb-4 line-clamp-2">
-                {biz.desc}
-              </p>
-              <div className="flex items-center justify-between text-[10px] text-steel">
-                <span>📍 {biz.location}</span>
-                <span className={`font-semibold ${biz.open ? "text-green-600" : "text-steel"}`}>
-                  ● {biz.open ? "Open" : "Closed"}
-                </span>
-              </div>
-            </Link>
-          ))}
+              </Link>
+            ))
+          )}
         </div>
 
         {/* Join CTA */}

@@ -61,6 +61,15 @@ export const getAdminContactDetails = async (tenantid?: string): Promise<SiteDet
   return res.data?.data ?? null;
 };
 
+export const getBusinessDetails = async (tenantid?: string): Promise<SiteDetail | null> => {
+  if (!tenantid) {
+    console.warn("getBusinessDetails no tenantid");
+    return null;
+  }
+  const res = await apiClient.get(`/businesses/${tenantid}`);
+  return res.data?.data ?? null;
+};
+
 export const updateAdminContactDetails = async (data: { tenantid: string; contactemail: string; contactphone: string; alternatecontactphone: string; address: string; }) => {
   try {
     const res = await apiClient.post(`/site-details/admincontact`, data);

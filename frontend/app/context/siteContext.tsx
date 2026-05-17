@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { getAdminContactDetails, getAdminDetails, getSiteInformation } from "../../services/settingsService";
+import { getAdminContactDetails, getAdminDetails, getSiteInformation, getBusinessDetails } from "../../services/settingsService";
 import { SiteDetail } from "@/app/interfaces/interface";
 import { useSearchParams } from "next/navigation";
 
@@ -54,6 +54,15 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
 
   const loadDetails = async () => {
     try {
+      if (tenantid) {
+        const details = await getBusinessDetails(tenantid);
+        if (details) {
+          setTenantidFromDb(details.tenantid || "");
+          setSiteDetails(details);
+          return;
+        }
+      }
+
       const adminData = await getAdminDetails(tenantid || "");
       setTenantidFromDb(adminData.tenantid);
       const siteData = await getSiteInformation(adminData.tenantid);

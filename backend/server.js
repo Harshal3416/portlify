@@ -9,6 +9,7 @@ const { uploadsDir } = require('./middleware/upload')
 const collectionRoutes = require('./routes/collections')
 const siteDetailsRoutes = require('./routes/siteDetails')
 const adminDetailsRoutes = require('./routes/adminDetails')
+const businessesRoutes = require('./routes/businesses')
 
 const app = express()
 const port = process.env.PORT || 3000
@@ -62,6 +63,7 @@ app.get('/', (req, res) => res.send('Enquiry App backend'))
 app.use('/api/collections', collectionRoutes)
 app.use('/api/site-details', siteDetailsRoutes)
 app.use('/api/admin-details', adminDetailsRoutes)
+app.use('/api/businesses', businessesRoutes)
 
 app.get('/test-db', async (req, res) => {
   try {
