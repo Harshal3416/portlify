@@ -23,9 +23,45 @@ export default function Card({
     const [availableInCart, setAvailableInCart] = useState(false)
     const [showProductDetails, setShowProductDetails] = useState(false);
     const [mounted, setMounted] = useState(false);
+    const [imageIndex, setImageIndex] = useState(0);
+    const [touchStartX, setTouchStartX] = useState<number | null>(null);
     const { showToast } = useToast();
 
     const siteDetails = useSiteDetails().siteDetails;
+    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
+
+    const images = (collection.itemassets?.images || []).filter((img): img is { filename: string; size: number; url: string } => Boolean(img.url));
+
+    const movePrev = () => {
+        if (images.length === 0) return;
+        setImageIndex((current) => (current === 0 ? images.length - 1 : current - 1));
+    };
+
+    const moveNext = () => {
+        if (images.length === 0) return;
+        setImageIndex((current) => (current === images.length - 1 ? 0 : current + 1));
+    };
+
+    const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+        setTouchStartX(event.touches[0].clientX);
+    };
+
+    const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+        if (touchStartX === null) return;
+        const deltaX = event.changedTouches[0].clientX - touchStartX;
+        if (deltaX > 40) {
+            movePrev();
+        } else if (deltaX < -40) {
+            moveNext();
+        }
+        setTouchStartX(null);
+    };
+
+    useEffect(() => {
+        if (imageIndex >= images.length) {
+            setImageIndex(0);
+        }
+    }, [images.length, imageIndex]);
 
     const openWhatsappForProduct = () => {
         console.log("Opening WhatsApp for product with contact", siteDetails?.contactphone);
@@ -115,7 +151,7 @@ export default function Card({
                 <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center overflow-auto p-4">
                     <button
                         type="button"
-                        className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+                        className="absolute inset-0"
                         onClick={() => setShowProductDetails(false)}
                         aria-label="Close product details"
                     />
@@ -137,19 +173,49 @@ export default function Card({
                         <div className="space-y-6 p-6 max-h-[80vh] overflow-y-auto">
                             <p className="text-slate-700">{collection.description}</p>
                             <div className="space-y-4">
-                                {collection.itemassets?.images?.length ? (
-                                    <div className="grid gap-4">
-                                        {collection.itemassets.images.map((img, index) => (
-                                            img.url ? (
-                                                <div key={`img-${index}`} className="overflow-hidden rounded-3xl bg-slate-100">
-                                                    <img
-                                                        src={process.env.NEXT_PUBLIC_BACKEND_URL + img.url}
-                                                        alt={img.filename}
-                                                        className="w-full object-cover"
-                                                    />
-                                                </div>
-                                            ) : null
-                                        ))}
+                                {images.length ? (
+                                    <div
+                                        className="relative overflow-hidden rounded-3xl bg-slate-100"
+                                        onTouchStart={handleTouchStart}
+                                        onTouchEnd={handleTouchEnd}
+                                    >
+                                        <div className="relative h-72 sm:h-96">
+                                            {images.map((img, index) => (
+                                                <img
+                                                    key={`img-${index}`}
+                                                    src={backendUrl + img.url}
+                                                    alt={img.filename}
+                                                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${index === imageIndex ? 'opacity-100' : 'opacity-0'}`}
+                                                />
+                                            ))}
+                                        </div>
+                                        <button
+                                            type="button"
+                                            className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition hover:bg-white"
+                                            onClick={movePrev}
+                                            aria-label="Previous image"
+                                        >
+                                            ‹
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/90 text-slate-700 shadow-lg transition hover:bg-white"
+                                            onClick={moveNext}
+                                            aria-label="Next image"
+                                        >
+                                            ›
+                                        </button>
+                                        <div className="absolute inset-x-0 bottom-3 flex justify-center gap-2">
+                                            {images.map((_, idx) => (
+                                                <button
+                                                    key={`dot-${idx}`}
+                                                    type="button"
+                                                    onClick={() => setImageIndex(idx)}
+                                                    className={`h-2.5 w-2.5 rounded-full transition ${idx === imageIndex ? 'bg-slate-900' : 'bg-white/70'}`}
+                                                    aria-label={`Show image ${idx + 1}`}
+                                                />
+                                            ))}
+                                        </div>
                                     </div>
                                 ) : null}
                                 {collection.itemassets?.videos?.length ? (
@@ -163,7 +229,7 @@ export default function Card({
                                         ))}
                                     </div>
                                 ) : null}
-                                {!collection.itemassets?.images?.length && !collection.itemassets?.videos?.length && (
+                                {!images.length && !collection.itemassets?.videos?.length && (
                                     <div className="rounded-3xl border border-dashed border-slate-300 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
                                         No media available.
                                     </div>
