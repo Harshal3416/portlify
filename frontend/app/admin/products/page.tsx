@@ -4,7 +4,6 @@ import { useEffect, useState, useRef, Suspense } from "react";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
-import Modal from 'react-bootstrap/Modal';
 import { renderImage } from "@/app/lib/renderImage";
 import { Collections } from "@/app/interfaces/interface";
 import { useSiteDetails } from "@/app/context/siteContext";
@@ -37,6 +36,14 @@ function ProductsContent() {
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleteId, setDeleteId] = useState('');
   const [addItemsModal, setAddProductModal] = useState(false);
+
+  useEffect(() => {
+    if (!addItemsModal && !showDeleteModal) return;
+    document.body.style.overflow = 'hidden';
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [addItemsModal, showDeleteModal]);
 
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
@@ -264,150 +271,179 @@ function ProductsContent() {
         )}
       </div>
 
-      {addItemsModal &&
-        <Modal show={addItemsModal} centered>
-          <Modal.Header>
-            <Modal.Title>{editingItemId ? "Edit product" : "Add a product"}
-            </Modal.Title>
-            <button className="modal-close" onClick={() => {
+      {addItemsModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+            onClick={() => {
               resetProductForm();
               setAddProductModal(false);
-            }
-            }>✕</button>
-          </Modal.Header>
-          <Modal.Body>
-            <div className="field-group">
-              <label className="field-label">Item Name <span className="text-red-500">*</span></label>
-              <input className="field-input" type="text" id="itemname" placeholder="e.g. Prestige Pressure Cooker" value={itemname}
-                onChange={(e) => setItemName(e.target.value)} />
+            }}
+            aria-label="Close add product modal"
+          />
+          <div className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[32px] bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">{editingItemId ? "Edit product" : "Add a product"}</h2>
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                onClick={() => {
+                  resetProductForm();
+                  setAddProductModal(false);
+                }}
+                aria-label="Close add product modal"
+              >
+                ✕
+              </button>
             </div>
-            <div className="field-group">
-              <label className="field-label">Item ID</label>
-              <input className="field-input" type="text" value={itemid} disabled />
-              <span className="field-hint">Auto-generated — cannot be changed</span>
-            </div>
-            <div className="field-group">
-              <label className="field-label">Price</label>
-              <input className="field-input" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
-            </div>
-            <div className="field-group">
-              <label className="field-label">Description <span className="text-red-500">*</span></label>
-              <textarea className="field-input" id="productDesc" placeholder="Describe the product..." value={description}
-                onChange={(e) => setDescription(e.target.value)}></textarea>
-              <div className="char-count" id="charCount">18/150 characters</div>
-            </div>
-            <div className="field-group">
-              <label className="field-label">Item Image</label>
-              <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
-                <div className="upload-area-icon flex flex-wrap items-start">
-                  {existingAssets.length + highlightFiles.length > 0 ? (
-                    <>
-                      {existingAssets.map((asset, i) => (
-                        <div key={`existing-${i}`} className="relative inline-block mr-1 mb-1">
-                          {asset.type === 'image' ? (
-                            <img src={process.env.NEXT_PUBLIC_BACKEND_URL + (asset.url || '')} alt={asset.filename} className="w-10 h-10 object-cover rounded" />
-                          ) : (
-                            <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">🎥</div>
-                          )}
-                          <button
-                            type="button"
-                            className="absolute top-0 right-0 -mt-1 -mr-1 bg-black/70 text-white rounded-full w-5 h-5 text-[10px] leading-5"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeExistingAsset(i);
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                      {highlightFiles.map((file, i) => (
-                        <div key={`new-${i}`} className="relative inline-block mr-1 mb-1">
-                          {file.type.startsWith('image/') ? (
-                            <img src={URL.createObjectURL(file)} alt={file.name} className="w-10 h-10 object-cover rounded" />
-                          ) : (
-                            <div className="w-10 h-10 flex items-center justify-center bg-gray-100 rounded">🎥</div>
-                          )}
-                          <button
-                            type="button"
-                            className="absolute top-0 right-0 -mt-1 -mr-1 bg-black/70 text-white rounded-full w-5 h-5 text-[10px] leading-5"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              removeHighlightFile(i);
-                            }}
-                          >
-                            ×
-                          </button>
-                        </div>
-                      ))}
-                    </>
-                  ) : '📁'}
+            <div className="space-y-4 p-6 max-h-[75vh] overflow-y-auto">
+              <div className="field-group">
+                <label className="field-label">Item Name <span className="text-red-500">*</span></label>
+                <input className="field-input" type="text" id="itemname" placeholder="e.g. Prestige Pressure Cooker" value={itemname}
+                  onChange={(e) => setItemName(e.target.value)} />
+              </div>
+              <div className="field-group">
+                <label className="field-label">Item ID</label>
+                <input className="field-input" type="text" value={itemid} disabled />
+                <span className="field-hint">Auto-generated — cannot be changed</span>
+              </div>
+              <div className="field-group">
+                <label className="field-label">Price</label>
+                <input className="field-input" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+              </div>
+              <div className="field-group">
+                <label className="field-label">Description <span className="text-red-500">*</span></label>
+                <textarea className="field-input" id="productDesc" placeholder="Describe the product..." value={description}
+                  onChange={(e) => setDescription(e.target.value)}></textarea>
+                <div className="char-count" id="charCount">18/150 characters</div>
+              </div>
+              <div className="field-group">
+                <label className="field-label">Item Image</label>
+                <div className="upload-area" onClick={() => fileInputRef.current?.click()}>
+                  <div className="upload-area-icon flex flex-wrap items-start">
+                    {existingAssets.length + highlightFiles.length > 0 ? (
+                      <>
+                        {existingAssets.map((asset, i) => (
+                          <div key={`existing-${i}`} className="relative inline-block mr-1 mb-1">
+                            {asset.type === 'image' ? (
+                              <img src={process.env.NEXT_PUBLIC_BACKEND_URL + (asset.url || '')} alt={asset.filename} className="w-10 h-10 object-cover rounded" />
+                            ) : (
+                              <div className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded">🎥</div>
+                            )}
+                            <button
+                              type="button"
+                              className="absolute top-0 right-0 -mt-1 -mr-1 bg-black/70 text-white rounded-full w-5 h-5 text-[10px] leading-5"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeExistingAsset(i);
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                        {highlightFiles.map((file, i) => (
+                          <div key={`new-${i}`} className="relative inline-block mr-1 mb-1">
+                            {file.type.startsWith('image/') ? (
+                              <img src={URL.createObjectURL(file)} alt={file.name} className="w-10 h-10 object-cover rounded" />
+                            ) : (
+                              <div className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded">🎥</div>
+                            )}
+                            <button
+                              type="button"
+                              className="absolute top-0 right-0 -mt-1 -mr-1 bg-black/70 text-white rounded-full w-5 h-5 text-[10px] leading-5"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                removeHighlightFile(i);
+                              }}
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </>
+                    ) : '📁'}
+                  </div>
+                  <p>Click to upload or drag & drop</p>
+                  <span>PNG, JPG, WEBP, MP4 · Max 5 images, 1 video</span>
+                  <input type="file" id="imgUpload" className="hidden"
+                    ref={fileInputRef} name="itemassets"
+                    accept="image/*,video/*"
+                    multiple
+                    onChange={(e) => {
+                      const files = Array.from(e.target.files || []);
+                      const images = files.filter(f => f.type.startsWith('image/'));
+                      const videos = files.filter(f => f.type.startsWith('video/'));
+                      const currentImageCount = existingAssets.filter((asset) => asset.type === 'image').length + highlightFiles.filter(f => f.type.startsWith('image/')).length;
+                      const currentVideoCount = existingAssets.filter((asset) => asset.type === 'video').length + highlightFiles.filter(f => f.type.startsWith('video/')).length;
+                      if (currentImageCount + images.length > 5) {
+                        setSubmitError("Maximum 5 images allowed");
+                        return;
+                      }
+                      if (currentVideoCount + videos.length > 1) {
+                        setSubmitError("Maximum 1 video allowed");
+                        return;
+                      }
+                      setSubmitError(null);
+                      setHighlightFiles((prev) => [...prev, ...files]);
+                    }} />
                 </div>
-                <p>Click to upload or drag & drop</p>
-                <span>PNG, JPG, WEBP, MP4 · Max 5 images, 1 video</span>
-                <input type="file" id="imgUpload" className="hidden"
-                  ref={fileInputRef} name="itemassets"
-                  accept="image/*,video/*"
-                  multiple
-                  onChange={(e) => {
-                    const files = Array.from(e.target.files || []);
-                    const images = files.filter(f => f.type.startsWith('image/'));
-                    const videos = files.filter(f => f.type.startsWith('video/'));
-                    const currentImageCount = existingAssets.filter((asset) => asset.type === 'image').length + highlightFiles.filter(f => f.type.startsWith('image/')).length;
-                    const currentVideoCount = existingAssets.filter((asset) => asset.type === 'video').length + highlightFiles.filter(f => f.type.startsWith('video/')).length;
-                    if (currentImageCount + images.length > 5) {
-                      setSubmitError("Maximum 5 images allowed");
-                      return;
-                    }
-                    if (currentVideoCount + videos.length > 1) {
-                      setSubmitError("Maximum 1 video allowed");
-                      return;
-                    }
-                    setSubmitError(null);
-                    setHighlightFiles((prev) => [...prev, ...files]);
-                  }} />
               </div>
             </div>
-          </Modal.Body>
-          <Modal.Footer>
-            {/* <div className="modal-footer"> */}
-            <button className="btn-cancel" onClick={() => {
-              resetProductForm();
-              setAddProductModal(false);
-            }
-            }>Cancel</button>
-            <button className="btn-save" onClick={handleSubmitProduct} disabled={
-              !itemid ||
-              !itemname ||
-              (!editingItemId && highlightFiles.length === 0)
-            }
-            >💾 Save Changes</button>
-          </Modal.Footer>
-        </Modal>}
+            <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:justify-end sm:items-center">
+              <button className="btn-cancel w-full rounded-full py-3 text-sm font-medium sm:w-auto" onClick={() => {
+                resetProductForm();
+                setAddProductModal(false);
+              }}>Cancel</button>
+              <button className="btn-save w-full rounded-full py-3 text-sm font-medium sm:w-auto" onClick={handleSubmitProduct} disabled={
+                !itemid ||
+                !itemname ||
+                (!editingItemId && highlightFiles.length === 0)
+              }>
+                💾 Save Changes
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {showDeleteModal && (
-        <Modal show={showDeleteModal} onHide={() => setShowDeleteModal(false)} centered>
-          <Modal.Header>
-            <Modal.Title>Delete product</Modal.Title>
-            <button className="modal-close" onClick={(e) => {
-              e.stopPropagation();
-              setShowDeleteModal(false);
-            }
-            }>✕</button>
-          </Modal.Header>
-          <Modal.Body>Are you sure you want to delete this product?</Modal.Body>
-          <Modal.Footer>
-            <button className="btn-enquire" onClick={() => setShowDeleteModal(false)}>
-              No
-            </button>
-            <button className="btn-remove" onClick={() => {
-              setShowDeleteModal(false);
-              handleDeleteProduct();
-            }}>
-              Yes, Delete
-            </button>
-          </Modal.Footer>
-        </Modal>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-slate-950/40 backdrop-blur-sm"
+            onClick={() => setShowDeleteModal(false)}
+            aria-label="Close delete confirmation modal"
+          />
+          <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+              <h2 className="text-lg font-semibold text-slate-900">Delete product</h2>
+              <button
+                type="button"
+                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                onClick={() => setShowDeleteModal(false)}
+                aria-label="Close delete confirmation modal"
+              >
+                ✕
+              </button>
+            </div>
+            <div className="px-6 py-5 text-slate-700">
+              Are you sure you want to delete this product?
+            </div>
+            <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:justify-end sm:items-center">
+              <button className="btn-enquire w-full rounded-full py-3 text-sm font-medium sm:w-auto" onClick={() => setShowDeleteModal(false)}>
+                No
+              </button>
+              <button className="btn-remove w-full rounded-full py-3 text-sm font-medium sm:w-auto" onClick={() => {
+                setShowDeleteModal(false);
+                handleDeleteProduct();
+              }}>
+                Yes, Delete
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
     </div>

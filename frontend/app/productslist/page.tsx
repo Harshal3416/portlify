@@ -2,7 +2,6 @@
 
 import { useEffect, useState, Suspense } from "react";
 import { useGetProductsQuery } from "@/hooks/useProductMutation";
-import Modal from 'react-bootstrap/Modal';
 import { renderImage } from "../lib/renderImage";
 import { IoMdAddCircleOutline } from "react-icons/io";
 import { IoRemoveCircleOutline } from "react-icons/io5";
@@ -109,6 +108,14 @@ function ProductListContent() {
         console.log("Updated cart total:", totalCount, items);
     }
 
+    useEffect(() => {
+        if (!isCartOpen) return;
+        document.body.style.overflow = 'hidden';
+        return () => {
+            document.body.style.overflow = '';
+        };
+    }, [isCartOpen]);
+
     return (
         <div>
             <div className="gallery-header">
@@ -138,62 +145,85 @@ function ProductListContent() {
             </div>
             {/* <ProductList search={search} /> */}
             {isCartOpen && cartItems && cartItems.length > 0 && (
-                <Modal show={isCartOpen} onHide={() => setCartOpen(false)} centered scrollable={true}>
-                    <Modal.Header>
-                        <Modal.Title>Cart</Modal.Title>
-                        <button className="modal-close" onClick={() => setCartOpen(false)}>✕</button>
-                    </Modal.Header>
-                    <Modal.Body>
-                        {cartItems.map((item: CartData, index) => {
-                            return (
-                                <div key={index} className="flex flex-row items-center p-4">
-                                    <span className="w-50">{item.itemname}:</span> <span> {renderImage(item.image, true)}</span>
-                                    <div className="flex items-center space-x-2">
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                    <button
+                        type="button"
+                        className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+                        onClick={() => setCartOpen(false)}
+                        aria-label="Close cart modal"
+                    />
+                    <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+                        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
+                            <h2 className="text-lg font-semibold text-slate-900">Cart</h2>
+                            <button
+                                type="button"
+                                className="inline-flex h-10 w-10 items-center justify-center rounded-full border border-slate-200 text-slate-600 transition hover:bg-slate-100"
+                                onClick={() => setCartOpen(false)}
+                                aria-label="Close cart modal"
+                            >
+                                ✕
+                            </button>
+                        </div>
+                        <div className="max-h-[70vh] overflow-y-auto">
+                            {cartItems.map((item: CartData, index) => (
+                                <div key={index} className="flex flex-col gap-4 border-b border-slate-200 px-6 py-4 last:border-b-0 sm:flex-row sm:items-center sm:justify-between">
+                                    <div className="flex items-center gap-3">
+                                        <div className="min-w-[140px] text-sm font-medium text-slate-900">{item.itemname}</div>
+                                        <div className="inline-flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-500">
+                                            {renderImage(item.image, true)}
+                                        </div>
+                                    </div>
+                                    <div className="flex flex-wrap items-center gap-2">
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.itemid, 'add')}
-                                            className="px-3 py-1 rounded-md hover:text-green-600"
+                                            className="rounded-full border border-slate-300 bg-white px-3 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-emerald-600"
                                         >
                                             <IoMdAddCircleOutline />
                                         </button>
-
-                                        <span className="px-4 py-1 mr-0 border border-gray-300 rounded-md bg-white">
+                                        <span className="rounded-full border border-slate-300 bg-slate-50 px-4 py-2 text-sm font-medium text-slate-900">
                                             {item.count}
                                         </span>
-
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.itemid, 'remove')}
                                             disabled={item.count === 1}
-                                            className="px-3 py-1 rounded-md hover:text-red-600"
+                                            className="rounded-full border border-slate-300 bg-white px-3 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-rose-600 disabled:cursor-not-allowed disabled:opacity-50"
                                         >
                                             <IoRemoveCircleOutline />
                                         </button>
                                         <button
                                             type="button"
                                             onClick={() => handleItemCount(item.itemid, 'delete')}
-                                            className="py-1 rounded-md hover:text-red-600"
+                                            className="rounded-full border border-slate-300 bg-white px-3 py-2 text-slate-700 transition hover:bg-slate-50 hover:text-rose-600"
                                         >
                                             <MdDeleteOutline />
                                         </button>
                                     </div>
-
                                 </div>
-                            )
-                        })}
-                    </Modal.Body>
-                    <Modal.Footer>
-                        <button className="btn-enquire" onClick={() => setCartOpen(false)}>
-                            Save and Close
-                        </button>
-                        <button className="btn-add" onClick={() => {
-                            setCartOpen(false);
-                            contactOverWhatsapp();
-                        }}>
-                            Buy Now
-                        </button>
-                    </Modal.Footer>
-                </Modal>
+                            ))}
+                        </div>
+                        <div className="flex flex-col gap-3 border-t border-slate-200 px-6 py-4 sm:flex-row sm:justify-end sm:items-center">
+                            <button
+                                type="button"
+                                className="btn-enquire w-full rounded-full py-3 text-sm font-medium sm:w-auto"
+                                onClick={() => setCartOpen(false)}
+                            >
+                                Save and Close
+                            </button>
+                            <button
+                                type="button"
+                                className="btn-add w-full rounded-full py-3 text-sm font-medium sm:w-auto"
+                                onClick={() => {
+                                    setCartOpen(false);
+                                    contactOverWhatsapp();
+                                }}
+                            >
+                                Buy Now
+                            </button>
+                        </div>
+                    </div>
+                </div>
             )}
         </div>
     );
