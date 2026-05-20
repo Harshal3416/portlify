@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef, Suspense } from "react";
+import { useEffect, useState, useRef, Suspense, useMemo } from "react";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
@@ -31,6 +31,15 @@ function ProductsContent() {
   const [editingItemId, setEditingItemId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
+  const initialFormRef = useRef<{
+    itemid: string;
+    itemname: string;
+    price: string;
+    description: string;
+    existingAssets: { filename: string; size: number; url?: string; type: string }[];
+    highlightFiles: { name: string; size: number; type: string; lastModified: number }[];
+  } | null>(null);
+
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const [showDeleteModal, setShowDeleteModal] = useState(false);
@@ -44,6 +53,40 @@ function ProductsContent() {
       document.body.style.overflow = '';
     };
   }, [addItemsModal, showDeleteModal]);
+
+  // Capture snapshot of form when modal opens to detect changes
+  // We intentionally only run this when the modal opens so we take the initial snapshot once.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    if (!addItemsModal) {
+      initialFormRef.current = null;
+      return;
+    }
+
+    initialFormRef.current = {
+      itemid,
+      itemname,
+      price,
+      description,
+      existingAssets: existingAssets.map((a) => ({ filename: a.filename, size: a.size, url: a.url || '', type: a.type })),
+      highlightFiles: highlightFiles.map((f) => ({ name: f.name, size: f.size, type: f.type, lastModified: (f as any).lastModified || 0 })),
+    };
+  // Intentionally only run when modal opens/closes or when we programmatically reset/start edit
+  }, [addItemsModal]);
+
+  const isDirty = useMemo(() => {
+    const init = initialFormRef.current;
+    if (!init) return false;
+    if (init.itemid !== itemid) return true;
+    if (init.itemname !== itemname) return true;
+    if (init.price !== price) return true;
+    if (init.description !== description) return true;
+    if (JSON.stringify(init.existingAssets) !== JSON.stringify(existingAssets.map((a) => ({ filename: a.filename, size: a.size, url: a.url || '', type: a.type })))) return true;
+    if (JSON.stringify(init.highlightFiles) !== JSON.stringify(highlightFiles.map((f) => ({ name: f.name, size: f.size, type: f.type, lastModified: (f as any).lastModified || 0 })))) return true;
+    return false;
+  }, [itemid, itemname, price, description, existingAssets, highlightFiles]);
+
+  const saveDisabled = !itemid || !itemname || !isDirty || (!editingItemId && highlightFiles.length === 0);
 
   const generateProductId = () => {
     // Simple unique ID generator (for demo purposes only)
@@ -177,7 +220,7 @@ function ProductsContent() {
 
       showToast(`Item saved successfully!`, "success");
       resetProductForm();
-
+      setAddProductModal(false);
     } catch (err: any) {
       setSubmitError(err?.message || "Failed to save item");
     }
@@ -303,14 +346,16 @@ function ProductsContent() {
                 <input className="field-input" type="text" id="itemname" placeholder="e.g. Prestige Pressure Cooker" value={itemname}
                   onChange={(e) => setItemName(e.target.value)} />
               </div>
-              <div className="field-group">
-                <label className="field-label">Item ID</label>
-                <input className="field-input" type="text" value={itemid} disabled />
-                <span className="field-hint">Auto-generated — cannot be changed</span>
-              </div>
-              <div className="field-group">
-                <label className="field-label">Price</label>
-                <input className="field-input" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+              <div className="grid gap-4 sm:grid-cols-2">
+                <div className="field-group">
+                  <label className="field-label">Item ID</label>
+                  <input className="field-input" type="text" value={itemid} disabled />
+                  <span className="field-hint">Auto-generated — cannot be changed</span>
+                </div>
+                <div className="field-group">
+                  <label className="field-label">Price</label>
+                  <input className="field-input" type="number" value={price} onChange={(e) => setPrice(e.target.value)} />
+                </div>
               </div>
               <div className="field-group">
                 <label className="field-label">Description <span className="text-red-500">*</span></label>
@@ -396,11 +441,11 @@ function ProductsContent() {
                 resetProductForm();
                 setAddProductModal(false);
               }}>Cancel</button>
-              <button className="btn-save w-full rounded-full py-3 text-sm font-medium sm:w-auto" onClick={handleSubmitProduct} disabled={
-                !itemid ||
-                !itemname ||
-                (!editingItemId && highlightFiles.length === 0)
-              }>
+              <button
+                className={"w-full rounded-full py-3 text-sm font-medium sm:w-auto " + (saveDisabled ? "btn-secondary" : "btn-save")}
+                onClick={handleSubmitProduct}
+                disabled={saveDisabled}
+              >
                 💾 Save Changes
               </button>
             </div>
