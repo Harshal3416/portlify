@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import Image from "next/image";
 import { useToast } from "@/app/context/ToastContext";
 import { renderImage } from "@/app/lib/renderImage";
 import { useSiteDetails } from "@/app/context/siteContext";
@@ -181,10 +182,11 @@ export default function Card({
                                     >
                                         <div className="relative h-72 sm:h-96">
                                             {images.map((img, index) => (
-                                                <img
+                                                <Image
                                                     key={`img-${index}`}
                                                     src={backendUrl + img.url}
                                                     alt={img.filename}
+                                                    fill
                                                     className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${index === imageIndex ? 'opacity-100' : 'opacity-0'}`}
                                                 />
                                             ))}

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense, useMemo } from "react";
+import Image from "next/image";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
@@ -372,7 +373,7 @@ function ProductsContent() {
                         {existingAssets.map((asset, i) => (
                           <div key={`existing-${i}`} className="relative inline-block mr-1 mb-1">
                             {asset.type === 'image' ? (
-                              <img src={process.env.NEXT_PUBLIC_BACKEND_URL + (asset.url || '')} alt={asset.filename} className="w-10 h-10 object-cover rounded" />
+                              <Image src={process.env.NEXT_PUBLIC_BACKEND_URL + (asset.url || '')} alt={asset.filename} width={40} height={40} className="w-10 h-10 object-cover rounded" />
                             ) : (
                               <div className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded">🎥</div>
                             )}
@@ -391,7 +392,7 @@ function ProductsContent() {
                         {highlightFiles.map((file, i) => (
                           <div key={`new-${i}`} className="relative inline-block mr-1 mb-1">
                             {file.type.startsWith('image/') ? (
-                              <img src={URL.createObjectURL(file)} alt={file.name} className="w-10 h-10 object-cover rounded" />
+                              <Image src={URL.createObjectURL(file)} alt={file.name} width={40} height={40} className="object-cover rounded" />
                             ) : (
                               <div className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded">🎥</div>
                             )}

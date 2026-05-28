@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Image from "next/image";
 import { useGetBusinessesQuery } from "@/hooks/useBusinessQuery";
 
 /* ─────────────────────────────────────────────────────────────
@@ -556,15 +557,19 @@ function Directory() {
                 <div className="flex items-start gap-3 mb-4">
                   <div className="w-12 h-12 rounded-xl overflow-hidden bg-linear-to-br from-steel-dark to-steel-mid flex items-center justify-center text-2xl flex-shrink-0">
                     {typeof biz.siteLogo === "string" ? (
-                      <img
+                      <Image
                         src={biz.siteLogo}
                         alt={biz.siteTitle || "Business logo"}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
                       />
                     ) : typeof biz.siteLogo === "object" && biz.siteLogo !== null && "url" in biz.siteLogo ? (
-                      <img
-                        src={(biz.siteLogo as { url?: string }).url}
+                      <Image
+                        src={(biz.siteLogo as { url?: string }).url || ""}
                         alt={biz.siteTitle || "Business logo"}
+                        width={48}
+                        height={48}
                         className="w-full h-full object-cover"
                       />
                     ) : (

@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import Image from "next/image";
 import { getAdminContactDetails } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
 
@@ -100,7 +101,7 @@ export default function Contact() {
           {gmailId && (
             <button className="contact-item" onClick={openGmail}>
               <div className="contact-icon mail">
-                <img src="/gmail.jpg" alt="" className="w-6 h-6" />
+                <Image src="/gmail.jpg" alt="Gmail" width={24} height={24} className="w-6 h-6" />
               </div>
               <div>
                 <div className="contact-text">{gmailId}</div>
@@ -113,7 +114,7 @@ export default function Contact() {
           {(phoneNumber || alternatePhoneNumber) && (
             <button className="contact-item" onClick={() => openPhoneDialer(phoneNumber || alternatePhoneNumber)}>
               <div className="contact-icon phone">
-                <img src="/phone.jpg" alt="" className="w-6 h-6" />
+                <Image src="/phone.jpg" alt="Phone" width={24} height={24} className="w-6 h-6" />
               </div>
               <div>
                 <div className="contact-text">{phoneNumber}{alternatePhoneNumber && ` | ${alternatePhoneNumber}`}</div>
@@ -126,7 +127,7 @@ export default function Contact() {
           {address && (
             <button className="contact-item" onClick={() => openLink(gmapLink)}>
               <div className="contact-icon location">
-                <img src="/gmap.jpg" alt="" className="w-6 h-6" />
+                <Image src="/gmap.jpg" alt="Google Maps" width={24} height={24} className="w-6 h-6" />
               </div>
               <div>
                 <div className="contact-text">{address}</div>
@@ -150,7 +151,7 @@ export default function Contact() {
           {instagramURL && (
             <button className="contact-item" onClick={() => openLink(instagramURL)}>
               <div className="contact-icon instagram">
-                <img src="/instagram.png" alt="" className="w-6 h-6" />
+                <Image src="/instagram.png" alt="Instagram" width={24} height={24} className="w-6 h-6" />
               </div>
               <div>
                 <div className="contact-text">Instagram</div>
@@ -162,7 +163,7 @@ export default function Contact() {
           {googlemap && (
             <button className="contact-item" onClick={(e) => { e.preventDefault(); openLink(googlemap); }}>
               <div className="contact-icon google">
-                <img src="/google.png" alt="" className="w-6 h-6" />
+                <Image src="/google.png" alt="Google" width={24} height={24} className="w-6 h-6" />
               </div>
               <div>
                 <div className="contact-text">Google Business</div>
@@ -174,7 +175,7 @@ export default function Contact() {
           {justDialLink && (
             <button className="contact-item" onClick={(e) => { e.preventDefault(); openLink(justDialLink); }}>
               <div className="contact-icon jd">
-                <img src="/justdial.png" alt="" className="w-6 h-6" />
+                <Image src="/justdial.png" alt="JustDial" width={24} height={24} className="w-6 h-6" />
               </div>
               <div>
                 <div className="contact-text">JustDial</div>
