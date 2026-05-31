@@ -1,48 +1,124 @@
 const express = require('express')
 const router = express.Router()
-const { upload } = require('../middleware/upload')
+const multer = require('multer')
 const pool = require('../database/db/db')
 const clerkAuth = require('../middleware/clerkAuth')
+const {
+  SITE_LOGO_BUCKET,
+  uploadImageToSupabase,
+  getPublicUrlFromPath,
+} = require('../utils/supabase.js')
+
+const upload = multer({
+  storage: multer.memoryStorage(),
+  limits: { fileSize: 5 * 1024 * 1024 },
+  fileFilter: (_req, file, cb) => {
+    if (file.mimetype?.startsWith('image/')) {
+      cb(null, true)
+    } else {
+      cb(new Error('Only image files are allowed for site logo'))
+    }
+  },
+})
+
+/** Parse sitelogourl from DB (json/jsonb string or object). */
+const parseSiteLogo = (stored) => {
+  if (!stored) return null
+  if (typeof stored === 'object') return stored
+  if (typeof stored === 'string') {
+    try {
+      return JSON.parse(stored)
+    } catch {
+      return { url: stored }
+    }
+  }
+  return null
+}
+
+/** Ensure logo metadata includes a usable public URL. */
+const enrichSiteLogo = (stored) => {
+  const logo = parseSiteLogo(stored)
+  if (!logo) return null
+
+  const needsUrl =
+    logo.filePath &&
+    (!logo.url || (typeof logo.url === 'string' && logo.url.startsWith('/uploads')))
+
+  if (needsUrl) {
+    const publicUrl = getPublicUrlFromPath(logo.filePath)
+    if (publicUrl) logo.url = publicUrl
+  }
+
+  return logo
+}
 
 // --- siteinformation routes ---
-router.post('/siteinformation', clerkAuth, upload.fields([{ name: 'sitelogourl', maxCount: 1 }]), async (req, res) => {
+router.post('/siteinformation', clerkAuth, upload.single('sitelogourl'), async (req, res) => {
   const { tenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription } = req.body
 
   if (!tenantid || !sitetitle) {
     return res.status(400).json({ error: 'tenantid and sitetitle are required' })
   }
 
-  console.log('Received siteinformation data:', tenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription ) // Debug log
   try {
-    const existingRow = await pool.query('SELECT sitelogourl FROM siteinformation WHERE tenantid = $1', [tenantid])
-    const existingLogo = existingRow.rows[0]?.sitelogourl || null
+    let sitelogourl = null
 
-    const sitelogourl = req.files?.sitelogourl
-      ? {
-          filename: req.files.sitelogourl[0].originalname,
-          size: req.files.sitelogourl[0].size,
-          url: `/uploads/${req.files.sitelogourl[0].filename}`,
-        }
-      : existingLogo
+    if (req.file) {
+      const uploadResult = await uploadImageToSupabase(
+        SITE_LOGO_BUCKET,
+        req.file,
+        tenantid,
+      )
+
+      sitelogourl = {
+        filename: req.file.originalname,
+        size: req.file.size,
+        filePath: uploadResult.filePath,
+        url: uploadResult.publicUrl,
+      }
+    } else {
+      const existingRow = await pool.query(
+        'SELECT sitelogourl FROM siteinformation WHERE tenantid = $1',
+        [tenantid],
+      )
+      sitelogourl = enrichSiteLogo(existingRow.rows[0]?.sitelogourl)
+    }
 
     const result = await pool.query(
       `INSERT INTO siteinformation (tenantid, sitelogourl, sitetitle, sitesubtitle, trustedtagline, sitedescription, updatedat)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())
        ON CONFLICT (tenantid) DO UPDATE SET
-          sitelogourl = EXCLUDED.sitelogourl,
+          sitelogourl = COALESCE(EXCLUDED.sitelogourl, siteinformation.sitelogourl),
           sitetitle = EXCLUDED.sitetitle,
          sitesubtitle = EXCLUDED.sitesubtitle,
          trustedtagline = EXCLUDED.trustedtagline,
          sitedescription = EXCLUDED.sitedescription,
          updatedat = NOW()
        RETURNING *`,
-      [tenantid, sitelogourl ? JSON.stringify(sitelogourl) : null, sitetitle, sitesubtitle || null, trustedtagline || null, sitedescription || null],
+      [
+        tenantid,
+        sitelogourl ? JSON.stringify(sitelogourl) : null,
+        sitetitle,
+        sitesubtitle || null,
+        trustedtagline || null,
+        sitedescription || null,
+      ],
     )
 
-    return res.status(201).json({ success: true, data: result.rows[0] })
+    const data = { ...result.rows[0] }
+    if (data.sitelogourl) {
+      data.sitelogourl = enrichSiteLogo(data.sitelogourl)
+    }
+
+    return res.status(201).json({ success: true, data })
   } catch (error) {
     console.error('Error saving siteinformation:', error)
-    return res.status(500).json({ success: false, error: 'Internal server error' })
+    const message =
+      error instanceof multer.MulterError
+        ? `Upload error: ${error.message}`
+        : error.message || 'Internal server error'
+    const status = error instanceof multer.MulterError || error.message?.includes('image') ? 400 : 500
+    return res.status(status).json({ success: false, error: message })
   }
 })
 
@@ -50,7 +126,11 @@ router.get('/siteinformation/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM siteinformation WHERE tenantid = $1', [tenantid])
-    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
+
+    if (result.rows[0]?.sitelogourl) {
+      result.rows[0].sitelogourl = enrichSiteLogo(result.rows[0].sitelogourl)
+    }
+
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching siteinformation:', error)
@@ -88,7 +168,6 @@ router.get('/admincontact/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM admincontact WHERE tenantid = $1', [tenantid])
-    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching admincontact:', error)
@@ -99,7 +178,7 @@ router.get('/admincontact/:tenantid', async (req, res) => {
 // --- adminsocial routes ---
 router.post('/adminsocial', clerkAuth, async (req, res) => {
   const { tenantid, instagramurl, googlemapurl, justdialurl } = req.body
-  console.log('Received adminsocial data:', req.body) // Debug log
+  console.log('Received adminsocial data:', req.body)
   if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })
 
   try {
@@ -125,7 +204,6 @@ router.get('/adminsocial/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM adminsocial WHERE tenantid = $1', [tenantid])
-    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching adminsocial:', error)
@@ -166,7 +244,6 @@ router.get('/openinghours/:tenantid', async (req, res) => {
   const { tenantid } = req.params
   try {
     const result = await pool.query('SELECT * FROM openinghours WHERE tenantid = $1', [tenantid])
-    // if (result.rowCount === 0) return res.status(404).json({ success: false, error: 'Not found' })
     return res.status(200).json({ success: true, data: result.rows[0] })
   } catch (error) {
     console.error('Error fetching openinghours:', error)
@@ -175,5 +252,3 @@ router.get('/openinghours/:tenantid', async (req, res) => {
 })
 
 module.exports = router
-
-

@@ -5,7 +5,7 @@ import Image from "next/image";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
 import { useToast } from "@/app/context/ToastContext";
-import { renderImage } from "@/app/lib/renderImage";
+import { renderImage, resolveImageSrc } from "@/app/lib/renderImage";
 import { Collections } from "@/app/interfaces/interface";
 import { useSiteDetails } from "@/app/context/siteContext";
 
@@ -370,10 +370,16 @@ function ProductsContent() {
                   <div className="upload-area-icon flex flex-wrap items-start">
                     {existingAssets.length + highlightFiles.length > 0 ? (
                       <>
-                        {existingAssets.map((asset, i) => (
+                        {existingAssets.map((asset, i) => {
+                          const previewSrc = asset.type === 'image' ? resolveImageSrc(asset) : null;
+                          return (
                           <div key={`existing-${i}`} className="relative inline-block mr-1 mb-1">
                             {asset.type === 'image' ? (
-                              <Image src={process.env.NEXT_PUBLIC_BACKEND_URL + (asset.url || '')} alt={asset.filename} width={40} height={40} className="w-10 h-10 object-cover rounded" />
+                              previewSrc ? (
+                                <Image src={previewSrc} alt={asset.filename} width={40} height={40} className="w-10 h-10 object-cover rounded" />
+                              ) : (
+                                <div className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded">🖼️</div>
+                              )
                             ) : (
                               <div className="w-10 h-10 flex items-center justify-center bg-slate-100 rounded">🎥</div>
                             )}
@@ -388,7 +394,7 @@ function ProductsContent() {
                               ×
                             </button>
                           </div>
-                        ))}
+                        )})}
                         {highlightFiles.map((file, i) => (
                           <div key={`new-${i}`} className="relative inline-block mr-1 mb-1">
                             {file.type.startsWith('image/') ? (
