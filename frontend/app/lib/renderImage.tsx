@@ -1,42 +1,60 @@
 import Image from "next/image";
 
-export const renderImage = (image: any, forCart: boolean) => {
-    if (!image) return '🖼️ ';
+const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
 
-    const baseProps = {
-        alt: "Product image",
-        className: `object-contain  ${forCart? 'h-12' : ''}`,
-    };
+/** Resolve stored logo/product URL for next/image (Supabase absolute or legacy /uploads paths). */
+export const resolveImageSrc = (image: unknown): string | null => {
+  if (!image) return null;
 
-    if (typeof image === "string") {
-        return (
-            <Image
-                src={process.env.NEXT_PUBLIC_BACKEND_URL + image}
-                width={forCart ? 48 : 400}
-                height={forCart ? 48 : 400}
-                {...baseProps}
-            />
-        );
+  if (typeof image === "string") {
+    if (image.startsWith("http://") || image.startsWith("https://")) {
+      return image;
     }
-
-    if (typeof image === "object" && "url" in image && image.url) {
-        return (
-            <Image
-                src={process.env.NEXT_PUBLIC_BACKEND_URL + image.url}
-                width={forCart ? 48 : 400}
-                height={forCart ? 48 : 400}
-                {...baseProps}
-            />
-        );
+    if (image.startsWith("/")) {
+      return `${backendBase}${image}`;
     }
+    return `${backendBase}/${image}`;
+  }
 
-    // For Blob objects (temporary previews), keep using img tag
+  if (typeof image === "object" && image !== null && "url" in image) {
+    const url = (image as { url?: string }).url;
+    if (url) return resolveImageSrc(url);
+  }
+
+  return null;
+};
+
+export const renderImage = (image: unknown, forCart: boolean) => {
+  if (!image) return "🖼️ ";
+
+  const baseProps = {
+    alt: "Product image",
+    className: `object-contain  ${forCart ? "h-12" : ""}`,
+  };
+
+  const resolvedSrc = resolveImageSrc(image);
+  if (resolvedSrc) {
     return (
-        <Image
-            width={40}
-            height={40}
-            src={URL.createObjectURL(image as Blob)}
-            {...baseProps}
-        />
+      <Image
+        src={resolvedSrc}
+        width={forCart ? 48 : 400}
+        height={forCart ? 48 : 400}
+        {...baseProps}
+      />
     );
-    };
+  }
+
+  // Local file preview before upload
+  if (image instanceof Blob) {
+    return (
+      <Image
+        width={40}
+        height={40}
+        src={URL.createObjectURL(image)}
+        {...baseProps}
+      />
+    );
+  }
+
+  return "🖼️ ";
+};
