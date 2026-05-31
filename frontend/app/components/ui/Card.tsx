@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
 import Image from "next/image";
 import { useToast } from "@/app/context/ToastContext";
-import { renderImage } from "@/app/lib/renderImage";
+import { renderImage, resolveImageSrc } from "@/app/lib/renderImage";
 import { useSiteDetails } from "@/app/context/siteContext";
 import { CardProps, CartData } from "@/app/interfaces/interface";
 
@@ -29,8 +29,6 @@ export default function Card({
     const { showToast } = useToast();
 
     const siteDetails = useSiteDetails().siteDetails;
-    const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
-
     const images = (collection.itemassets?.images || []).filter((img): img is { filename: string; size: number; url: string } => Boolean(img.url));
 
     const movePrev = () => {
@@ -181,15 +179,18 @@ export default function Card({
                                         onTouchEnd={handleTouchEnd}
                                     >
                                         <div className="relative h-72 sm:h-96">
-                                            {images.map((img, index) => (
+                                            {images.map((img, index) => {
+                                                const src = resolveImageSrc(img);
+                                                if (!src) return null;
+                                                return (
                                                 <Image
                                                     key={`img-${index}`}
-                                                    src={backendUrl + img.url}
+                                                    src={src}
                                                     alt={img.filename}
                                                     fill
                                                     className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${index === imageIndex ? 'opacity-100' : 'opacity-0'}`}
                                                 />
-                                            ))}
+                                            )})}
                                         </div>
                                         <button
                                             type="button"
@@ -222,13 +223,14 @@ export default function Card({
                                 ) : null}
                                 {collection.itemassets?.videos?.length ? (
                                     <div className="space-y-4">
-                                        {collection.itemassets.videos.map((vid, index) => (
-                                            vid.url ? (
+                                        {collection.itemassets.videos.map((vid, index) => {
+                                            const src = resolveImageSrc(vid);
+                                            return src ? (
                                                 <video key={`vid-${index}`} controls className="w-full rounded-3xl bg-slate-100">
-                                                    <source src={process.env.NEXT_PUBLIC_BACKEND_URL + vid.url} type="video/mp4" />
+                                                    <source src={src} type="video/mp4" />
                                                 </video>
-                                            ) : null
-                                        ))}
+                                            ) : null;
+                                        })}
                                     </div>
                                 ) : null}
                                 {!images.length && !collection.itemassets?.videos?.length && (

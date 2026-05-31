@@ -15,6 +15,9 @@ const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY
 /** Supabase Storage bucket for site logos (must exist and be public for getPublicUrl). */
 const SITE_LOGO_BUCKET = process.env.SUPABASE_SITE_LOGO_BUCKET || 'sitelogourl'
 
+/** Supabase Storage bucket for collection images/videos (must exist and be public). */
+const COLLECTION_ASSETS_BUCKET = process.env.SUPABASE_COLLECTION_BUCKET || 'collectionassets'
+
 const getJwtRole = (jwt) => {
   if (!jwt || typeof jwt !== 'string') return null
   const parts = jwt.split('.')
@@ -31,7 +34,7 @@ const serviceRoleJwtRole = supabaseServiceRoleKey ? getJwtRole(supabaseServiceRo
 
 if (!supabaseUrl || !supabaseServiceRoleKey) {
   console.warn(
-    'Warning: Supabase Storage not fully configured. Logo upload will fail. ' +
+    'Warning: Supabase Storage not fully configured. File upload will fail. ' +
       'Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in backend/.env ' +
       '(Project Settings → API → service_role secret — not the anon/public key).',
   )
@@ -49,31 +52,36 @@ const supabase = createClient(
   clientOptions,
 )
 
-const sanitizeFilename = (originalName) => {
-  const base = path.basename(originalName || 'logo').replace(/[^a-zA-Z0-9._-]/g, '_')
-  return base.length > 0 ? base : 'logo'
+const sanitizeFilename = (originalName, fallback = 'file') => {
+  const base = path.basename(originalName || fallback).replace(/[^a-zA-Z0-9._-]/g, '_')
+  return base.length > 0 ? base : fallback
 }
 
-/**
- * Upload a Multer memory-storage file to Supabase Storage.
- * @param {string} bucketName
- * @param {{ buffer: Buffer, mimetype: string, originalname: string }} file
- * @param {string} [tenantid] Optional prefix folder per tenant
- * @returns {{ filePath: string, publicUrl: string }}
- */
-const uploadImageToSupabase = async (bucketName, file, tenantid) => {
+const assertStorageConfigured = () => {
   if (!supabaseUrl || !supabaseServiceRoleKey) {
     throw new Error(
       'Supabase Storage is not configured. Set SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in backend/.env.',
     )
   }
-
   if (serviceRoleJwtRole !== 'service_role') {
     throw new Error(
       `SUPABASE_SERVICE_ROLE_KEY is not a service_role key (detected role: "${serviceRoleJwtRole ?? 'unknown'}"). ` +
         'Use the service_role secret from Supabase Dashboard → Project Settings → API, not the anon/public key.',
     )
   }
+}
+
+/**
+ * Upload a Multer memory-storage file to Supabase Storage.
+ * @param {string} bucketName
+ * @param {{ buffer: Buffer, mimetype: string, originalname: string }} file
+ * @param {{ tenantid?: string, folder?: string }} [options]
+ * @returns {{ filePath: string, publicUrl: string }}
+ */
+const uploadFileToSupabase = async (bucketName, file, options = {}) => {
+  assertStorageConfigured()
+
+  const { tenantid, folder = 'files' } = options
 
   if (!file?.buffer || !Buffer.isBuffer(file.buffer)) {
     throw new Error('Invalid upload file: missing buffer. Use multer memoryStorage().')
@@ -81,8 +89,8 @@ const uploadImageToSupabase = async (bucketName, file, tenantid) => {
 
   const safeName = sanitizeFilename(file.originalname)
   const storagePath = tenantid
-    ? `images/${tenantid}/${Date.now()}-${safeName}`
-    : `images/${Date.now()}-${safeName}`
+    ? `${folder}/${tenantid}/${Date.now()}-${safeName}`
+    : `${folder}/${Date.now()}-${safeName}`
 
   const { error } = await supabase.storage.from(bucketName).upload(storagePath, file.buffer, {
     contentType: file.mimetype || 'application/octet-stream',
@@ -109,6 +117,10 @@ const uploadImageToSupabase = async (bucketName, file, tenantid) => {
   return { filePath, publicUrl }
 }
 
+/** @deprecated alias — site logos use folder `images` */
+const uploadImageToSupabase = async (bucketName, file, tenantid) =>
+  uploadFileToSupabase(bucketName, file, { tenantid, folder: 'images' })
+
 /**
  * @param {string} filePath Stored as "bucketName/path/inside/bucket"
  */
@@ -131,8 +143,37 @@ const getPublicUrlFromPath = (filePath) => {
   }
 }
 
+/** Ensure asset metadata includes a usable public URL (legacy /uploads or filePath-only rows). */
+const enrichAsset = (asset) => {
+  if (!asset || typeof asset !== 'object') return asset
+
+  const needsUrl =
+    asset.filePath &&
+    (!asset.url || (typeof asset.url === 'string' && asset.url.startsWith('/uploads')))
+
+  if (needsUrl) {
+    const publicUrl = getPublicUrlFromPath(asset.filePath)
+    if (publicUrl) return { ...asset, url: publicUrl }
+  }
+
+  return asset
+}
+
+const enrichItemAssets = (itemassets) => {
+  if (!itemassets || typeof itemassets !== 'object') return itemassets
+
+  return {
+    images: (itemassets.images || []).map(enrichAsset),
+    videos: (itemassets.videos || []).map(enrichAsset),
+  }
+}
+
 module.exports = {
   SITE_LOGO_BUCKET,
+  COLLECTION_ASSETS_BUCKET,
+  uploadFileToSupabase,
   uploadImageToSupabase,
   getPublicUrlFromPath,
+  enrichAsset,
+  enrichItemAssets,
 }

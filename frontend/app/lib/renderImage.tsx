@@ -2,7 +2,7 @@ import Image from "next/image";
 
 const backendBase = process.env.NEXT_PUBLIC_BACKEND_URL ?? "";
 
-/** Resolve stored logo/product URL for next/image (Supabase absolute or legacy /uploads paths). */
+/** Resolve stored media URL (Supabase absolute or legacy /uploads paths). */
 export const resolveImageSrc = (image: unknown): string | null => {
   if (!image) return null;
 
@@ -23,6 +23,8 @@ export const resolveImageSrc = (image: unknown): string | null => {
 
   return null;
 };
+
+export const resolveMediaSrc = resolveImageSrc;
 
 export const renderImage = (image: unknown, forCart: boolean) => {
   if (!image) return "🖼️ ";
