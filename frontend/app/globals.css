@@ -1063,11 +1063,6 @@ html {
     height: 34px;
   }
 
-  /* .logo {
-    flex-basis: 100%;
-    order: 1;
-  } */
-
   .nav-actions {
     flex-basis: 100%;
     order: 2;

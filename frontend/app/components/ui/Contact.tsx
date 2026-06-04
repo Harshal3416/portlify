@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import Image from "next/image";
-import { getAdminContactDetails } from "@/services/settingsService";
+import { getAdminContactDetails, getAdminSocialLinks } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
 
 export default function Contact() {
@@ -31,15 +31,16 @@ export default function Contact() {
   const fetchAdminContactDetails = async () => {
     if (!tenantid) return;
     try {
-      const data = await getAdminContactDetails(tenantid);
+      let data = await getAdminContactDetails(tenantid);
+      const socialLinks = await getAdminSocialLinks(tenantid);
       setContactEmail(data?.contactemail || "");
       setContactPhone(data?.contactphone || "");
       setAlternateContactPhone(data?.alternatecontactphone || "");
       setAddress(data?.address || "");
-      setInstagramURL(data?.instagramurl || "");
-      setGoogleMapURL(data?.googlemapurl || "");
-      setJustDialURL(data?.justdialurl || "");
-      setGmapLink(data?.gmapLink || "");
+      setInstagramURL(socialLinks?.instagramurl || "");
+      setGoogleMapURL(socialLinks?.googlemapurl || "");
+      setJustDialURL(socialLinks?.justdialurl || "");
+      setGmapLink(socialLinks?.gmapLink || "");
     } catch (err: any) {
       showToast(err.message, "danger");
     }
