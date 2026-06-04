@@ -7,10 +7,13 @@ import { UserButton, useUser } from '@clerk/nextjs';
 
 import { renderImage } from '../../lib/renderImage';
 import { useSiteDetails } from '@/app/context/siteContext';
+import { usePathname } from 'next/navigation';
+import { QRCodeModal } from './QRCodeModal';
 
+  
 export function Header() {
-
-const { siteDetails, authTenantId } = useSiteDetails();
+  const { siteDetails, authTenantId } = useSiteDetails();
+  const pathname = usePathname();
   
   const { user, isLoaded } = useUser();
 
@@ -19,6 +22,10 @@ const { siteDetails, authTenantId } = useSiteDetails();
   const searchParams = useSearchParams();
   const tenantidFromUrl = searchParams.get('tenantid');
   const [tenantid, setTenantId] = useState(tenantidFromUrl || '');
+  const [isQRModalOpen, setIsQRModalOpen] = useState(false);
+
+  const isStorePage = pathname === '/store' || pathname?.startsWith('/store?');
+  const currentPageURL = typeof window !== 'undefined' ? window.location.href : '';
 
 
   useEffect(() => {
@@ -58,10 +65,23 @@ const { siteDetails, authTenantId } = useSiteDetails();
               <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>
               <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
             </>)}
+          {isStorePage && (
+            <button 
+              className="nav-btn qr-btn" 
+              onClick={() => setIsQRModalOpen(true)}
+              title="Share QR Code"
+            >
+              📱 QR Code
+            </button>
+          )}
           <div className="avatar"> <UserButton /></div>
         </div>
       </div>
+      <QRCodeModal 
+        isOpen={isQRModalOpen} 
+        onClose={() => setIsQRModalOpen(false)} 
+        url={currentPageURL}
+      />
     </header>
   );
 }
-
