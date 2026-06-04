@@ -58,24 +58,26 @@ export function Header() {
             {/* {sitesubtitle &&  <span>{sitesubtitle}</span>} */}
           </div>
         </div>
-        <div className="nav-actions">
-          {isLoaded && user && tenantid && authTenantId === tenantid && (
-            <>
-              <button className="nav-btn ghost" onClick={() => router.push(`/admin/products?tenantid=${tenantid}`)}>📦 Manage Collection</button>
-              <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>
-              <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
-            </>)}
-          {isStorePage && (
-            <button 
-              className="nav-btn qr-btn" 
-              onClick={() => setIsQRModalOpen(true)}
-              title="Share QR Code"
-            >
-              📱 QR Code
-            </button>
-          )}
-          <div className="avatar"> <UserButton /></div>
-        </div>
+        {(isLoaded && user) && (
+          <div className="nav-actions">
+            {tenantid && authTenantId === tenantid && (
+              <>
+                <button className="nav-btn ghost" onClick={() => router.push(`/admin/products?tenantid=${tenantid}`)}>📦 Manage Collection</button>
+                <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>
+                <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
+              </>)}
+            {isStorePage && (
+              <button 
+                className="nav-btn qr-btn" 
+                onClick={() => setIsQRModalOpen(true)}
+                title="Share QR Code"
+              >
+                📱 QR Code
+              </button>
+            )}
+            <div className="avatar"> <UserButton /></div>
+          </div>
+        )}
       </div>
       <QRCodeModal 
         isOpen={isQRModalOpen} 

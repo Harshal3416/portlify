@@ -295,7 +295,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="m-4 w-[80%] mx-auto min-h-screen pb-24">
+    <div className="m-4 w-[90%] mx-auto min-h-screen pb-24">
       <div className="page-header">
         <div>
           <div className="page-title">Collection</div>
@@ -327,7 +327,7 @@ function ProductsContent() {
         <p>Loading items...</p>
       )}
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-2">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-3">
         {/* Existing product cards */}
         {items.length === 0 ? (
           <p className="text-sm text-gray-500 self-center">
