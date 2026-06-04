@@ -147,14 +147,14 @@ export default function Card({
             </div>
 
             {mounted && showProductDetails && createPortal(
-                <div className="fixed inset-0 z-50 flex min-h-screen items-center justify-center overflow-auto p-4">
+                <div className="fixed inset-0 z-50 flex min-h-screen items-start sm:items-center justify-center overflow-auto p-4">
                     <button
                         type="button"
                         className="absolute inset-0"
                         onClick={() => setShowProductDetails(false)}
                         aria-label="Close product details"
                     />
-                    <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+                    <div className="relative z-10 mt-[32%] sm:mt-0 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
                         <div className="flex items-start justify-between gap-4 border-b border-slate-200 px-6 py-4">
                             <div>
                                 <h2 className="text-xl font-semibold text-slate-900">{collection.itemname}</h2>

@@ -145,14 +145,14 @@ function ProductListContent() {
             </div>
             {/* <ProductList search={search} /> */}
             {isCartOpen && cartItems && cartItems.length > 0 && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+                <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-auto p-4">
                     <button
                         type="button"
                         className="absolute inset-0 bg-black/40 backdrop-blur-sm"
                         onClick={() => setCartOpen(false)}
                         aria-label="Close cart modal"
                     />
-                    <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+                    <div className="relative z-10 mt-[32%] sm:mt-0 w-full max-w-3xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
                         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
                             <h2 className="text-lg font-semibold text-slate-900">Cart</h2>
                             <button

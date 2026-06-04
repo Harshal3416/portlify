@@ -347,7 +347,7 @@ function ProductsContent() {
       </div>
 
       {addItemsModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-auto p-4">
           <button
             type="button"
             className="absolute inset-0"
@@ -357,7 +357,7 @@ function ProductsContent() {
             }}
             aria-label="Close add product modal"
           />
-          <div className="relative z-10 w-full max-w-5xl overflow-hidden rounded-[32px] bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+          <div className="relative z-10 mt-[32%] sm:mt-0 w-full max-w-5xl overflow-hidden rounded-[32px] bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <h2 className="text-lg font-semibold text-slate-900">{editingItemId ? "Edit product" : "Add a product"}</h2>
               <button
@@ -492,14 +492,14 @@ function ProductsContent() {
       )}
 
       {showDeleteModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div className="fixed inset-0 z-50 flex items-start sm:items-center justify-center overflow-auto p-4">
           <button
             type="button"
             className="absolute inset-0"
             onClick={() => setShowDeleteModal(false)}
             aria-label="Close delete confirmation modal"
           />
-          <div className="relative z-10 w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
+          <div className="relative z-10 mt-[32%] sm:mt-0 w-full max-w-xl overflow-hidden rounded-3xl bg-white shadow-[0_35px_80px_rgba(0,0,0,0.12)] ring-1 ring-black/10">
             <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200">
               <h2 className="text-lg font-semibold text-slate-900">Delete product</h2>
               <button
