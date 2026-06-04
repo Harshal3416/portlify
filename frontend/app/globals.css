@@ -857,7 +857,7 @@ textarea.field-input {
 main.store-layout {
   max-width: 1200px;
   margin: 0 auto;
-  padding: 48px 24px;
+  padding: 16px;
   display: grid;
   grid-template-columns: 1fr 360px;
   gap: 32px;
@@ -1094,7 +1094,6 @@ html {
     font-size: 15px;
     white-space: nowrap;
     overflow: hidden;
-    max-width: calc(100% - 56px);
   }
 
   .nav-actions {
