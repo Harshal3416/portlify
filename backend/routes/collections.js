@@ -67,13 +67,22 @@ router.post(
   upload.fields([{ name: 'itemassets', maxCount: 10 }]),
   async (req, res) => {
     try {
-      const { itemid, itemname, description, tenantid, price } = req.body
+      const { itemid, itemname, description, tenantid: bodyTenantid, price } = req.body
+      const tenantid = req.tenantId
 
-      if (!itemid || !itemname || !tenantid) {
+      if (!tenantid) {
+        return res.status(403).json({ success: false, error: 'Unauthorized: tenant owner not found' })
+      }
+
+      if (!itemid || !itemname) {
         return res.status(400).json({
           success: false,
-          error: 'itemid, itemname and tenantid are required',
+          error: 'itemid and itemname are required',
         })
+      }
+
+      if (bodyTenantid && bodyTenantid !== tenantid) {
+        return res.status(403).json({ success: false, error: 'Tenant mismatch: cannot create for another tenant' })
       }
 
       const allFiles = req.files?.itemassets || []
@@ -154,12 +163,20 @@ router.put(
   async (req, res) => {
     try {
       const { itemid } = req.params
-      const { itemname, description, tenantid, price } = req.body
+      const { itemname, description, tenantid: bodyTenantid, price } = req.body
+      const tenantid = req.tenantId
 
       if (!tenantid) {
-        return res.status(400).json({
+        return res.status(403).json({
           success: false,
-          error: 'tenantid is required',
+          error: 'Unauthorized: tenant owner not found',
+        })
+      }
+
+      if (bodyTenantid && bodyTenantid !== tenantid) {
+        return res.status(403).json({
+          success: false,
+          error: 'Tenant mismatch: cannot modify another tenant',
         })
       }
 
@@ -244,8 +261,13 @@ router.put(
 // Delete item by itemid
 router.delete('/:itemid', clerkAuth, async (req, res) => {
   const { itemid } = req.params
+  const tenantid = req.tenantId
 
-  const result = await pool.query('DELETE FROM collections WHERE itemid = $1 RETURNING *', [itemid])
+  if (!tenantid) {
+    return res.status(403).json({ success: false, error: 'Unauthorized: tenant owner not found' })
+  }
+
+  const result = await pool.query('DELETE FROM collections WHERE itemid = $1 AND tenantid = $2 RETURNING *', [itemid, tenantid])
 
   if (result.rows.length === 0) {
     return res.status(404).json({ success: false, error: 'Item not found' })

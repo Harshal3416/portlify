@@ -54,10 +54,19 @@ const enrichSiteLogo = (stored) => {
 
 // --- siteinformation routes ---
 router.post('/siteinformation', clerkAuth, upload.single('sitelogourl'), async (req, res) => {
-  const { tenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription } = req.body
+  const { tenantid: bodyTenantid, sitetitle, sitesubtitle, trustedtagline, sitedescription } = req.body
+  const tenantid = req.tenantId
 
-  if (!tenantid || !sitetitle) {
-    return res.status(400).json({ error: 'tenantid and sitetitle are required' })
+  if (!tenantid) {
+    return res.status(403).json({ error: 'Unauthorized: tenant owner not found' })
+  }
+
+  if (bodyTenantid && bodyTenantid !== tenantid) {
+    return res.status(403).json({ error: 'Tenant mismatch: cannot modify another tenant' })
+  }
+
+  if (!sitetitle) {
+    return res.status(400).json({ error: 'sitetitle is required' })
   }
 
   try {
@@ -140,9 +149,13 @@ router.get('/siteinformation/:tenantid', async (req, res) => {
 
 // --- admincontact routes ---
 router.post('/admincontact', clerkAuth, async (req, res) => {
-  const { tenantid, contactemail, contactphone, alternatecontactphone, address } = req.body
+  const { tenantid: bodyTenantid, contactemail, contactphone, alternatecontactphone, address } = req.body
+  const tenantid = req.tenantId
 
-  if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })
+  if (!tenantid) return res.status(403).json({ error: 'Unauthorized: tenant owner not found' })
+  if (bodyTenantid && bodyTenantid !== tenantid) {
+    return res.status(403).json({ error: 'Tenant mismatch: cannot modify another tenant' })
+  }
 
   try {
     const result = await pool.query(
@@ -177,9 +190,14 @@ router.get('/admincontact/:tenantid', async (req, res) => {
 
 // --- adminsocial routes ---
 router.post('/adminsocial', clerkAuth, async (req, res) => {
-  const { tenantid, instagramurl, googlemapurl, justdialurl } = req.body
+  const { tenantid: bodyTenantid, instagramurl, googlemapurl, justdialurl } = req.body
   console.log('Received adminsocial data:', req.body)
-  if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })
+  const tenantid = req.tenantId
+
+  if (!tenantid) return res.status(403).json({ error: 'Unauthorized: tenant owner not found' })
+  if (bodyTenantid && bodyTenantid !== tenantid) {
+    return res.status(403).json({ error: 'Tenant mismatch: cannot modify another tenant' })
+  }
 
   try {
     const result = await pool.query(
@@ -213,9 +231,13 @@ router.get('/adminsocial/:tenantid', async (req, res) => {
 
 // --- openinghours routes ---
 router.post('/openinghours', clerkAuth, async (req, res) => {
-  const { tenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday } = req.body
+  const { tenantid: bodyTenantid, monday, tuesday, wednesday, thursday, friday, saturday, sunday } = req.body
+  const tenantid = req.tenantId
 
-  if (!tenantid) return res.status(400).json({ error: 'tenantid is required' })
+  if (!tenantid) return res.status(403).json({ error: 'Unauthorized: tenant owner not found' })
+  if (bodyTenantid && bodyTenantid !== tenantid) {
+    return res.status(403).json({ error: 'Tenant mismatch: cannot modify another tenant' })
+  }
 
   try {
     const result = await pool.query(

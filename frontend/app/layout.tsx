@@ -59,16 +59,16 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning className={`${playfair.variable} ${dmSans.variable}`}>
       <body className={`${geistSans.variable} ${geistMono.variable} bg-[#f9f6f0] bg-cream text-steel-dark overflow-x-hidden antialiased` }>
-        <SiteProviderWrapper>
-          <QueryProvider>
-            <ToastProvider>
-              <ClerkProvider>
+        <ClerkProvider>
+          <SiteProviderWrapper>
+            <QueryProvider>
+              <ToastProvider>
                 <AuthInitializer />
                 <AppChrome>{children}</AppChrome>
-              </ClerkProvider>
-            </ToastProvider>
-          </QueryProvider>
-        </SiteProviderWrapper>
+              </ToastProvider>
+            </QueryProvider>
+          </SiteProviderWrapper>
+        </ClerkProvider>
       </body>
     </html>
   );

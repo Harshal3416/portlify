@@ -1,4 +1,5 @@
 const { verifyToken } = require('@clerk/backend')
+const pool = require('../database/db/db')
 
 async function clerkAuth(req, res, next) {
   try {
@@ -13,7 +14,12 @@ async function clerkAuth(req, res, next) {
       secretKey: process.env.CLERK_SECRET_KEY,
       jwtKey: process.env.CLERK_JWT_KEY // TODO: remove if not required
     })
-    req.clerkId = payload.sub  // attach userId to request
+
+    req.clerkId = payload.sub // attach userId to request
+
+    const result = await pool.query('SELECT tenantid FROM admindetails WHERE clerkid = $1', [req.clerkId])
+    req.tenantId = result.rows[0]?.tenantid || null
+
     next() // VERY IMPORTANT
   } catch (err) {
     console.error('Clerk auth error:', err)
