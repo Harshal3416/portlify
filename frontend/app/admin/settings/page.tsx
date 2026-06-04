@@ -355,7 +355,7 @@ export default function Settings() {
     return (
         <div className="settings-layout">
             {/* <!-- Left Nav --> */}
-            <div className="settings-nav">
+            <div className="settings-nav hidden md:block">
                 <div className="settings-nav-header">Settings</div>
                 <div className={`nav-item ${activeSection === 'adminSec' ? 'active' : ''}`} data-target="adminSec" onClick={() => handleNavClick('adminSec')}><span className="nav-item-icon">🔑</span> Admin Details</div>
                 <div className={`nav-item ${activeSection === 'siteInfo' ? 'active' : ''}`} data-target="siteInfo" onClick={() => handleNavClick('siteInfo')}><span className="nav-item-icon">🏪</span> Site Info</div>
