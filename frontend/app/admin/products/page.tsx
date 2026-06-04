@@ -295,7 +295,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="m-4 w-[80%] mx-auto h-screen">
+    <div className="m-4 w-[80%] mx-auto min-h-screen pb-24">
       <div className="page-header">
         <div>
           <div className="page-title">Collection</div>
