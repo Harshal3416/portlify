@@ -1,6 +1,8 @@
 'use client';
 
 import { useEffect, useRef, useState } from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import { getAdminContactDetails, getAdminSocialLinks, getOpeningHours, getSiteInformation, updateAdminContactDetails, updateAdminDetails, updateAdminSocialLinks, updateOpeningHours, updateSiteInformation } from "@/services/settingsService";
 import { useToast } from "@/app/context/ToastContext";
 import { renderImage } from "@/app/lib/renderImage";
@@ -8,10 +10,14 @@ import { useSiteDetails } from "@/app/context/siteContext";
 
 export default function Settings() {
 
+    const router = useRouter();
+    const searchParams = useSearchParams();
+    const { user, isLoaded } = useUser();
     const { showToast } = useToast();
-    const { siteDetails, refetchSiteInfo } = useSiteDetails();
+    const { siteDetails, authTenantId, authTenantLoaded, refetchSiteInfo } = useSiteDetails();
     
     const [tenantid, setTenantid] = useState('');
+    const [isAuthorized, setIsAuthorized] = useState(false);
 
     // Admin details states
     const [ownername, setOwnerName] = useState("");
@@ -88,6 +94,47 @@ export default function Settings() {
         fetchOpeningHours()
     }, [isAdminDetailsFromDb]);
 
+    useEffect(() => {
+      const queryTenantId = searchParams.get('tenantid') || siteDetails?.tenantid || '';
+      if (!isLoaded) return;
+
+      if (!user) {
+        router.push('/');
+        return;
+      }
+
+      if (authTenantLoaded) {
+        if (!authTenantId || !queryTenantId || authTenantId !== queryTenantId) {
+          router.push('/');
+          return;
+        }
+
+        setIsAuthorized(true);
+      }
+    }, [isLoaded, user, authTenantId, authTenantLoaded, searchParams, siteDetails, router]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        setActiveSection(entry.target.id);
+                    }
+                });
+            },
+            { threshold: 0.3, rootMargin: '-100px 0px 0px 0px' }
+        );
+
+        const sections = document.querySelectorAll('.settings-card');
+        sections.forEach(section => observer.observe(section));
+
+        return () => observer.disconnect();
+    }, []);
+
+    if (!isLoaded || !authTenantLoaded || !isAuthorized) {
+      return null;
+    }
+
     // Admin details Update functions
     const updateAdminDetailsFn = async () => {
         try {
@@ -119,7 +166,7 @@ export default function Settings() {
     };
 
     // Fetch site Information
-    const fetchSiteInformation = async () => {
+    async function fetchSiteInformation() {
         try {
             const data = await getSiteInformation(tenantid);
             console.log("Fetched site information:", data);
@@ -134,7 +181,7 @@ export default function Settings() {
         } catch (err: any) {
             showToast(err, "danger")
         }
-    };
+    }
 
     // Update admin contact details function
     const updateAdminContactDetailsFn = async () => {
@@ -173,7 +220,7 @@ export default function Settings() {
     };
 
     // Fetch admin contact details
-    const fetchAdminContactDetails = async () => {
+    async function fetchAdminContactDetails() {
         try {
             const data = await getAdminContactDetails(tenantid);
             setContactEmail(data?.contactemail || '');
@@ -215,7 +262,7 @@ export default function Settings() {
     };
 
     // Fetch social links details
-    const fetchAdminSocialLinks = async () => {
+    async function fetchAdminSocialLinks() {
         try {
             const data = await getAdminSocialLinks(tenantid);
             setInstagramUrl(data?.instagramurl || '');
@@ -248,7 +295,7 @@ export default function Settings() {
     };
 
     // Fetch opening hours details
-    const fetchOpeningHours = async () => {
+    async function fetchOpeningHours() {
         try {
             const data = await getOpeningHours(tenantid);
             setMonday(data?.monday || '');
@@ -282,24 +329,6 @@ export default function Settings() {
             return false;
         }
     }
-
-    useEffect(() => {
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        setActiveSection(entry.target.id);
-                    }
-                });
-            },
-            { threshold: 0.3, rootMargin: '-100px 0px 0px 0px' }
-        );
-
-        const sections = document.querySelectorAll('.settings-card');
-        sections.forEach(section => observer.observe(section));
-
-        return () => observer.disconnect();
-    }, []);
 
     const handleNavClick = (sectionId: string) => {
         if (!tenantid) {

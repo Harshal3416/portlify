@@ -1,12 +1,16 @@
 "use client";
 
 import { createContext, useContext, useState, useEffect, useCallback } from "react";
+import { useUser } from '@clerk/nextjs';
 import { getAdminContactDetails, getAdminDetails, getSiteInformation, getBusinessDetails } from "../../services/settingsService";
 import { SiteDetail } from "@/app/interfaces/interface";
 import { useSearchParams } from "next/navigation";
 
 interface SiteContextType {
   siteDetails: SiteDetail | null;
+  authTenantId: string | null;
+  isAuthorizedTenant: boolean;
+  authTenantLoaded: boolean;
   refetchSiteInfo: () => Promise<void>;
 }
 
@@ -21,6 +25,10 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   const tenantidFromUrl = searchParams?.get('tenantid') || null;
   const tenantid = tenantidFromUrl;
   const [tenantidfromdb, setTenantidFromDb] = useState('');
+  const [authTenantId, setAuthTenantId] = useState<string | null>(null);
+  const [authTenantLoaded, setAuthTenantLoaded] = useState(false);
+  const [isAuthorizedTenant, setIsAuthorizedTenant] = useState(false);
+  const { user, isLoaded } = useUser();
 
   useEffect(() => {
     setIsClient(true);
@@ -31,6 +39,33 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
       loadDetails();
     }
   }, [isClient, tenantid]);
+
+  useEffect(() => {
+    if (!isLoaded) return;
+
+    const loadAuthTenant = async () => {
+      try {
+        if (!user) {
+          setAuthTenantId(null);
+          return;
+        }
+
+        const authAdminData = await getAdminDetails();
+        setAuthTenantId(authAdminData?.tenantid || null);
+      } catch (error) {
+        console.error('Failed to load authenticated admin details:', error);
+        setAuthTenantId(null);
+      } finally {
+        setAuthTenantLoaded(true);
+      }
+    };
+
+    loadAuthTenant();
+  }, [isLoaded, user]);
+
+  useEffect(() => {
+    setIsAuthorizedTenant(Boolean(authTenantId && tenantid && authTenantId === tenantid));
+  }, [authTenantId, tenantid]);
 
   const refetchSiteInfo = useCallback(async () => {
     loadDetails();
@@ -77,7 +112,7 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
   };
 
   return (
-    <SiteContext.Provider value={{ siteDetails, refetchSiteInfo }}>
+    <SiteContext.Provider value={{ siteDetails, authTenantId, isAuthorizedTenant, authTenantLoaded, refetchSiteInfo }}>
       {children}
     </SiteContext.Provider>
   );

@@ -1,6 +1,8 @@
 "use client";
 
 import { useEffect, useState, useRef, Suspense, useMemo } from "react";
+import { useRouter, useSearchParams } from 'next/navigation';
+import { useUser } from '@clerk/nextjs';
 import Image from "next/image";
 import Card from "@/app/components/ui/Card";
 import { useCreateProduct, useDeleteProduct, useGetProductsQuery, useUpdateProduct } from "@/hooks/useProductMutation";
@@ -10,13 +12,14 @@ import { Collections } from "@/app/interfaces/interface";
 import { useSiteDetails } from "@/app/context/siteContext";
 
 function ProductsContent() {
-  const createMutation = useCreateProduct();
-  const updateMutation = useUpdateProduct();
-  const deleteMutation = useDeleteProduct();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const { user, isLoaded } = useUser();
   const { showToast } = useToast();
-  const { siteDetails } = useSiteDetails();
+  const { siteDetails, authTenantId, authTenantLoaded } = useSiteDetails();
   
   const [tenantid, setTenantId] = useState('');
+  const [isAuthorized, setIsAuthorized] = useState(false);
 
   // Use React Query for fetching items - simplifies data fetching with caching
   // Returns data, loading state, error, and refetch function
@@ -98,13 +101,41 @@ function ProductsContent() {
     return id;
   };
 
+  const createMutation = useCreateProduct();
+  const updateMutation = useUpdateProduct();
+  const deleteMutation = useDeleteProduct();
+
   useEffect(() => {
     setTenantId(siteDetails?.tenantid || '');
   }, [siteDetails])
 
   useEffect(() => {
+    const queryTenantId = searchParams.get('tenantid') || siteDetails?.tenantid || '';
+
+    if (!isLoaded) return;
+
+    if (!user) {
+      router.push('/');
+      return;
+    }
+
+    if (authTenantLoaded) {
+      if (!authTenantId || !queryTenantId || authTenantId !== queryTenantId) {
+        router.push('/');
+        return;
+      }
+
+      setIsAuthorized(true);
+    }
+  }, [isLoaded, user, authTenantId, authTenantLoaded, searchParams, siteDetails, router]);
+
+  useEffect(() => {
     setProductId(generateProductId());
   }, []);
+
+  if (!isLoaded || !authTenantLoaded || !isAuthorized) {
+    return null;
+  }
 
   const resetProductForm = () => {
     setItemName("");
@@ -264,7 +295,7 @@ function ProductsContent() {
   };
 
   return (
-    <div className="m-4 w-[80%] mx-auto h-screen">
+    <div className="m-4 w-[80%] mx-auto min-h-screen pb-24">
       <div className="page-header">
         <div>
           <div className="page-title">Collection</div>

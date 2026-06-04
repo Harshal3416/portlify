@@ -10,7 +10,7 @@ import { useSiteDetails } from '@/app/context/siteContext';
 
 export function Header() {
 
-const { siteDetails } = useSiteDetails();
+const { siteDetails, authTenantId } = useSiteDetails();
   
   const { user, isLoaded } = useUser();
 
@@ -52,7 +52,7 @@ const { siteDetails } = useSiteDetails();
           </div>
         </div>
         <div className="nav-actions">
-          {isLoaded && user && tenantid && (
+          {isLoaded && user && tenantid && authTenantId === tenantid && (
             <>
               <button className="nav-btn ghost" onClick={() => router.push(`/admin/products?tenantid=${tenantid}`)}>📦 Manage Collection</button>
               <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>

@@ -6,13 +6,19 @@ const clerkAuth = require('../middleware/clerkAuth')
 
 // POST — save admin details for logged-in user
 router.post("/", clerkAuth, async (req, res) => {
-  const { tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype } = req.body;
+  const { tenantid: bodyTenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype } = req.body;
   const clerkId = req.clerkId; // injected by middleware
+  const authTenantId = req.tenantId
+  const tenantid = authTenantId || bodyTenantid
 
   if (!tenantid) {
     return res
       .status(400)
-      .json({ error: "tenantid and tenantdomain are required" });
+      .json({ error: "tenantid is required" });
+  }
+
+  if (authTenantId && bodyTenantid && bodyTenantid !== authTenantId) {
+    return res.status(403).json({ error: 'Tenant mismatch: cannot change tenant ownership' })
   }
 
   try {
