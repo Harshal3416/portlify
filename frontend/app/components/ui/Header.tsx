@@ -66,18 +66,21 @@ export function Header() {
                 <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>
                 <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
               </>)}
-            {isStorePage && (
-              <button 
-                className="nav-btn qr-btn" 
-                onClick={() => setIsQRModalOpen(true)}
-                title="Share QR Code"
-              >
-                📱 QR Code
-              </button>
-            )}
             <div className="avatar"> <UserButton /></div>
           </div>
         )}
+        <div>
+
+        {isStorePage && (
+          <button 
+          className="nav-btn qr-btn" 
+          onClick={() => setIsQRModalOpen(true)}
+          title="Share QR Code"
+          >
+            📱 QR Code
+          </button>
+        )}
+        </div>
       </div>
       <QRCodeModal 
         isOpen={isQRModalOpen} 
