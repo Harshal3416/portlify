@@ -968,6 +968,8 @@ main.store-layout {
   font-size: 14px;
   color: var(--text-dark);
   margin-bottom: 4px;
+  height: 42px;
+  overflow: hidden;
 }
 
 .product-id {
@@ -989,7 +991,8 @@ main.store-layout {
 
 .product-actions {
   display: flex;
-  gap: 8px;
+  gap: 4px;
+  justify-content: center;
 }
 
 .price-badge{

@@ -136,10 +136,10 @@ export default function Card({
                         </>
                     ) : (
                         <>
-                            <button className="btn-enquire" onClick={openWhatsappForProduct}>💬 Enquire</button>
+                            <button className="btn-enquire" onClick={openWhatsappForProduct}>💬</button>
                             {availableInCart ?
-                                <button className="btn-remove" onClick={removeFromCart}>🗑 Remove</button> :
-                                <button className="btn-add" onClick={addToCart}>🛒 Add</button>
+                                <button className="btn-remove" onClick={removeFromCart}>🗑</button> :
+                                <button className="btn-add" onClick={addToCart}>🛒</button>
                             }
                         </>
                     )}
@@ -188,7 +188,7 @@ export default function Card({
                                                     src={src}
                                                     alt={img.filename}
                                                     fill
-                                                    className={`absolute inset-0 h-full w-full object-cover transition-opacity duration-300 ${index === imageIndex ? 'opacity-100' : 'opacity-0'}`}
+                                                    className={`absolute inset-0 h-full w-full object-contain transition-opacity duration-300 ${index === imageIndex ? 'opacity-100' : 'opacity-0'}`}
                                                 />
                                             )})}
                                         </div>

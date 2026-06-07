@@ -24,6 +24,14 @@ export const metadata: Metadata = {
   title: "Catalogr — Create Your Free Business Showcase",
   description:
     "Catalogr lets any business — shop, broker, bakery, guest lodge — build a stunning digital product catalog and share it with customers in minutes. Free, forever.",
+  icons: {
+    icon: [
+      { url: "/favicon.ico" },
+      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
+      { url: "/favicon-192x192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+  },
 };
 
 const playfair = Playfair_Display({
