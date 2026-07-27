@@ -104,7 +104,11 @@ export default function Settings() {
       }
 
       if (authTenantLoaded) {
-        if (!authTenantId || !queryTenantId || authTenantId !== queryTenantId) {
+        const isOwner = authTenantId === queryTenantId;
+        const isNewTenantSetup = !authTenantId && !!queryTenantId;
+        const isBrandNewUser = !authTenantId && !queryTenantId;
+
+        if (!isOwner && !isNewTenantSetup && !isBrandNewUser) {
           router.push('/');
           return;
         }
@@ -141,6 +145,7 @@ export default function Settings() {
             await updateAdminDetails({ tenantid, ownername, ownertitle, aboutowner, yearsofexperience, productssold, happyclients, shoptype });
             showToast("Details saved!", "success")
             setIsAdminDetailsFromDb(true);
+            await refetchSiteInfo?.();
             // set tenant id in url without refreshing the page
                 const newUrl = `${window.location.pathname}?tenantid=${tenantid}`;
                 window.history.pushState({ path: newUrl }, '', newUrl);

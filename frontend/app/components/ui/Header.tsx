@@ -60,12 +60,15 @@ export function Header() {
         </div>
         {(isLoaded && user) && (
           <div className="nav-actions">
-            {tenantid && authTenantId === tenantid && (
+            {(authTenantId === tenantid || authTenantId) && (
               <>
-                <button className="nav-btn ghost" onClick={() => router.push(`/admin/products?tenantid=${tenantid}`)}>📦 Manage Collection</button>
-                <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings?tenantid=${tenantid}`)}>⚙️ Site Settings</button>
-                <button className="nav-btn ghost" onClick={() => router.push(`/store?tenantid=${tenantid}`)}>🏪 Customer Portal</button>
+                <button className="nav-btn ghost" onClick={() => router.push(`/admin/products${tenantid ? `?tenantid=${tenantid}` : ''}`)}>📦 Manage Collection</button>
+                <button className="nav-btn ghost" onClick={() => router.push(`/admin/settings${tenantid ? `?tenantid=${tenantid}` : ''}`)}>⚙️ Site Settings</button>
+                <button className="nav-btn ghost" onClick={() => router.push(`/store${tenantid ? `?tenantid=${tenantid}` : ''}`)}>🏪 Customer Portal</button>
               </>)}
+            {!authTenantId && (
+              <button className="nav-btn ghost" onClick={() => router.push('/admin/settings')}>⚙️ Site Settings</button>
+            )}
             <div className="avatar"> <UserButton /></div>
           </div>
         )}

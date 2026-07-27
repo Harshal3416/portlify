@@ -34,82 +34,92 @@ export function SiteProvider({ children }: { children: React.ReactNode }) {
     setIsClient(true);
   }, []);
 
-  useEffect(() => {
-    if (isClient && tenantid) {
-      loadDetails();
-    }
-  }, [isClient, tenantid]);
-
-  useEffect(() => {
+  const loadAuthTenant = useCallback(async () => {
     if (!isLoaded) return;
 
-    const loadAuthTenant = async () => {
-      try {
-        if (!user) {
-          setAuthTenantId(null);
-          return;
-        }
-
-        const authAdminData = await getAdminDetails();
-        setAuthTenantId(authAdminData?.tenantid || null);
-      } catch (error) {
-        console.error('Failed to load authenticated admin details:', error);
+    try {
+      if (!user) {
         setAuthTenantId(null);
-      } finally {
-        setAuthTenantLoaded(true);
+        return;
       }
-    };
 
-    loadAuthTenant();
+      const authAdminData = await getAdminDetails();
+      setAuthTenantId(authAdminData?.tenantid || null);
+    } catch (error) {
+      console.error('Failed to load authenticated admin details:', error);
+      setAuthTenantId(null);
+    } finally {
+      setAuthTenantLoaded(true);
+    }
   }, [isLoaded, user]);
 
   useEffect(() => {
-    setIsAuthorizedTenant(Boolean(authTenantId && tenantid && authTenantId === tenantid));
-  }, [authTenantId, tenantid]);
-
-  const refetchSiteInfo = useCallback(async () => {
-    loadDetails();
-    console.log("Refetching site info with tenantid", tenantid, "and tenantidfromdb", tenantidfromdb);
-    if (!tenantidfromdb || !tenantid) return;
-    try {
-      const siteData = await getSiteInformation(tenantidfromdb || tenantid);
-      setSiteDetails((prev) => prev ? { ...prev, ...siteData } : siteData);
-      console.log("Site info refetched from context", siteData);
-    } catch (error) {
-      console.error("Failed to refetch site info:", error);
-    }
-  }, [tenantid, tenantidfromdb]);
+    loadAuthTenant();
+  }, [loadAuthTenant]);
 
   useEffect(() => {
-    if (isClient && !tenantid) {
-      // If no tenantid from URL, try to load with empty string or default
-      loadDetails();
+    setIsAuthorizedTenant(Boolean(tenantid && (authTenantId === tenantid || authTenantId === null)));
+  }, [authTenantId, tenantid]);
+
+  const loadDetails = useCallback(async (overrideTenantId?: string) => {
+    const currentTenantId = overrideTenantId || tenantid;
+
+    if (!currentTenantId) {
+      setSiteDetails(null);
+      return;
     }
-  }, [isClient]);
 
-  const loadDetails = async () => {
     try {
-      // if (tenantid) {
-      //   const details = await getBusinessDetails(tenantid);
-      //   if (details) {
-      //     setTenantidFromDb(details.tenantid || "");
-      //     setSiteDetails(details);
-      //     return;
-      //   }
-      // }
+      const adminData = (await getAdminDetails(currentTenantId)) || {};
+      const siteData = (await getSiteInformation(currentTenantId)) || {};
+      const contactDetails = (await getAdminContactDetails(currentTenantId)) || {};
 
-      const adminData = await getAdminDetails(tenantid || "");
-      setTenantidFromDb(adminData.tenantid);
-      const siteData = await getSiteInformation(adminData.tenantid);
-      const contactDetails = await getAdminContactDetails(adminData.tenantid);
-      const details = adminData ? { ...adminData, ...siteData, ...contactDetails } : { ...siteData, ...contactDetails };
+      const fallbackDetails: SiteDetail = {
+        tenantid: currentTenantId,
+        tenantdomain: '',
+        ownertitle: '',
+        aboutowner: '',
+        sitesubtitle: '',
+        trustedtagline: '',
+        shoptype: '',
+        shortdescription: '',
+        yearsofexperience: '',
+        productssold: '',
+        happyclients: '',
+        sitetitle: '',
+        sitelogourl: null,
+      };
+
+      const details = {
+        ...fallbackDetails,
+        ...adminData,
+        ...siteData,
+        ...contactDetails,
+        tenantid: currentTenantId,
+      };
+
+      setTenantidFromDb(currentTenantId);
       console.log("Context Data", details);
       setSiteDetails(details);
     } catch (error) {
       console.error("Failed to load site details:", error);
       setSiteDetails(null);
     }
-  };
+  }, [tenantid]);
+
+  const refetchSiteInfo = useCallback(async () => {
+    const currentTenantId = tenantidfromdb || tenantid;
+    if (!currentTenantId) return;
+
+    await loadDetails(currentTenantId);
+    await loadAuthTenant();
+  }, [loadDetails, loadAuthTenant, tenantid, tenantidfromdb]);
+
+  useEffect(() => {
+    if (isClient && tenantid) {
+      loadDetails();
+    }
+  }, [isClient, tenantid, loadDetails]);
 
   return (
     <SiteContext.Provider value={{ siteDetails, authTenantId, isAuthorizedTenant, authTenantLoaded, refetchSiteInfo }}>

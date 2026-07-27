@@ -6,8 +6,15 @@ export const getAdminDetails = async (tenantid?: string) => {
   console.log("Fetching admin details for tenantid:", tenantid);
 
   const endpoint = tenantid ? `/admin-details/${tenantid}` : `/admin-details`;
-  const res = await apiClient.get(endpoint);
-  return res.data?.data ?? null;
+  try {
+    const res = await apiClient.get(endpoint);
+    return res.data?.data ?? null;
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      return null;
+    }
+    throw err;
+  }
 }
 
 export const updateAdminDetails = async (data: { tenantid: string; ownername: string; ownertitle: string; aboutowner: string; yearsofexperience: string; productssold: string; happyclients: string; shoptype: string; }) => {
@@ -27,9 +34,16 @@ export const getSiteInformation = async (tenantid?: string): Promise<SiteDetail 
     return null;
   }
   console.log("Settings fetch for:", tenantid);
-  const res = await apiClient.get(`/site-details/siteinformation/${tenantid}`);
-  console.log("getSiteInformation res:", res.data);
-  return res.data.data ?? null;
+  try {
+    const res = await apiClient.get(`/site-details/siteinformation/${tenantid}`);
+    console.log("getSiteInformation res:", res.data);
+    return res.data.data ?? null;
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      return null;
+    }
+    throw err;
+  }
 };
 
 export const updateSiteInformation = async (data: {tenantid: string; sitelogourl: File | null; sitetitle: string; sitesubtitle: string; trustedtagline:string; sitedescription: string; }) => {
@@ -56,9 +70,16 @@ export const getAdminContactDetails = async (tenantid?: string): Promise<SiteDet
     return null;
   }
   console.log("Settings fetch for:", tenantid);
-  const res = await apiClient.get(`/site-details/admincontact/${tenantid}`);
-  console.log("admincontact res:", res.data);
-  return res.data?.data ?? null;
+  try {
+    const res = await apiClient.get(`/site-details/admincontact/${tenantid}`);
+    console.log("admincontact res:", res.data);
+    return res.data?.data ?? null;
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      return null;
+    }
+    throw err;
+  }
 };
 
 export const getBusinessDetails = async (tenantid?: string): Promise<SiteDetail | null> => {
@@ -87,9 +108,16 @@ export const getAdminSocialLinks = async (tenantid?: string): Promise<SiteDetail
     return null;
   }
   console.log("Settings fetch for:", tenantid);
-  const res = await apiClient.get(`/site-details/adminsocial/${tenantid}`);
-  console.log("Settings res:", res.data);
-  return res.data?.data ?? null;
+  try {
+    const res = await apiClient.get(`/site-details/adminsocial/${tenantid}`);
+    console.log("Settings res:", res.data);
+    return res.data?.data ?? null;
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      return null;
+    }
+    throw err;
+  }
 };
 
 export const updateAdminSocialLinks = async (data: { tenantid: string; instagramurl: string; googlemapurl: string; justdialurl: string; }) => {
@@ -109,9 +137,16 @@ export const getOpeningHours = async (tenantid?: string): Promise<SiteDetail | n
     return null;
   }
   console.log("Settings fetch for:", tenantid);
-  const res = await apiClient.get(`/site-details/openinghours/${tenantid}`);
-  console.log("Settings res:", res.data);
-  return res.data?.data ?? null;
+  try {
+    const res = await apiClient.get(`/site-details/openinghours/${tenantid}`);
+    console.log("Settings res:", res.data);
+    return res.data?.data ?? null;
+  } catch (err: any) {
+    if (err?.response?.status === 404) {
+      return null;
+    }
+    throw err;
+  }
 };
 
 export const updateOpeningHours = async (data: { tenantid: string; monday: string; tuesday: string; wednesday: string; thursday: string; friday: string; saturday: string; sunday: string; }) => {

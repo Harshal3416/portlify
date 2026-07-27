@@ -120,7 +120,11 @@ function ProductsContent() {
     }
 
     if (authTenantLoaded) {
-      if (!authTenantId || !queryTenantId || authTenantId !== queryTenantId) {
+      const isOwner = authTenantId === queryTenantId;
+      const isNewTenantSetup = !authTenantId && !!queryTenantId;
+      const isBrandNewUser = !authTenantId && !queryTenantId;
+
+      if (!isOwner && !isNewTenantSetup && !isBrandNewUser) {
         router.push('/');
         return;
       }
